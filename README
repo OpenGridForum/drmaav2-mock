@@ -6,3 +6,6 @@ of the C language binding.
 
 For further information, please consult me <peter@troeger.eu>.
 
+====== WARNING ======
+This is NOT the final C binding for DRMAAv2. If you are a DRM system vendor and intent to use the header file in this repository for some production code, stop here and talk to us first.
+====== WARNING ====== 
