@@ -260,7 +260,7 @@ drmaa2_error_t       drmaa2_dict_set    (      drmaa2_dict_t d, const char * key
 /************************** UNSET values  ***********************/
 
 // FIXME: Ignores the recommendation of the IDL spec
-#define  DRMAA2_UNSET_BOOLEAN   drmaa2_boolean_t.DRMAA2_FALSE
+#define  DRMAA2_UNSET_BOOLEAN   DRMAA2_FALSE
 #define  DRMAA2_UNSET_STRING    NULL   // FIXME: Ignores the recommendation of the IDL spec
 #define  DRMAA2_UNSET_NUM       -1     // FIXME: Ignores the recommendation of the IDL spec
 #define  DRMAA2_UNSET_ENUM      -1
