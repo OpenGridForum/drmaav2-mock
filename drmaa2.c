@@ -28,24 +28,24 @@ typedef job_session_s *job_session_t;
 
 
 
-drmaa2_job_template_t  drmaa2_job_template_create(void)
+drmaa2_jtemplate  drmaa2_job_template_create(void)
 {
-    drmaa2_job_template_t jt = (drmaa2_job_template_t)malloc(sizeof(drmaa2_job_template_s));
+    drmaa2_jtemplate jt = (drmaa2_jtemplate)malloc(sizeof(drmaa2_jtemplate_s));
     jt->remoteCommand       = DRMAA2_UNSET_STRING;
     jt->args                = DRMAA2_UNSET_LIST;          
-    jt->submitAsHold        = DRMAA2_UNSET_BOOLEAN;
-    jt->rerunnable          = DRMAA2_UNSET_BOOLEAN;
+    jt->submitAsHold        = DRMAA2_UNSET_BOOL;
+    jt->rerunnable          = DRMAA2_UNSET_BOOL;
     jt->jobEnvironment      = DRMAA2_UNSET_DICT;
     jt->workingDirectory    = DRMAA2_UNSET_STRING;        
     jt->jobCategory         = DRMAA2_UNSET_STRING;            
     jt->email               = DRMAA2_UNSET_LIST;
-    jt->emailOnStarted      = DRMAA2_UNSET_BOOLEAN;
-    jt->emailOnTerminated   = DRMAA2_UNSET_BOOLEAN;
+    jt->emailOnStarted      = DRMAA2_UNSET_BOOL;
+    jt->emailOnTerminated   = DRMAA2_UNSET_BOOL;
     jt->jobName             = DRMAA2_UNSET_STRING;              
     jt->inputPath           = DRMAA2_UNSET_STRING;
     jt->outputPath          = DRMAA2_UNSET_STRING;
     jt->errorPath           = DRMAA2_UNSET_STRING;
-    jt->joinFiles           = DRMAA2_UNSET_BOOLEAN;
+    jt->joinFiles           = DRMAA2_UNSET_BOOL;
     jt->reservationId       = DRMAA2_UNSET_STRING;
     jt->queueName           = DRMAA2_UNSET_STRING;
     jt->minSlots            = DRMAA2_UNSET_NUM;
@@ -65,14 +65,14 @@ drmaa2_job_template_t  drmaa2_job_template_create(void)
 }
 
 
-drmaa2_error_t drmaa2_job_template_free(drmaa2_job_template_t jt)
+drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 {
     free(jt);
     return 0;
 }
 
 
-drmaa2_job_h drmaa2_js_run_job(const drmaa2_jobsession_h js, const drmaa2_job_template_t jt)
+drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtemplate jt)
 {
     pid_t childpid;
 
@@ -100,7 +100,7 @@ drmaa2_job_h drmaa2_js_run_job(const drmaa2_jobsession_h js, const drmaa2_job_te
 }
 
 
-drmaa2_job_h drmaa2_j_wait_terminated(const drmaa2_job_h j, const time_t timeout)
+drmaa2_j_h drmaa2_j_wait_terminated(const drmaa2_j_h j, const time_t timeout)
 {
     pid_t child;
     int status;
@@ -116,7 +116,7 @@ char * drmaa2_get_drms_name(void)
     return NULL;
 }
 
-drmaa2_version_t drmaa2_get_drms_version(void)
+drmaa2_version drmaa2_get_drms_version(void)
 {
     return NULL;
 }
@@ -126,13 +126,13 @@ char *drmaa2_get_drmaa_name(void)
     return NULL;
 }
 
-drmaa2_version_t drmaa2_get_drmaa_version(void)
+drmaa2_version drmaa2_get_drmaa_version(void)
 {
     return NULL;
 }
 
 
-drmaa2_jobsession_h drmaa2_create_jobsession(const char * session_name, const char * contact){
+drmaa2_jsession_h drmaa2_create_jobsession(const char * session_name, const char * contact){
     job_session_t js = (job_session_t)malloc(sizeof(job_session_s));
     js->name = session_name;
     js->contact = contact;
@@ -141,7 +141,7 @@ drmaa2_jobsession_h drmaa2_create_jobsession(const char * session_name, const ch
 }
 
 
-drmaa2_error_t drmaa2_close_jobsession(drmaa2_jobsession_h js)
+drmaa2_error drmaa2_close_jobsession(drmaa2_jsession_h js)
 {
     // should this method be called before destruction?
     free(js);
@@ -150,7 +150,7 @@ drmaa2_error_t drmaa2_close_jobsession(drmaa2_jobsession_h js)
 }
 
 
-drmaa2_error_t drmaa2_destroy_jobsession(const char * session_name)
+drmaa2_error drmaa2_destroy_jobsession(const char * session_name)
 {
     // TODO: reap persistent information
     return 0;
