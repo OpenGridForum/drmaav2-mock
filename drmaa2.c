@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+// Constants
+drmaa2_version version=NULL;
 
 // TODO:    use jobinfo
 //          replace pid by id
@@ -28,7 +30,7 @@ typedef job_session_s *job_session_t;
 
 
 
-drmaa2_jtemplate  drmaa2_job_template_create(void)
+drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 {
     drmaa2_jtemplate jt = (drmaa2_jtemplate)malloc(sizeof(drmaa2_jtemplate_s));
     jt->remoteCommand       = DRMAA2_UNSET_STRING;
@@ -123,16 +125,21 @@ drmaa2_version drmaa2_get_drms_version(void)
 
 char *drmaa2_get_drmaa_name(void)
 {
-    return NULL;
+    return "drmaa2-mock";
 }
 
 drmaa2_version drmaa2_get_drmaa_version(void)
 {
-    return NULL;
+    if (version == NULL) {
+        version=malloc(sizeof(drmaa2_version_s));
+        version->major="2";
+        version->minor="0";
+    }
+    return version;
 }
 
 
-drmaa2_jsession_h drmaa2_create_jobsession(const char * session_name, const char * contact){
+drmaa2_jsession_h drmaa2_create_jsession(const char * session_name, const char * contact){
     job_session_t js = (job_session_t)malloc(sizeof(job_session_s));
     js->name = session_name;
     js->contact = contact;
@@ -141,7 +148,7 @@ drmaa2_jsession_h drmaa2_create_jobsession(const char * session_name, const char
 }
 
 
-drmaa2_error drmaa2_close_jobsession(drmaa2_jsession_h js)
+drmaa2_error drmaa2_close_jsession(drmaa2_jsession_h js)
 {
     // should this method be called before destruction?
     free(js);
@@ -150,7 +157,7 @@ drmaa2_error drmaa2_close_jobsession(drmaa2_jsession_h js)
 }
 
 
-drmaa2_error drmaa2_destroy_jobsession(const char * session_name)
+drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 {
     // TODO: reap persistent information
     return 0;
