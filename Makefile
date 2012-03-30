@@ -1,13 +1,17 @@
-all: test
+DRMAAOBJS = drmaa2.o drmaa2-list.o 
+CC = gcc
+CFLAGS =
 
-test: test.o drmaa2.o
-	gcc -o test test.o drmaa2.o
+all: test large
 
-drmaa2.o: drmaa2.c drmaa2.h
-	gcc -c drmaa2.c
+test: $(DRMAAOBJS) test.o
+	$(CC) -o $@ $(DRMAAOBJS) test.o
 
-test.o: test.c
-	gcc -c test.c
+large: $(DRMAAOBJS) large.o
+	$(CC) -o $@ $(DRMAAOBJS) large.o
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f drmaa2.o test.o test
+	rm -f $(DRMAAOBJS) test.o test large.o large
