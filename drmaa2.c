@@ -1,34 +1,29 @@
 #include "drmaa2.h"
+#include "drmaa2-list.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-// Constants
+// Constants, filled on demand in according functions
 drmaa2_version version=NULL;
 
 // TODO:    use jobinfo
 //          replace pid by id
-typedef struct job
+typedef struct drmaa2_j_s
 {
     const char *id;
     const char *session_name;
     pid_t pid;
-} job_s;
-typedef job_s *job_t;
+} drmaa2_j_s;
 
-
-typedef struct job_session
+typedef struct drmaa2_jsession_s
 {
     const char *contact;
     const char *name;
-    job_t jobs;
-} job_session_s;
-typedef job_session_s *job_session_t;
-
-
-
+    drmaa2_j_h jobs;
+} drmaa2_jsession_s;
 
 drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 {
@@ -77,9 +72,9 @@ drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtemplate jt)
 {
     pid_t childpid;
+    char ** args;
 
-    job_session_t js_t = (job_session_t)js;
-
+    //TODO: copy job template, work only with the copy 
     if ((childpid = fork()) == -1)
     {
         perror("fork failed\n");
@@ -88,14 +83,17 @@ drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtem
     else if (childpid == 0)
         {
             // child
-            execv(jt->remoteCommand, jt->args);
+            if (jt->args) 
+		args=stringlist_get_array(jt->args);
+            execv(jt->remoteCommand, args);
+            if (jt->args) stringlist_free_array(args);
             exit(0);
         }
         else
         {
             // parent
-            job_t j = (job_t)malloc(sizeof(job_s));
-            j->session_name = js_t->name;
+            drmaa2_j_h j = (drmaa2_j_h)malloc(sizeof(drmaa2_j_s));
+            j->session_name = js->name;
             j->pid = childpid;
             return j;
         }
@@ -107,8 +105,7 @@ drmaa2_j_h drmaa2_j_wait_terminated(const drmaa2_j_h j, const time_t timeout)
     pid_t child;
     int status;
 
-    job_t j_t = (job_t)j;
-    child = waitpid(j_t->pid, &status, 0);
+    child = waitpid(j->pid, &status, 0);
     return j;
 }
 
@@ -140,7 +137,7 @@ drmaa2_version drmaa2_get_drmaa_version(void)
 
 
 drmaa2_jsession_h drmaa2_create_jsession(const char * session_name, const char * contact){
-    job_session_t js = (job_session_t)malloc(sizeof(job_session_s));
+    drmaa2_jsession_h js = (drmaa2_jsession_h)malloc(sizeof(drmaa2_jsession_s));
     js->name = session_name;
     js->contact = contact;
     // TODO: append job-session to js-list
