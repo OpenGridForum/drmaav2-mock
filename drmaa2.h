@@ -110,13 +110,14 @@ drmaa2_error drmaa2_string_free(char*);
 drmaa2_error drmaa2_lasterror(void);
 char *       drmaa2_lasterror_text(void);
 
-typedef void *      drmaa2_list;
-typedef drmaa2_list drmaa2_string_list;
-typedef drmaa2_list drmaa2_j_list;
-typedef drmaa2_list drmaa2_queueinfo_list;
-typedef drmaa2_list drmaa2_machineinfo_list;
-typedef drmaa2_list drmaa2_slotinfo_list;
-typedef drmaa2_list drmaa2_r_list;
+struct drmaa2_list_s;        /*forward*/
+typedef struct drmaa2_list_s * drmaa2_list;
+typedef struct drmaa2_list_s * drmaa2_string_list;
+typedef struct drmaa2_list_s * drmaa2_j_list;
+typedef struct drmaa2_list_s * drmaa2_queueinfo_list;
+typedef struct drmaa2_list_s * drmaa2_machineinfo_list;
+typedef struct drmaa2_list_s * drmaa2_slotinfo_list;
+typedef struct drmaa2_list_s * drmaa2_r_list;
 
 typedef enum drmaa2_listtype {
   DRMAA2_STRINGLIST,        
@@ -127,16 +128,19 @@ typedef enum drmaa2_listtype {
   DRMAA2_RESERVATIONLIST
 } drmaa2_listtype;
 
-drmaa2_list  drmaa2_list_create (const drmaa2_listtype t);
+typedef void (*drmaa2_list_entryfree)(void * value);
+drmaa2_list  drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback);
 drmaa2_error drmaa2_list_free   (      drmaa2_list l); 
 void *       drmaa2_list_get    (      drmaa2_list l, int pos);
 drmaa2_error drmaa2_list_add    (      drmaa2_list l, void * value);
 drmaa2_error drmaa2_list_del    (      drmaa2_list l, int pos);
 int          drmaa2_list_size   (const drmaa2_list l);
 
-typedef void *  drmaa2_dict;
+struct drmaa2_dict_s;        /*forward*/
+typedef struct drmaa2_dict_s * drmaa2_dict;
 
-drmaa2_dict        drmaa2_dict_create (void);
+typedef void (*drmaa2_dict_entryfree)(char * value);
+drmaa2_dict        drmaa2_dict_create (const drmaa2_dict_entryfree callback);
 drmaa2_error       drmaa2_dict_free   (drmaa2_dict d); 
 drmaa2_string_list drmaa2_dict_list   (const drmaa2_dict d);            
 drmaa2_bool        drmaa2_dict_has    (const drmaa2_dict d, const char * key);
@@ -303,12 +307,19 @@ drmaa2_error drmaa2_set_instance_value (      void * instance, const char * name
 
 typedef void (*drmaa2_callback)(drmaa2_notification * notification);
 
-typedef void * drmaa2_jsession_h;
-typedef void * drmaa2_rsession_h;
-typedef void * drmaa2_msession_h;
-typedef void * drmaa2_j_h;
-typedef void * drmaa2_jarray_h;
-typedef void * drmaa2_r_h;
+struct drmaa2_jsession_s; /*forward*/
+struct drmaa2_rsession_s; /*forward*/
+struct drmaa2_msession_s; /*forward*/
+struct drmaa2_j_s;	      /*forward*/
+struct drmaa2_jarray_s;   /*forward*/
+struct drmaa2_r_s;        /*forward*/
+
+typedef struct drmaa2_jsession_s * drmaa2_jsession_h;
+typedef struct drmaa2_rsession_s * drmaa2_rsession_h;
+typedef struct drmaa2_msession_s * drmaa2_msession_h;
+typedef struct drmaa2_j_s        * drmaa2_j_h;
+typedef struct drmaa2_jarray_s   * drmaa2_jarray_h;
+typedef struct drmaa2_r_s        * drmaa2_r_h;
 
 char *         drmaa2_rsession_get_contact          (const drmaa2_rsession_h rs);
 char *         drmaa2_rsession_get_session_name     (const drmaa2_rsession_h rs); 
