@@ -1,5 +1,8 @@
 #include <time.h>
 
+#ifndef DRMAA2_H
+#define DRMAA2_H
+
 typedef enum drmaa2_jstate {
   DRMAA2_UNDETERMINED                =  0,
   DRMAA2_QUEUED                      =  1,
@@ -390,3 +393,4 @@ drmaa2_string_list  drmaa2_get_jsession_names           (void);
 drmaa2_string_list  drmaa2_get_rsession_names           (void);
 drmaa2_error        drmaa2_register_event_notification  (const drmaa2_callback callback);
 
+#endif
