@@ -7,6 +7,9 @@ all: test large
 test: $(DRMAAOBJS) test.o
 	$(CC) -o $@ $(DRMAAOBJS) test.o
 
+test_list: $(DRMAAOBJS) test_list.o
+	$(CC) -o $@ $(DRMAAOBJS) test_list.o
+
 large: $(DRMAAOBJS) large.o
 	$(CC) -o $@ $(DRMAAOBJS) large.o
 
