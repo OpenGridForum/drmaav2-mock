@@ -162,10 +162,10 @@ drmaa2_error       drmaa2_dict_set    (      drmaa2_dict d, const char * key, co
 #define  DRMAA2_UNSET_LIST      NULL
 #define  DRMAA2_UNSET_DICT      NULL
 #define  DRMAA2_UNSET_TIME      ((time_t) -3)
-#define  DRMAA2_UNSET_CALLBACK  NULL	
+#define  DRMAA2_UNSET_CALLBACK  NULL    
 
 
-typedef struct drmaa2_jinfo_s {
+typedef struct {
   char *             jobId;
   int                exitStatus;        
   char *             terminatingSignal;
@@ -188,13 +188,13 @@ typedef drmaa2_jinfo_s * drmaa2_jinfo;
 drmaa2_jinfo drmaa2_jinfo_create (void);
 drmaa2_error drmaa2_jinfo_free   (drmaa2_jinfo ji);
 
-typedef struct drmaa2_slotinfo_s {
+typedef struct {
   char *                machineName; 
   long long             slots;
 } drmaa2_slotinfo_s;
 typedef drmaa2_slotinfo_s * drmaa2_slotinfo;
 
-typedef struct drmaa2_rinfo_s {
+typedef struct {
   char *               reservationId;
   char *               reservationName;
   time_t               reservedStartTime;
@@ -205,7 +205,7 @@ typedef struct drmaa2_rinfo_s {
 } drmaa2_rinfo_s;
 typedef drmaa2_rinfo_s * drmaa2_rinfo;
 
-typedef struct drmaa2_jtemplate_s {
+typedef struct {
   char *             remoteCommand;          
   drmaa2_string_list args;          
   drmaa2_bool        submitAsHold;
@@ -243,7 +243,7 @@ drmaa2_jtemplate drmaa2_jtemplate_create   (void);
 drmaa2_error     drmaa2_jtemplate_free     (drmaa2_jtemplate jt);
 char*            drmaa2_jtemplate_tostring (drmaa2_jtemplate jt);
 
-typedef struct drmaa2_rtemplate_s {
+typedef struct {
   char *             reservationName;          
   time_t             startTime;          
   time_t             endTime;          
@@ -262,7 +262,7 @@ typedef drmaa2_rtemplate_s * drmaa2_rtemplate;
 drmaa2_rtemplate     drmaa2_rtemplate_create (void);
 drmaa2_error         drmaa2_rtemplate_free   (drmaa2_rtemplate rt);
 
-typedef struct drmaa2_notification_s {
+typedef struct {
   drmaa2_event   event;
   char *         jobId;
   char *         sessionName;
@@ -270,18 +270,18 @@ typedef struct drmaa2_notification_s {
 } drmaa2_notification_s;
 typedef drmaa2_notification_s * drmaa2_notification;
 
-typedef struct drmaa2_queueinfo_s {
+typedef struct {
   char *                       name;
 } drmaa2_queueinfo_s;
 typedef drmaa2_queueinfo_s * drmaa2_queueinfo;
 
-typedef struct drmaa2_version_s {
+typedef struct {
   char *                       major; 
   char *                       minor;
 } drmaa2_version_s;
 typedef drmaa2_version_s * drmaa2_version;
 
-typedef struct drmaa2_machineinfo_s {
+typedef struct {
   char *          name;  
   drmaa2_bool     available;    
   long long       sockets;      
@@ -317,76 +317,76 @@ struct drmaa2_j_s;	      /*forward*/
 struct drmaa2_jarray_s;   /*forward*/
 struct drmaa2_r_s;        /*forward*/
 
-typedef struct drmaa2_jsession_s * drmaa2_jsession_h;
-typedef struct drmaa2_rsession_s * drmaa2_rsession_h;
-typedef struct drmaa2_msession_s * drmaa2_msession_h;
-typedef struct drmaa2_j_s        * drmaa2_j_h;
-typedef struct drmaa2_jarray_s   * drmaa2_jarray_h;
-typedef struct drmaa2_r_s        * drmaa2_r_h;
+typedef struct drmaa2_jsession_s * drmaa2_jsession;
+typedef struct drmaa2_rsession_s * drmaa2_rsession;
+typedef struct drmaa2_msession_s * drmaa2_msession;
+typedef struct drmaa2_j_s        * drmaa2_j;
+typedef struct drmaa2_jarray_s   * drmaa2_jarray;
+typedef struct drmaa2_r_s        * drmaa2_r;
 
-char *         drmaa2_rsession_get_contact          (const drmaa2_rsession_h rs);
-char *         drmaa2_rsession_get_session_name     (const drmaa2_rsession_h rs); 
-drmaa2_r_h     drmaa2_rsession_get_reservation      (const drmaa2_rsession_h rs, const char * reservation_id);
-drmaa2_r_h     drmaa2_rsession_request_reservation  (const drmaa2_rsession_h rs, const drmaa2_rtemplate rt);
-drmaa2_r_list  drmaa2_rsession_get_reservations     (const drmaa2_rsession_h rs);
+char *         drmaa2_rsession_get_contact          (const drmaa2_rsession rs);
+char *         drmaa2_rsession_get_session_name     (const drmaa2_rsession rs); 
+drmaa2_r       drmaa2_rsession_get_reservation      (const drmaa2_rsession rs, const char * reservation_id);
+drmaa2_r       drmaa2_rsession_request_reservation  (const drmaa2_rsession rs, const drmaa2_rtemplate rt);
+drmaa2_r_list  drmaa2_rsession_get_reservations     (const drmaa2_rsession rs);
 
-char *            drmaa2_r_get_id                   (const drmaa2_r_h r);
-char *            drmaa2_r_get_session_name         (const drmaa2_r_h r);
-drmaa2_rtemplate  drmaa2_r_get_reservation_template (const drmaa2_r_h r);
-drmaa2_rinfo      drmaa2_r_get_info                 (const drmaa2_r_h r);
-drmaa2_error      drmaa2_r_terminate                (drmaa2_r_h r);
+char *            drmaa2_r_get_id                   (const drmaa2_r r);
+char *            drmaa2_r_get_session_name         (const drmaa2_r r);
+drmaa2_rtemplate  drmaa2_r_get_reservation_template (const drmaa2_r r);
+drmaa2_rinfo      drmaa2_r_get_info                 (const drmaa2_r r);
+drmaa2_error      drmaa2_r_terminate                (drmaa2_r r);
 
-char *           drmaa2_jarray_get_id            (const drmaa2_jarray_h ja);
-drmaa2_j_list    drmaa2_jarray_get_jobs          (const drmaa2_jarray_h ja); 
-char *           drmaa2_jarray_get_session_name  (const drmaa2_jarray_h ja);
-drmaa2_jtemplate drmaa2_jarray_get_job_template  (const drmaa2_jarray_h ja); 
-drmaa2_error     drmaa2_jarray_suspend           (drmaa2_jarray_h ja); 
-drmaa2_error     drmaa2_jarray_resume            (drmaa2_jarray_h ja); 
-drmaa2_error     drmaa2_jarray_hold              (drmaa2_jarray_h ja); 
-drmaa2_error     drmaa2_jarray_release           (drmaa2_jarray_h ja); 
-drmaa2_error     drmaa2_jarray_terminate         (drmaa2_jarray_h ja); 
+char *           drmaa2_jarray_get_id            (const drmaa2_jarray ja);
+drmaa2_j_list    drmaa2_jarray_get_jobs          (const drmaa2_jarray ja); 
+char *           drmaa2_jarray_get_session_name  (const drmaa2_jarray ja);
+drmaa2_jtemplate drmaa2_jarray_get_job_template  (const drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_suspend           (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_resume            (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_hold              (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_release           (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_terminate         (drmaa2_jarray ja); 
 
-char *              drmaa2_jsession_get_contact         (const drmaa2_jsession_h js); 
-char *              drmaa2_jsession_get_session_name    (const drmaa2_jsession_h js);
-drmaa2_string_list  drmaa2_jsession_get_job_categories  (const drmaa2_jsession_h js); 
-drmaa2_j_list       drmaa2_jsession_get_jobs            (const drmaa2_jsession_h js, const drmaa2_jinfo filter);
-drmaa2_jarray_h     drmaa2_jsession_get_job_array       (const drmaa2_jsession_h js, const char * jobarray_id);
-drmaa2_j_h          drmaa2_jsession_run_job             (const drmaa2_jsession_h js, const drmaa2_jtemplate jt);
-drmaa2_jarray_h     drmaa2_jsession_run_bulk_jobs       (const drmaa2_jsession_h js, const drmaa2_jtemplate jt, unsigned long begin_index, unsigned long end_index, unsigned long step, unsigned long max_parallel);
-drmaa2_j_h          drmaa2_jsession_wait_any_started    (const drmaa2_jsession_h js, const drmaa2_j_list l, const time_t timeout);
-drmaa2_j_h          drmaa2_jsession_wait_any_terminated (const drmaa2_jsession_h js, const drmaa2_j_list l, const time_t timeout);
+char *              drmaa2_jsession_get_contact         (const drmaa2_jsession js); 
+char *              drmaa2_jsession_get_session_name    (const drmaa2_jsession js);
+drmaa2_string_list  drmaa2_jsession_get_job_categories  (const drmaa2_jsession js); 
+drmaa2_j_list       drmaa2_jsession_get_jobs            (const drmaa2_jsession js, const drmaa2_jinfo filter);
+drmaa2_jarray       drmaa2_jsession_get_job_array       (const drmaa2_jsession js, const char * jobarray_id);
+drmaa2_j            drmaa2_jsession_run_job             (const drmaa2_jsession js, const drmaa2_jtemplate jt);
+drmaa2_jarray       drmaa2_jsession_run_bulk_jobs       (const drmaa2_jsession js, const drmaa2_jtemplate jt, unsigned long begin_index, unsigned long end_index, unsigned long step, unsigned long max_parallel);
+drmaa2_j            drmaa2_jsession_wait_any_started    (const drmaa2_jsession js, const drmaa2_j_list l, const time_t timeout);
+drmaa2_j            drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js, const drmaa2_j_list l, const time_t timeout);
 
-char *             drmaa2_j_get_id            (const drmaa2_j_h j);
-char *             drmaa2_j_get_session_name  (const drmaa2_j_h j);
-drmaa2_jtemplate   drmaa2_j_get_jt            (const drmaa2_j_h j);
-drmaa2_error       drmaa2_j_suspend           (drmaa2_j_h j); 
-drmaa2_error       drmaa2_j_resume            (drmaa2_j_h j); 
-drmaa2_error       drmaa2_j_hold              (drmaa2_j_h j); 
-drmaa2_error       drmaa2_j_release           (drmaa2_j_h j); 
-drmaa2_error       drmaa2_j_terminate         (drmaa2_j_h j); 
-drmaa2_jstate      drmaa2_j_get_state         (const drmaa2_j_h j, char ** substate); 
-drmaa2_jinfo       drmaa2_j_get_info          (const drmaa2_j_h j);
-drmaa2_j_h         drmaa2_j_wait_started      (const drmaa2_j_h j, const time_t timeout); 
-drmaa2_j_h         drmaa2_j_wait_terminated   (const drmaa2_j_h j, const time_t timeout); 
+char *             drmaa2_j_get_id            (const drmaa2_j j);
+char *             drmaa2_j_get_session_name  (const drmaa2_j j);
+drmaa2_jtemplate   drmaa2_j_get_jt            (const drmaa2_j j);
+drmaa2_error       drmaa2_j_suspend           (drmaa2_j j); 
+drmaa2_error       drmaa2_j_resume            (drmaa2_j j); 
+drmaa2_error       drmaa2_j_hold              (drmaa2_j j); 
+drmaa2_error       drmaa2_j_release           (drmaa2_j j); 
+drmaa2_error       drmaa2_j_terminate         (drmaa2_j j); 
+drmaa2_jstate      drmaa2_j_get_state         (const drmaa2_j j, char ** substate); 
+drmaa2_jinfo       drmaa2_j_get_info          (const drmaa2_j j);
+drmaa2_j           drmaa2_j_wait_started      (const drmaa2_j j, const time_t timeout); 
+drmaa2_j           drmaa2_j_wait_terminated   (const drmaa2_j j, const time_t timeout); 
 
-drmaa2_r_list            drmaa2_msession_get_all_reservations  (const drmaa2_msession_h ms);
-drmaa2_j_list            drmaa2_msession_get_all_jobs          (const drmaa2_msession_h ms, const drmaa2_jinfo filter);
-drmaa2_queueinfo_list    drmaa2_msession_get_all_queues        (const drmaa2_msession_h ms, const drmaa2_string_list names);
-drmaa2_machineinfo_list  drmaa2_msession_get_all_machines      (const drmaa2_msession_h ms, const drmaa2_string_list names);
+drmaa2_r_list            drmaa2_msession_get_all_reservations  (const drmaa2_msession ms);
+drmaa2_j_list            drmaa2_msession_get_all_jobs          (const drmaa2_msession ms, const drmaa2_jinfo filter);
+drmaa2_queueinfo_list    drmaa2_msession_get_all_queues        (const drmaa2_msession ms, const drmaa2_string_list names);
+drmaa2_machineinfo_list  drmaa2_msession_get_all_machines      (const drmaa2_msession ms, const drmaa2_string_list names);
 
 char *              drmaa2_get_drms_name                (void);
 drmaa2_version      drmaa2_get_drms_version             (void);
 char *              drmaa2_get_drmaa_name               (void);
 drmaa2_version      drmaa2_get_drmaa_version            (void);
 drmaa2_bool         drmaa2_supports                     (const drmaa2_capability c);
-drmaa2_jsession_h   drmaa2_create_jsession              (const char * session_name, const char * contact);
-drmaa2_rsession_h   drmaa2_create_rsession              (const char * session_name, const char * contact);
-drmaa2_jsession_h   drmaa2_open_jsession                (const char * session_name);
-drmaa2_rsession_h   drmaa2_open_rsession                (const char * session_name);
-drmaa2_msession_h   drmaa2_open_msession                (const char * session_name);
-drmaa2_error        drmaa2_close_jsession               (drmaa2_jsession_h js);
-drmaa2_error        drmaa2_close_rsession               (drmaa2_rsession_h rs);
-drmaa2_error        drmaa2_close_msession               (drmaa2_msession_h ms);
+drmaa2_jsession     drmaa2_create_jsession              (const char * session_name, const char * contact);
+drmaa2_rsession     drmaa2_create_rsession              (const char * session_name, const char * contact);
+drmaa2_jsession     drmaa2_open_jsession                (const char * session_name);
+drmaa2_rsession     drmaa2_open_rsession                (const char * session_name);
+drmaa2_msession     drmaa2_open_msession                (const char * session_name);
+drmaa2_error        drmaa2_close_jsession               (drmaa2_jsession js);
+drmaa2_error        drmaa2_close_rsession               (drmaa2_rsession rs);
+drmaa2_error        drmaa2_close_msession               (drmaa2_msession ms);
 drmaa2_error        drmaa2_destroy_jsession             (const char * session_name);
 drmaa2_error        drmaa2_destroy_rsession             (const char * session_name);
 drmaa2_string_list  drmaa2_get_jsession_names           (void);
