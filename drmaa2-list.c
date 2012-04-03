@@ -55,7 +55,7 @@ void *drmaa2_list_get (drmaa2_list l, int pos)
 drmaa2_error drmaa2_list_add (drmaa2_list l, void * value)
 {   
     drmaa2_list_item_h new_item;
-    if ((new_item = (drmaa2_list_item_h)malloc(sizeof(drmaa2_list_item_s))) == NULL)
+    if ((new_item = (drmaa2_list_item_h)malloc(sizeof(drmaa2_list_item_t))) == NULL)
     {
         printf("bad allocation\n");
         return DRMAA2_OUT_OF_RESOURCE;
@@ -118,7 +118,7 @@ drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entry
 
   drmaa2_list l;
 
-  l = (drmaa2_list)malloc(sizeof(drmaa2_list_s));
+  l = (drmaa2_list)malloc(sizeof(drmaa2_list_t));
   l->type = t;
   l->size = 0;
   l->head = NULL;

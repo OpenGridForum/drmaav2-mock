@@ -4,13 +4,16 @@ struct drmaa2_list_s {
   drmaa2_listtype type;
   int size;
   void * head;
-} drmaa2_list_s;
+};
+typedef struct drmaa2_list_s drmaa2_list_t;
+
 
 struct drmaa2_list_item_s {
 	void *data;
 	struct drmaa2_list_item_s *next;
-} drmaa2_list_item_s;
-typedef struct drmaa2_list_item_s *drmaa2_list_item_h;
+};
+typedef struct drmaa2_list_item_s drmaa2_list_item_t;
+typedef drmaa2_list_item_t *drmaa2_list_item_h;
 
 
 char **stringlist_get_array(drmaa2_list l);
