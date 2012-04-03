@@ -72,7 +72,7 @@ drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtemplate jt)
 {
     pid_t childpid;
-    char ** args;
+    char ** args = NULL;
 
     //TODO: copy job template, work only with the copy 
     if ((childpid = fork()) == -1)
@@ -84,9 +84,10 @@ drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtem
         {
             // child
             if (jt->args) 
-		args=stringlist_get_array(jt->args);
-            execv(jt->remoteCommand, args);
-            if (jt->args) stringlist_free_array(args);
+		        args=stringlist_get_array(jt->args);
+            execv(jt->remoteCommand, args);     //TODO: no clean up necessary?
+            if (jt->args)
+                stringlist_free_array(args);
             exit(0);
         }
         else
@@ -103,9 +104,29 @@ drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtem
 drmaa2_j_h drmaa2_j_wait_terminated(const drmaa2_j_h j, const time_t timeout)
 {
     pid_t child;
-    int status;
+    int status = 0;
 
     child = waitpid(j->pid, &status, 0);
+    printf("status of child %d: %d\n", child, status);
+
+    if (WIFEXITED(status))
+    {
+        printf("Process terminated normally by a call to _exit(2) or exit(3).\n");
+        printf("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
+    }
+    if (WIFSIGNALED(status))
+    {
+        printf("Process terminated due to receipt of a signal.\n");
+        printf("%d  - evaluates to the number of the signal that caused the termination of the process.\n", WTERMSIG(status));
+        printf("%d  - evaluates as true if the termination of the process was accompanied by the creation of a core \
+             file containing an image of the process when the signal was received.\n", WCOREDUMP(status));
+    }
+    if (WIFSTOPPED(status))
+    {
+        printf("Process has not terminated, but has stopped and can be restarted.  This macro can be true only if the wait call \
+             specified the WUNTRACED option or if the child process is being traced (see ptrace(2)).\n");
+        printf("%d  - evaluates to the number of the signal that caused the process to stop.\n", WSTOPSIG(status));
+    }
     return j;
 }
 
