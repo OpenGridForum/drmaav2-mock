@@ -6,6 +6,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+
+
 // Constants, filled on demand in according functions
 drmaa2_version version=NULL;
 
@@ -16,14 +18,26 @@ typedef struct drmaa2_j_s
     const char *id;
     const char *session_name;
     pid_t pid;
-} drmaa2_j_s;
+} drmaa2_j_t;
 
 typedef struct drmaa2_jsession_s
 {
     const char *contact;
     const char *name;
     drmaa2_j_h jobs;
-} drmaa2_jsession_s;
+} drmaa2_jsession_t;
+
+typedef struct drmaa2_rsession_s
+{
+    const char *contact;
+    const char *name;
+    //TODO: complete
+} drmaa2_rsession_t;
+
+typedef struct drmaa2_msession_s
+{
+    const char *name;
+} drmaa2_msession_t;
 
 drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 {
@@ -65,7 +79,32 @@ drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 {
     free(jt);
-    return 0;
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_rtemplate drmaa2_rtemplate_create(void)
+{
+    drmaa2_rtemplate rt = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
+    rt->reservationName = DRMAA2_UNSET_STRING;          
+    rt->startTime = DRMAA2_UNSET_TIME;          
+    rt->endTime = DRMAA2_UNSET_TIME;          
+    rt->duration = DRMAA2_UNSET_TIME;          
+    rt->minSlots = DRMAA2_UNSET_NUM;              
+    rt->maxSlots = DRMAA2_UNSET_NUM;
+    rt->jobCategory = DRMAA2_UNSET_STRING;
+    rt->usersACL = DRMAA2_UNSET_LIST;            
+    rt->candidateMachines = DRMAA2_UNSET_LIST; 
+    rt->minPhysMemory = DRMAA2_UNSET_NUM;            
+    rt->machineOS = -1;    //TODO    
+    rt->machineArch = -1;   //TODO
+}
+
+
+drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
+{
+    free(rt);
+    return DRMAA2_SUCCESS;
 }
 
 
@@ -93,7 +132,7 @@ drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtem
         else
         {
             // parent
-            drmaa2_j_h j = (drmaa2_j_h)malloc(sizeof(drmaa2_j_s));
+            drmaa2_j_h j = (drmaa2_j_h)malloc(sizeof(drmaa2_j_t));
             j->session_name = js->name;
             j->pid = childpid;
             return j;
@@ -157,12 +196,31 @@ drmaa2_version drmaa2_get_drmaa_version(void)
 }
 
 
-drmaa2_jsession_h drmaa2_create_jsession(const char * session_name, const char * contact){
-    drmaa2_jsession_h js = (drmaa2_jsession_h)malloc(sizeof(drmaa2_jsession_s));
+drmaa2_jsession_h drmaa2_create_jsession(const char * session_name, const char * contact)
+{
+    drmaa2_jsession_h js = (drmaa2_jsession_h)malloc(sizeof(drmaa2_jsession_t));
     js->name = session_name;
     js->contact = contact;
     // TODO: append job-session to js-list
     return js;
+}
+
+
+drmaa2_rsession_h drmaa2_create_rsession(const char * session_name, const char * contact)
+{
+    drmaa2_rsession_h rs = (drmaa2_rsession_h)malloc(sizeof(drmaa2_rsession_t));
+    rs->name = session_name;
+    rs->contact = contact;
+    // TODO: append reservation-session to rs-list
+    return rs;
+}
+
+
+drmaa2_msession_h drmaa2_open_msession(const char * session_name)
+{
+    drmaa2_msession_h ms = (drmaa2_msession_h)malloc(sizeof(drmaa2_msession_t));
+    ms->name = session_name;
+    return ms;
 }
 
 

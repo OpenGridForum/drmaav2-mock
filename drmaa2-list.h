@@ -17,4 +17,4 @@ typedef drmaa2_list_item_t *drmaa2_list_item_h;
 
 
 char **stringlist_get_array(drmaa2_list l);
-void stringlist_free_array(char * const array[]);
+void stringlist_free_array(char ** array);
