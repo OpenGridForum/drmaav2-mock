@@ -11,15 +11,15 @@ int main () {
   drmaa2_string_list      cl=drmaa2_list_create(DRMAA2_STRINGLIST, callback_free);
   drmaa2_dict            env=drmaa2_dict_create(NULL);
   drmaa2_jinfo            ji=NULL;
-  drmaa2_j_h               j=NULL;
-  drmaa2_r_h               r=NULL;
+  drmaa2_j               j=NULL;
+  drmaa2_r               r=NULL;
   drmaa2_machineinfo_list ml=NULL;
   drmaa2_machineinfo       m=NULL;
 
   // open sessions to DRM system
-  drmaa2_jsession_h       js=drmaa2_create_jsession("myjsession", NULL);
-  drmaa2_rsession_h       rs=drmaa2_create_rsession("myrsession", NULL);
-  drmaa2_msession_h       ms=drmaa2_open_msession(NULL);
+  drmaa2_jsession       js=drmaa2_create_jsession("myjsession", NULL);
+  drmaa2_rsession       rs=drmaa2_create_rsession("myrsession", NULL);
+  drmaa2_msession       ms=drmaa2_open_msession(NULL);
   
   // determine name of first machine
   ml=drmaa2_msession_get_all_machines(ms, DRMAA2_UNSET_LIST);

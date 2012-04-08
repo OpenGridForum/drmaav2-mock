@@ -18,26 +18,28 @@ typedef struct drmaa2_j_s
     const char *id;
     const char *session_name;
     pid_t pid;
-} drmaa2_j_t;
+} drmaa2_j_s;
 
 typedef struct drmaa2_jsession_s
 {
     const char *contact;
     const char *name;
-    drmaa2_j_h jobs;
-} drmaa2_jsession_t;
+    drmaa2_j jobs;
+} drmaa2_jsession_s;
 
 typedef struct drmaa2_rsession_s
 {
     const char *contact;
     const char *name;
     //TODO: complete
-} drmaa2_rsession_t;
+} drmaa2_rsession_s;
 
 typedef struct drmaa2_msession_s
 {
     const char *name;
-} drmaa2_msession_t;
+} drmaa2_msession_s;
+
+
 
 drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 {
@@ -108,7 +110,7 @@ drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 }
 
 
-drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtemplate jt)
+drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
 {
     pid_t childpid;
     char ** args = NULL;
@@ -132,7 +134,7 @@ drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtem
         else
         {
             // parent
-            drmaa2_j_h j = (drmaa2_j_h)malloc(sizeof(drmaa2_j_t));
+            drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
             j->session_name = js->name;
             j->pid = childpid;
             return j;
@@ -140,7 +142,7 @@ drmaa2_j_h drmaa2_jsession_run_job(const drmaa2_jsession_h js, const drmaa2_jtem
 }
 
 
-drmaa2_j_h drmaa2_j_wait_terminated(const drmaa2_j_h j, const time_t timeout)
+drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 {
     pid_t child;
     int status = 0;
@@ -196,9 +198,8 @@ drmaa2_version drmaa2_get_drmaa_version(void)
 }
 
 
-drmaa2_jsession_h drmaa2_create_jsession(const char * session_name, const char * contact)
-{
-    drmaa2_jsession_h js = (drmaa2_jsession_h)malloc(sizeof(drmaa2_jsession_t));
+drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact){
+    drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
     js->name = session_name;
     js->contact = contact;
     // TODO: append job-session to js-list
@@ -206,9 +207,9 @@ drmaa2_jsession_h drmaa2_create_jsession(const char * session_name, const char *
 }
 
 
-drmaa2_rsession_h drmaa2_create_rsession(const char * session_name, const char * contact)
+drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * contact)
 {
-    drmaa2_rsession_h rs = (drmaa2_rsession_h)malloc(sizeof(drmaa2_rsession_t));
+    drmaa2_rsession rs = (drmaa2_rsession)malloc(sizeof(drmaa2_rsession_s));
     rs->name = session_name;
     rs->contact = contact;
     // TODO: append reservation-session to rs-list
@@ -216,15 +217,15 @@ drmaa2_rsession_h drmaa2_create_rsession(const char * session_name, const char *
 }
 
 
-drmaa2_msession_h drmaa2_open_msession(const char * session_name)
+drmaa2_msession drmaa2_open_msession(const char * session_name)
 {
-    drmaa2_msession_h ms = (drmaa2_msession_h)malloc(sizeof(drmaa2_msession_t));
+    drmaa2_msession ms = (drmaa2_msession)malloc(sizeof(drmaa2_msession_s));
     ms->name = session_name;
     return ms;
 }
 
 
-drmaa2_error drmaa2_close_jsession(drmaa2_jsession_h js)
+drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
     // should this method be called before destruction?
     free(js);

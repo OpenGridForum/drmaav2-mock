@@ -8,27 +8,24 @@ char **stringlist_get_array(drmaa2_list l)
 {
     assert(l->type == DRMAA2_STRINGLIST);
     char **array = (char **)malloc(l->size * sizeof(char *));
-    drmaa2_list_item_h current_item = (drmaa2_list_item_h)l->head;
+    drmaa2_list_item current_item = (drmaa2_list_item)l->head;
     int i;
-    char *tmp;
     for (i = 0; i < l->size; i++)
     {
-        tmp = (char *) malloc((strlen(current_item->data) + 1) * sizeof(char));
-        array[i] = tmp;
-        strcpy(tmp, (char *)current_item->data);
+        array[i] = current_item->data;
         current_item = current_item->next;
     }
     return array;
 }
 
-void stringlist_free_array(char * const array[])
+void stringlist_free_array(char **array)
 {
 }
 
 drmaa2_error drmaa2_list_free (drmaa2_list l)
 {
-    drmaa2_list_item_h head = (drmaa2_list_item_h)l->head;
-    drmaa2_list_item_h tmp;
+    drmaa2_list_item head = (drmaa2_list_item)l->head;
+    drmaa2_list_item tmp;
     while (head != NULL)
     {
         tmp = head;
@@ -44,7 +41,7 @@ void *drmaa2_list_get (drmaa2_list l, int pos)
 {
     if (pos < 0 || pos >= l->size)
         return NULL;
-    drmaa2_list_item_h current_item = (drmaa2_list_item_h)l->head;
+    drmaa2_list_item current_item = (drmaa2_list_item)l->head;
     int i;
     for (i = 0; i < pos; i++)
         current_item = current_item->next;
@@ -54,8 +51,8 @@ void *drmaa2_list_get (drmaa2_list l, int pos)
 
 drmaa2_error drmaa2_list_add (drmaa2_list l, void * value)
 {   
-    drmaa2_list_item_h new_item;
-    if ((new_item = (drmaa2_list_item_h)malloc(sizeof(drmaa2_list_item_t))) == NULL)
+    drmaa2_list_item new_item;
+    if ((new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item))) == NULL)
     {
         printf("bad allocation\n");
         return DRMAA2_OUT_OF_RESOURCE;
@@ -69,7 +66,7 @@ drmaa2_error drmaa2_list_add (drmaa2_list l, void * value)
     }
     else
     {
-        drmaa2_list_item_h current_item = (drmaa2_list_item_h)l->head;
+        drmaa2_list_item current_item = (drmaa2_list_item)l->head;
         while (current_item->next)
             current_item = current_item->next;
         current_item->next = new_item;
@@ -84,10 +81,10 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, int pos)
     if (pos < 0 || pos >= l->size)
         return DRMAA2_INVALID_ARGUMENT;
 
-    drmaa2_list_item_h current_item = (drmaa2_list_item_h)l->head;
+    drmaa2_list_item current_item = (drmaa2_list_item)l->head;
     if (pos == 0)
     {
-        drmaa2_list_item_h to_delete = current_item;
+        drmaa2_list_item to_delete = current_item;
         l->head = to_delete->next;
         l->size--;
         free(to_delete);
@@ -99,7 +96,7 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, int pos)
     for (i = 0; i < pos-1; i++)
         current_item = current_item->next;
     //current_item points to the item before the one we want to remove
-    drmaa2_list_item_h to_delete = current_item->next;
+    drmaa2_list_item to_delete = current_item->next;
     current_item->next = to_delete->next;
     l->size--;
     free(to_delete);
@@ -118,7 +115,7 @@ drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entry
 
   drmaa2_list l;
 
-  l = (drmaa2_list)malloc(sizeof(drmaa2_list_t));
+  l = (drmaa2_list)malloc(sizeof(drmaa2_list_s));
   l->type = t;
   l->size = 0;
   l->head = NULL;
