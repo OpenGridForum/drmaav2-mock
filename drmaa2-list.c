@@ -6,6 +6,7 @@
 
 char **stringlist_get_array(drmaa2_list l)
 {
+    // no deep copy
     assert(l->type == DRMAA2_STRINGLIST);
     char **array = (char **)malloc(l->size * sizeof(char *));
     drmaa2_list_item current_item = (drmaa2_list_item)l->head;
@@ -20,6 +21,8 @@ char **stringlist_get_array(drmaa2_list l)
 
 void stringlist_free_array(char **array)
 {
+    // no deep free
+    free(array);
 }
 
 drmaa2_error drmaa2_list_free (drmaa2_list l)
@@ -111,8 +114,8 @@ int drmaa2_list_size (const drmaa2_list l)
 }
 
 
-drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback) {
-
+drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback)
+{
   drmaa2_list l;
 
   l = (drmaa2_list)malloc(sizeof(drmaa2_list_s));

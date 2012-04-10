@@ -3,7 +3,7 @@
 #include <string.h>
 #include "drmaa2-list.h"
 
-void callback_free(void * entry)
+void callback_free(void *entry)
 {
     free(entry);
 }
@@ -11,6 +11,7 @@ void callback_free(void * entry)
 
 int main ()
 {
+    printf("======================= TEST_LIST ==============================\n");
     drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, callback_free);
     assert(drmaa2_list_size(sl) == 0);
 
@@ -55,4 +56,6 @@ int main ()
 
     // cleanup
     drmaa2_list_free(sl);
+
+    printf("===================FINISHED TEST_LIST ==========================\n");
 }

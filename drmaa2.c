@@ -5,20 +5,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <string.h>
 
 
 
 // Constants, filled on demand in according functions
 drmaa2_version version=NULL;
 
-// TODO:    use jobinfo
-//          replace pid by id
-typedef struct drmaa2_j_s
-{
-    const char *id;
-    const char *session_name;
-    pid_t pid;
-} drmaa2_j_s;
 
 typedef struct drmaa2_jsession_s
 {
@@ -39,6 +32,20 @@ typedef struct drmaa2_msession_s
     const char *name;
 } drmaa2_msession_s;
 
+typedef struct drmaa2_j_s
+{
+    const char *id;
+    const char *session_name;
+    pid_t pid;
+    drmaa2_jinfo info;
+} drmaa2_j_s;
+
+typedef struct drmaa2_r_s
+{
+    const char *reservation_id;;
+    const char *session_name;
+    drmaa2_rtemplate reservation_template;
+} drmaa2_r_s;
 
 
 drmaa2_jtemplate  drmaa2_jtemplate_create(void)
@@ -98,8 +105,9 @@ drmaa2_rtemplate drmaa2_rtemplate_create(void)
     rt->usersACL = DRMAA2_UNSET_LIST;            
     rt->candidateMachines = DRMAA2_UNSET_LIST; 
     rt->minPhysMemory = DRMAA2_UNSET_NUM;            
-    rt->machineOS = -1;    //TODO    
-    rt->machineArch = -1;   //TODO
+    rt->machineOS = DRMAA2_OTHER_OS;  
+    rt->machineArch = DRMAA2_OTHER_CPU;
+    return rt;
 }
 
 
@@ -107,6 +115,22 @@ drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 {
     free(rt);
     return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
+{
+    drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
+    r->reservation_id = NULL;
+    r->session_name = rs->name;
+    //TODO: store information
+    return r;
+}
+
+
+char *drmaa2_r_get_id(const drmaa2_r r)
+{
+    return (char *)r->reservation_id;   //TODO
 }
 
 
@@ -137,8 +161,15 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
             j->session_name = js->name;
             j->pid = childpid;
+            j->info = NULL;
             return j;
         }
+}
+
+
+drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
+{
+    return j->info;
 }
 
 
@@ -172,6 +203,31 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 }
 
 
+drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
+{
+    drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, NULL);
+
+    // TODO: get real machine info
+    drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
+    char *name = (char *)malloc(sizeof("my machine"));
+    strcpy(name, "my machine");
+    mi->name                = name;  
+    mi->available           = 1;    
+    mi->sockets             = 1;      
+    mi->coresPerSocket      = 1;
+    mi->threadsPerCore      = 1;  
+    mi->load                = 0;  
+    mi->physMemory          = 4194304;
+    mi->virtMemory          = 4194304;    
+    mi->machineOS           = DRMAA2_MACOS;  
+    mi->machineOSVersion    = NULL;
+    mi->machineArch         = DRMAA2_X86;
+
+    drmaa2_list_add(ml, mi);
+    return ml;
+}
+
+
 char * drmaa2_get_drms_name(void)
 {
     return NULL;
@@ -195,6 +251,12 @@ drmaa2_version drmaa2_get_drmaa_version(void)
         version->minor="0";
     }
     return version;
+}
+
+
+drmaa2_bool drmaa2_supports(const drmaa2_capability c)
+{
+    return DRMAA2_FALSE;
 }
 
 
@@ -230,12 +292,27 @@ drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
     // should this method be called before destruction?
     free(js);
     // TODO: persist information (which??)
-    return 0;
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
+{
+    free(ms);
+    return DRMAA2_SUCCESS;
 }
 
 
 drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 {
     // TODO: reap persistent information
-    return 0;
+    return DRMAA2_SUCCESS;
 }
+
+
+drmaa2_error drmaa2_destroy_rsession(const char * session_name)
+{
+    // TODO: reap persistent information
+    return DRMAA2_SUCCESS;
+}
+
