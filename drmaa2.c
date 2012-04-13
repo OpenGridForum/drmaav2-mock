@@ -37,14 +37,16 @@ typedef struct drmaa2_j_s
     const char *id;
     const char *session_name;
     pid_t pid;
+    drmaa2_jtemplate template;
     drmaa2_jinfo info;
 } drmaa2_j_s;
 
 typedef struct drmaa2_r_s
 {
-    const char *reservation_id;;
+    const char *id;;
     const char *session_name;
-    drmaa2_rtemplate reservation_template;
+    drmaa2_rtemplate template;
+    drmaa2_rinfo info;
 } drmaa2_r_s;
 
 
@@ -121,16 +123,27 @@ drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
 {
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
-    r->reservation_id = NULL;
+    r->id = NULL;
     r->session_name = rs->name;
-    //TODO: store information
+    r->template = rt;
+
+    drmaa2_rinfo info = (drmaa2_rinfo)malloc(sizeof(drmaa2_rinfo_s));
+    info->reservationId = r->id;
+    info->reservationName = r->session_name;
+    info->reservedStartTime = rt->startTime;
+    info->reservedEndTime = rt->endTime;
+    info->usersACL = rt->usersACL;
+    info->reservedSlots = rt->maxSlots;
+    info->reservedMachines = rt->candidateMachines;
+
+    r->info = info;
     return r;
 }
 
 
 char *drmaa2_r_get_id(const drmaa2_r r)
 {
-    return (char *)r->reservation_id;   //TODO
+    return (char *)r->id;   //TODO
 }
 
 
@@ -150,18 +163,36 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             // child
             if (jt->args) 
 		        args=stringlist_get_array(jt->args);
-            execv(jt->remoteCommand, args);     //TODO: no clean up necessary?
-            if (jt->args)
-                stringlist_free_array(args);
-            exit(0);
+            execv(jt->remoteCommand, args);
         }
         else
         {
             // parent
             drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
+            j->id = NULL;
             j->session_name = js->name;
             j->pid = childpid;
-            j->info = NULL;
+            j->template = jt;
+
+            drmaa2_jinfo info = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
+            info->jobId = j->id;
+            info->exitStatus = DRMAA2_UNSET_NUM;
+            info->terminatingSignal = DRMAA2_UNSET_STRING;
+            info->annotation = DRMAA2_UNSET_STRING;
+            info->jobState = DRMAA2_UNDETERMINED;
+            info->jobSubState = DRMAA2_UNSET_STRING;
+            info->allocatedMachines = DRMAA2_UNSET_STRING;
+            info->submissionMachine = DRMAA2_UNSET_STRING;
+            info->jobOwner = DRMAA2_UNSET_STRING;
+            info->slots = DRMAA2_UNSET_NUM;
+            info->queueName = DRMAA2_UNSET_STRING;
+            info->wallclockTime = DRMAA2_UNSET_TIME;
+            info->cpuTime = DRMAA2_UNSET_NUM;
+            info->submissionTime = time(NULL);
+            info->dispatchTime = time(NULL);
+            info->finishTime = DRMAA2_UNSET_TIME;
+
+            j->info = info;
             return j;
         }
 }
@@ -176,13 +207,15 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 {
     pid_t child;
-    int status = 0;
+    int status;
 
     child = waitpid(j->pid, &status, 0);
-    printf("status of child %d: %d\n", child, status);
 
     if (WIFEXITED(status))
     {
+        j->info->exitStatus = WEXITSTATUS(status);
+        j->info->finishTime = time(NULL);
+
         printf("Process terminated normally by a call to _exit(2) or exit(3).\n");
         printf("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
     }

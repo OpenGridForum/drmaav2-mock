@@ -5,7 +5,7 @@
 
 
 typedef struct drmaa2_list_item_s {
-	const void *data;
+	void *data;
 	struct drmaa2_list_item_s *next;
 } drmaa2_list_item_s;
 typedef drmaa2_list_item_s *drmaa2_list_item;

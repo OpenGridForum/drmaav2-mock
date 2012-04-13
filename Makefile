@@ -20,4 +20,4 @@ large: $(DRMAAOBJS) large.o
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f $(DRMAAOBJS) test.o test large.o large
+	rm -f $(DRMAAOBJS) *.o test large test_list test_dict
