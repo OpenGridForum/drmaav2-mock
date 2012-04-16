@@ -4,11 +4,11 @@
 #include <string.h>
 #include <assert.h>
 
-char **stringlist_get_array(drmaa2_list l)
+const char **stringlist_get_array(drmaa2_list l)
 {
     // no deep copy
     assert(l->type == DRMAA2_STRINGLIST);
-    char **array = (char **)malloc(l->size * sizeof(char *));
+    const char **array = (const char **)malloc(l->size * sizeof(char *));
     drmaa2_list_item current_item = (drmaa2_list_item)l->head;
     int i;
     for (i = 0; i < l->size; i++)
@@ -40,7 +40,7 @@ drmaa2_error drmaa2_list_free (drmaa2_list l)
 }
 
 
-void *drmaa2_list_get (drmaa2_list l, int pos)
+const void *drmaa2_list_get (drmaa2_list l, int pos)
 {
     if (pos < 0 || pos >= l->size)
         return NULL;
@@ -52,7 +52,7 @@ void *drmaa2_list_get (drmaa2_list l, int pos)
 }
 
 
-drmaa2_error drmaa2_list_add (drmaa2_list l, void * value)
+drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
 {   
     drmaa2_list_item new_item;
     if ((new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item))) == NULL)

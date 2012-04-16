@@ -128,8 +128,8 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
     r->template = rt;
 
     drmaa2_rinfo info = (drmaa2_rinfo)malloc(sizeof(drmaa2_rinfo_s));
-    info->reservationId = r->id;
-    info->reservationName = r->session_name;
+    info->reservationId = (char *)r->id;
+    info->reservationName = (char *)r->session_name;
     info->reservedStartTime = rt->startTime;
     info->reservedEndTime = rt->endTime;
     info->usersACL = rt->usersACL;
@@ -162,7 +162,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         {
             // child
             if (jt->args) 
-		        args=stringlist_get_array(jt->args);
+		        args = (char **)stringlist_get_array(jt->args);
             execv(jt->remoteCommand, args);
         }
         else
@@ -175,7 +175,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             j->template = jt;
 
             drmaa2_jinfo info = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
-            info->jobId = j->id;
+            info->jobId = (char *)j->id;
             info->exitStatus = DRMAA2_UNSET_NUM;
             info->terminatingSignal = DRMAA2_UNSET_STRING;
             info->annotation = DRMAA2_UNSET_STRING;

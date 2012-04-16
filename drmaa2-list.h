@@ -5,7 +5,7 @@
 
 
 typedef struct drmaa2_list_item_s {
-	void *data;
+	const void *data;
 	struct drmaa2_list_item_s *next;
 } drmaa2_list_item_s;
 typedef drmaa2_list_item_s *drmaa2_list_item;
@@ -18,7 +18,7 @@ typedef struct drmaa2_list_s {
 
 
 
-char **stringlist_get_array(drmaa2_list l);
+const char **stringlist_get_array(drmaa2_list l);
 void stringlist_free_array(char **array);
 
 

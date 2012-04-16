@@ -50,7 +50,7 @@ drmaa2_bool drmaa2_dict_has(const drmaa2_dict d, const char * key)
 }
 
 
-char *drmaa2_dict_get(const drmaa2_dict d, const char * key)
+const char *drmaa2_dict_get(const drmaa2_dict d, const char * key)
 {
     drmaa2_dict_item current_item = d->head;
     while (current_item != NULL)

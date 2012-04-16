@@ -47,7 +47,7 @@ int main ()
     assert(!strcmp((char *)drmaa2_list_get(sl,1), "last bar"));
 
 
-    char **array = stringlist_get_array(sl);
+    const char **array = stringlist_get_array(sl);
     int i;
     for (i = 0; i < sl->size; i++)
         printf("%s (%li)\n", array[i], strlen(array[i]));
