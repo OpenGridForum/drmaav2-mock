@@ -134,8 +134,8 @@ typedef enum drmaa2_listtype {
 typedef void (*drmaa2_list_entryfree)(void * value);
 drmaa2_list  drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback);
 drmaa2_error drmaa2_list_free   (      drmaa2_list l); 
-void *       drmaa2_list_get    (      drmaa2_list l, int pos);
-drmaa2_error drmaa2_list_add    (      drmaa2_list l, void * value);
+const void * drmaa2_list_get    (      drmaa2_list l, int pos);
+drmaa2_error drmaa2_list_add    (      drmaa2_list l, const void * value);
 drmaa2_error drmaa2_list_del    (      drmaa2_list l, int pos);
 int          drmaa2_list_size   (const drmaa2_list l);
 
@@ -147,7 +147,7 @@ drmaa2_dict        drmaa2_dict_create (const drmaa2_dict_entryfree callback);
 drmaa2_error       drmaa2_dict_free   (drmaa2_dict d); 
 drmaa2_string_list drmaa2_dict_list   (const drmaa2_dict d);            
 drmaa2_bool        drmaa2_dict_has    (const drmaa2_dict d, const char * key);
-char *             drmaa2_dict_get    (const drmaa2_dict d, const char * key);
+const char *       drmaa2_dict_get    (const drmaa2_dict d, const char * key);
 drmaa2_error       drmaa2_dict_del    (      drmaa2_dict d, const char * key);
 drmaa2_error       drmaa2_dict_set    (      drmaa2_dict d, const char * key, const char * val);
 
