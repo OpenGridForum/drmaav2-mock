@@ -89,6 +89,7 @@ drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 
 drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 {
+    //TODO: free fields if necessary
     free(jt);
     return DRMAA2_SUCCESS;
 }
@@ -115,6 +116,7 @@ drmaa2_rtemplate drmaa2_rtemplate_create(void)
 
 drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 {
+    //TODO: free fields if necessary
     free(rt);
     return DRMAA2_SUCCESS;
 }
@@ -125,6 +127,7 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
     r->id = NULL;
     r->session_name = rs->name;
+    //TODO: copy job template, work only with the copy 
     r->template = rt;
 
     drmaa2_rinfo info = (drmaa2_rinfo)malloc(sizeof(drmaa2_rinfo_s));
@@ -143,16 +146,14 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 
 char *drmaa2_r_get_id(const drmaa2_r r)
 {
-    return (char *)r->id;   //TODO
+    return (char *)r->id;
 }
 
 
 drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
 {
     pid_t childpid;
-    char ** args = NULL;
 
-    //TODO: copy job template, work only with the copy 
     if ((childpid = fork()) == -1)
     {
         perror("fork failed\n");
@@ -161,6 +162,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     else if (childpid == 0)
         {
             // child
+            char **args = NULL;
             if (jt->args) 
 		        args = (char **)stringlist_get_array(jt->args);
             execv(jt->remoteCommand, args);
@@ -172,6 +174,8 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             j->id = NULL;
             j->session_name = js->name;
             j->pid = childpid;
+
+            //TODO: copy job template, work only with the copy 
             j->template = jt;
 
             drmaa2_jinfo info = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
@@ -239,6 +243,7 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
 {
     drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, NULL);
+    //TODO: callback for cleanup
 
     // TODO: get real machine info
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
@@ -261,7 +266,7 @@ drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession m
 }
 
 
-char * drmaa2_get_drms_name(void)
+char *drmaa2_get_drms_name(void)
 {
     return NULL;
 }
@@ -293,21 +298,24 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 }
 
 
-drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact){
+drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact)
+{
+    // TODO: uniqueness test of name
+    // handle empty names
     drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
     js->name = session_name;
     js->contact = contact;
-    // TODO: append job-session to js-list
     return js;
 }
 
 
 drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * contact)
 {
+    // TODO: uniqueness test of name
+    // handle empty names
     drmaa2_rsession rs = (drmaa2_rsession)malloc(sizeof(drmaa2_rsession_s));
     rs->name = session_name;
     rs->contact = contact;
-    // TODO: append reservation-session to rs-list
     return rs;
 }
 
@@ -322,9 +330,9 @@ drmaa2_msession drmaa2_open_msession(const char * session_name)
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
-    // should this method be called before destruction?
     free(js);
     // TODO: persist information (which??)
+    // TODO: cleanup
     return DRMAA2_SUCCESS;
 }
 
@@ -339,6 +347,7 @@ drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 {
     // TODO: reap persistent information
+    // TODO: cleanup
     return DRMAA2_SUCCESS;
 }
 
@@ -346,6 +355,21 @@ drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 {
     // TODO: reap persistent information
+    // TODO: cleanup
     return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_string_list drmaa2_get_jsession_names(void)
+{
+    //return only persistent data
+    return NULL;
+}
+
+drmaa2_string_list drmaa2_get_rsession_names(void)
+{
+    //return only persistent data
+    //or set error
+    return NULL;
 }
 
