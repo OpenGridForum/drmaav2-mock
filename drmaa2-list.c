@@ -40,7 +40,7 @@ drmaa2_error drmaa2_list_free (drmaa2_list l)
 }
 
 
-void *drmaa2_list_get (drmaa2_list l, int pos)
+const void *drmaa2_list_get (drmaa2_list l, int pos)
 {
     if (pos < 0 || pos >= l->size)
         return NULL;
@@ -52,7 +52,7 @@ void *drmaa2_list_get (drmaa2_list l, int pos)
 }
 
 
-drmaa2_error drmaa2_list_add (drmaa2_list l, void * value)
+drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
 {   
     drmaa2_list_item_h new_item;
     if ((new_item = (drmaa2_list_item_h)malloc(sizeof(drmaa2_list_item_t))) == NULL)
