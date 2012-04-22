@@ -127,8 +127,9 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
     r->id = NULL;
     r->session_name = rs->name;
-    //TODO: copy job template, work only with the copy 
-    r->template = rt;
+    //copy reservation template, work only with the copy
+    r->template = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
+    memcpy(r->template, rt, sizeof(drmaa2_rtemplate_s));
 
     drmaa2_rinfo info = (drmaa2_rinfo)malloc(sizeof(drmaa2_rinfo_s));
     info->reservationId = (char *)r->id;
@@ -175,8 +176,9 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             j->session_name = js->name;
             j->pid = childpid;
 
-            //TODO: copy job template, work only with the copy 
-            j->template = jt;
+            //copy job template, work only with the copy 
+            j->template = (drmaa2_jtemplate)malloc(sizeof(drmaa2_jtemplate_s));
+            memcpy(j->template, jt, sizeof(drmaa2_jtemplate_s));
 
             drmaa2_jinfo info = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
             info->jobId = (char *)j->id;
@@ -243,7 +245,7 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
 {
     drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, NULL);
-    //TODO: callback for cleanup
+    //TODO: set callback for cleanup
 
     // TODO: get real machine info
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));

@@ -12,7 +12,7 @@ void callback_free(void *entry)
 int main ()
 {
     printf("======================= TEST_LIST ==============================\n");
-    drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, callback_free);
+    drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
     assert(drmaa2_list_size(sl) == 0);
 
     //test add
