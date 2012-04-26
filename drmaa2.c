@@ -43,7 +43,7 @@ typedef struct drmaa2_j_s
 
 typedef struct drmaa2_r_s
 {
-    const char *id;;
+    const char *id;
     const char *session_name;
     drmaa2_rtemplate template;
     drmaa2_rinfo info;
@@ -201,6 +201,12 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             j->info = info;
             return j;
         }
+}
+
+
+char *drmaa2_j_get_id(const drmaa2_j j)
+{
+    return j->id;
 }
 
 

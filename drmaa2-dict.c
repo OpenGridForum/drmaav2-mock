@@ -15,6 +15,11 @@ drmaa2_dict drmaa2_dict_create(const drmaa2_dict_entryfree callback)
 
 drmaa2_error drmaa2_dict_free(drmaa2_dict d)
 {
+    if (d == NULL)
+    {
+        return DRMAA2_SUCCESS;
+    }
+
     drmaa2_dict_item head = d->head;
     drmaa2_dict_item tmp;
     while (head != NULL)

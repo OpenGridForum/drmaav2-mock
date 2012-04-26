@@ -27,6 +27,11 @@ void stringlist_free_array(char **array)
 
 drmaa2_error drmaa2_list_free (drmaa2_list l)
 {
+    if (l == NULL)
+    {
+        return DRMAA2_SUCCESS;
+    }
+
     drmaa2_list_item head = (drmaa2_list_item)l->head;
     drmaa2_list_item tmp;
     while (head != NULL)
