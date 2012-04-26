@@ -147,6 +147,7 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 
 char *drmaa2_r_get_id(const drmaa2_r r)
 {
+    //TODO return copy
     return (char *)r->id;
 }
 
@@ -206,7 +207,8 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 
 char *drmaa2_j_get_id(const drmaa2_j j)
 {
-    return j->id;
+    //TODO: return copy
+    return (char *)j->id;
 }
 
 

@@ -38,6 +38,7 @@ drmaa2_error drmaa2_list_free (drmaa2_list l)
     {
         tmp = head;
         head = tmp->next;
+        if (l->free_entry != NULL) l->free_entry((void *)tmp->data);
         free(tmp);
     }
     free(l);
@@ -45,12 +46,13 @@ drmaa2_error drmaa2_list_free (drmaa2_list l)
 }
 
 
-const void *drmaa2_list_get (drmaa2_list l, int pos)
+const void *drmaa2_list_get (const drmaa2_list l, long pos)
 {
     if (pos < 0 || pos >= l->size)
         return NULL;
+
     drmaa2_list_item current_item = (drmaa2_list_item)l->head;
-    int i;
+    long i;
     for (i = 0; i < pos; i++)
         current_item = current_item->next;
     return current_item->data;
@@ -84,7 +86,7 @@ drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
     return DRMAA2_SUCCESS;
 }
 
-drmaa2_error drmaa2_list_del (drmaa2_list l, int pos)
+drmaa2_error drmaa2_list_del (drmaa2_list l, long pos)
 {
     if (pos < 0 || pos >= l->size)
         return DRMAA2_INVALID_ARGUMENT;
@@ -95,29 +97,27 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, int pos)
         drmaa2_list_item to_delete = current_item;
         l->head = to_delete->next;
         l->size--;
+        if (l->free_entry != NULL) l->free_entry((void *)to_delete->data);
         free(to_delete);
 
         return DRMAA2_SUCCESS;
     }
 
-    int i;
+    long i;
     for (i = 0; i < pos-1; i++)
         current_item = current_item->next;
     //current_item points to the item before the one we want to remove
     drmaa2_list_item to_delete = current_item->next;
     current_item->next = to_delete->next;
     l->size--;
-    if (l->free_entry != NULL)
-    {
-        l->free_entry((void *)to_delete->data);  
-    }
+    if (l->free_entry != NULL) l->free_entry((void *)to_delete->data);  
     free(to_delete);
 
     return DRMAA2_SUCCESS;
 }
 
 
-int drmaa2_list_size (const drmaa2_list l)
+long drmaa2_list_size (const drmaa2_list l)
 {
     return l->size;
 }
