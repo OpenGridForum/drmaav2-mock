@@ -14,7 +14,7 @@ int main ()
 {
     drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
     drmaa2_rtemplate        rt = drmaa2_rtemplate_create();
-    drmaa2_string_list      cl = drmaa2_list_create(DRMAA2_STRINGLIST, callback_free);
+    drmaa2_string_list      cl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
     drmaa2_dict            env = drmaa2_dict_create(NULL);
     drmaa2_jinfo            ji = NULL;
     drmaa2_j                 j = NULL;

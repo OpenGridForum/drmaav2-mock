@@ -11,9 +11,10 @@ typedef struct drmaa2_list_item_s {
 typedef drmaa2_list_item_s *drmaa2_list_item;
 
 typedef struct drmaa2_list_s {
-  drmaa2_listtype type;
-  int size;
-  void * head;
+	drmaa2_list_entryfree free_entry;
+	drmaa2_listtype type;
+	int size;
+	void *head;
 } drmaa2_list_s;
 
 

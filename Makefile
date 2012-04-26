@@ -16,7 +16,7 @@ test_list: $(DRMAAOBJS) test_list.o
 large: $(DRMAAOBJS) large.o
 	$(CC) -o $@ $(DRMAAOBJS) large.o
 
-%.o: %.c
+%.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:

@@ -16,6 +16,7 @@ int main ()
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);
     drmaa2_jtemplate_free(jt);
     drmaa2_destroy_jsession("testsession");
+
     return 0;
 }
 

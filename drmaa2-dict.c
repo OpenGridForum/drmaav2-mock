@@ -7,6 +7,7 @@
 drmaa2_dict drmaa2_dict_create(const drmaa2_dict_entryfree callback)
 {
     drmaa2_dict d = (drmaa2_dict)malloc(sizeof(drmaa2_dict_s));
+    d->free_entry = callback;
     d->head = NULL;
     return d;
 }
@@ -20,6 +21,11 @@ drmaa2_error drmaa2_dict_free(drmaa2_dict d)
     {
         tmp = head;
         head = head->next;
+        if (d->free_entry != NULL)
+        {
+            d->free_entry((char *)tmp->key);
+            d->free_entry((char *)tmp->value);
+        }
         free(tmp);
     }
     free(d);

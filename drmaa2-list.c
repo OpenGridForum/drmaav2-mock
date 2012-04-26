@@ -102,6 +102,10 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, int pos)
     drmaa2_list_item to_delete = current_item->next;
     current_item->next = to_delete->next;
     l->size--;
+    if (l->free_entry != NULL)
+    {
+        l->free_entry((void *)to_delete->data);  
+    }
     free(to_delete);
 
     return DRMAA2_SUCCESS;
@@ -119,28 +123,29 @@ drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entry
   drmaa2_list l;
 
   l = (drmaa2_list)malloc(sizeof(drmaa2_list_s));
+  l->free_entry = callback;
   l->type = t;
   l->size = 0;
   l->head = NULL;
   switch (l->type) {
     case DRMAA2_STRINGLIST:
-      return (drmaa2_string_list)l;
-      break;
+        return (drmaa2_string_list)l;
+        break;
     case DRMAA2_JOBLIST:
-      return (drmaa2_j_list)l;
-      break;
+        return (drmaa2_j_list)l;
+        break;
     case DRMAA2_QUEUEINFOLIST:
-      return (drmaa2_queueinfo_list)l;
-      break;
+        return (drmaa2_queueinfo_list)l;
+        break;
     case DRMAA2_MACHINEINFOLIST:
-      return (drmaa2_machineinfo_list)l;
-      break;
+        return (drmaa2_machineinfo_list)l;
+        break;
     case DRMAA2_SLOTINFOLIST:
-      return (drmaa2_slotinfo_list)l;
-      break;
+        return (drmaa2_slotinfo_list)l;
+        break;
     case DRMAA2_RESERVATIONLIST:
-      return (drmaa2_r_list)l;
-      break;
+        return (drmaa2_r_list)l;
+        break;
   }
 }
 
