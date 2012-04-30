@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "drmaa2.h"
 
 void error_handler()
@@ -40,7 +41,7 @@ int main ()
     r = drmaa2_rsession_request_reservation(rs, rt);
 
     // submit job 
-    jt->remoteCommand = "/bin/date";
+    jt->remoteCommand = strdup("/bin/date");
     jt->reservationId = drmaa2_r_get_id(r);
     drmaa2_dict_set(env, "FOO", "BAR");
     jt->jobEnvironment = env;
@@ -53,12 +54,12 @@ int main ()
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup
-    drmaa2_list_free(cl);
-    drmaa2_dict_free(env);
-    drmaa2_jtemplate_free(jt);
-    drmaa2_rtemplate_free(rt);
+    drmaa2_jtemplate_free(jt);  // includes free of env
+    drmaa2_rtemplate_free(rt);  // includes free of cl
+    drmaa2_jinfo_free(ji);
     drmaa2_close_msession(ms);  
     drmaa2_destroy_rsession("myrsession");
     drmaa2_destroy_jsession("myjsession");
+    drmaa2_list_free(ml);
 }
 

@@ -9,9 +9,6 @@
 
 
 
-// Constants, filled on demand in according functions
-drmaa2_version version=NULL;
-
 
 typedef struct drmaa2_jsession_s
 {
@@ -48,6 +45,76 @@ typedef struct drmaa2_r_s
     drmaa2_rtemplate template;
     drmaa2_rinfo info;
 } drmaa2_r_s;
+
+
+drmaa2_error drmaa2_string_free(char* string)
+{
+    free(string);
+}
+
+
+drmaa2_jinfo drmaa2_jinfo_create(void)
+{
+    drmaa2_jinfo ji = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
+    ji->jobId               = DRMAA2_UNSET_STRING;
+    ji->exitStatus          = DRMAA2_UNSET_NUM;
+    ji->terminatingSignal   = DRMAA2_UNSET_STRING;
+    ji->annotation          = DRMAA2_UNSET_STRING;
+    ji->jobState            = DRMAA2_UNDETERMINED;
+    ji->jobSubState         = DRMAA2_UNSET_STRING;
+    ji->allocatedMachines   = DRMAA2_UNSET_LIST;
+    ji->submissionMachine   = DRMAA2_UNSET_STRING;
+    ji->jobOwner            = DRMAA2_UNSET_STRING;
+    ji->slots               = DRMAA2_UNSET_NUM;
+    ji->queueName           = DRMAA2_UNSET_STRING;
+    ji->wallclockTime       = DRMAA2_UNSET_TIME;
+    ji->cpuTime             = DRMAA2_UNSET_NUM;
+    ji->submissionTime      = DRMAA2_UNSET_TIME;
+    ji->dispatchTime        = DRMAA2_UNSET_TIME;
+    ji->finishTime          = DRMAA2_UNSET_TIME;
+    return ji;
+}
+
+
+drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
+{
+    drmaa2_string_free(ji->jobId);
+    drmaa2_string_free(ji->terminatingSignal);
+    drmaa2_string_free(ji->annotation);
+    drmaa2_string_free(ji->jobSubState);
+    drmaa2_list_free(ji->allocatedMachines);
+    drmaa2_string_free(ji->submissionMachine);
+    drmaa2_string_free(ji->jobOwner);
+    drmaa2_string_free(ji->queueName);
+    free(ji);
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_rinfo drmaa2_rinfo_create(void)
+{
+    // no drmaa function - only used by implementation
+    drmaa2_rinfo ri = (drmaa2_rinfo) malloc(sizeof(drmaa2_rinfo_s));
+    ri->reservationId       = DRMAA2_UNSET_STRING;
+    ri->reservationName     = DRMAA2_UNSET_STRING;
+    ri->reservedStartTime   = DRMAA2_UNSET_TIME;
+    ri->reservedEndTime     = DRMAA2_UNSET_TIME;
+    ri->usersACL            = DRMAA2_UNSET_LIST;
+    ri->reservedSlots       = DRMAA2_UNSET_NUM;
+    ri->reservedMachines    = DRMAA2_UNSET_LIST;
+    return ri;
+}
+
+
+drmaa2_error drmaa2_rinfo_free(drmaa2_rinfo ri)
+{
+    drmaa2_string_free(ri->reservationId);
+    drmaa2_string_free(ri->reservationName);
+    drmaa2_list_free(ri->usersACL);
+    drmaa2_list_free(ri->reservedMachines);
+    free(ri);
+    return DRMAA2_SUCCESS;
+}
 
 
 drmaa2_jtemplate  drmaa2_jtemplate_create(void)
@@ -89,7 +156,25 @@ drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 
 drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 {
-    //TODO: free fields if necessary
+    // free fields
+    free(jt->remoteCommand);
+    drmaa2_list_free(jt->args);          
+    drmaa2_dict_free(jt->jobEnvironment);
+    free(jt->workingDirectory);        
+    free(jt->jobCategory);            
+    drmaa2_list_free(jt->email);
+    free(jt->jobName);              
+    free(jt->inputPath);
+    free(jt->outputPath);
+    free(jt->errorPath);
+    free(jt->reservationId);
+    free(jt->queueName);
+    drmaa2_list_free(jt->candidateMachines);
+    drmaa2_dict_free(jt->stageInFiles); 
+    drmaa2_dict_free(jt->stageOutFiles);
+    drmaa2_dict_free(jt->resourceLimits);
+    free(jt->accountingId);
+    // free container
     free(jt);
     return DRMAA2_SUCCESS;
 }
@@ -98,25 +183,30 @@ drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 drmaa2_rtemplate drmaa2_rtemplate_create(void)
 {
     drmaa2_rtemplate rt = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
-    rt->reservationName = DRMAA2_UNSET_STRING;          
-    rt->startTime = DRMAA2_UNSET_TIME;          
-    rt->endTime = DRMAA2_UNSET_TIME;          
-    rt->duration = DRMAA2_UNSET_TIME;          
-    rt->minSlots = DRMAA2_UNSET_NUM;              
-    rt->maxSlots = DRMAA2_UNSET_NUM;
-    rt->jobCategory = DRMAA2_UNSET_STRING;
-    rt->usersACL = DRMAA2_UNSET_LIST;            
-    rt->candidateMachines = DRMAA2_UNSET_LIST; 
-    rt->minPhysMemory = DRMAA2_UNSET_NUM;            
-    rt->machineOS = DRMAA2_OTHER_OS;  
-    rt->machineArch = DRMAA2_OTHER_CPU;
+    rt->reservationName     = DRMAA2_UNSET_STRING;          
+    rt->startTime           = DRMAA2_UNSET_TIME;          
+    rt->endTime             = DRMAA2_UNSET_TIME;          
+    rt->duration            = DRMAA2_UNSET_TIME;          
+    rt->minSlots            = DRMAA2_UNSET_NUM;              
+    rt->maxSlots            = DRMAA2_UNSET_NUM;
+    rt->jobCategory         = DRMAA2_UNSET_STRING;
+    rt->usersACL            = DRMAA2_UNSET_LIST;            
+    rt->candidateMachines   = DRMAA2_UNSET_LIST; 
+    rt->minPhysMemory       = DRMAA2_UNSET_NUM;            
+    rt->machineOS           = DRMAA2_OTHER_OS;  
+    rt->machineArch         = DRMAA2_OTHER_CPU;
     return rt;
 }
 
 
 drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 {
-    //TODO: free fields if necessary
+    // free fields
+    free(rt->reservationName);          
+    free(rt->jobCategory);
+    drmaa2_list_free(rt->usersACL);            
+    drmaa2_list_free(rt->candidateMachines);
+    // free container 
     free(rt);
     return DRMAA2_SUCCESS;
 }
@@ -126,19 +216,20 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 {
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
     r->id = NULL;
-    r->session_name = rs->name;
-    //copy reservation template, work only with the copy
+    r->session_name = (rs->name != NULL) ? strdup(rs->name) : DRMAA2_UNSET_STRING;
+    // copy reservation template, work only with the copy
     r->template = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
     memcpy(r->template, rt, sizeof(drmaa2_rtemplate_s));
+    //TODO: deep copy
 
-    drmaa2_rinfo info = (drmaa2_rinfo)malloc(sizeof(drmaa2_rinfo_s));
-    info->reservationId = (char *)r->id;
-    info->reservationName = (char *)r->session_name;
+    drmaa2_rinfo info = drmaa2_rinfo_create();
+    info->reservationId     = (r->id != NULL) ? strdup(r->id) : DRMAA2_UNSET_STRING;
+    info->reservationName   = (r->session_name != NULL) ? strdup(r->session_name) : DRMAA2_UNSET_STRING;
     info->reservedStartTime = rt->startTime;
-    info->reservedEndTime = rt->endTime;
-    info->usersACL = rt->usersACL;
-    info->reservedSlots = rt->maxSlots;
-    info->reservedMachines = rt->candidateMachines;
+    info->reservedEndTime   = rt->endTime;
+    info->usersACL          = rt->usersACL; //TODO: copy to be able to use destructor
+    info->reservedSlots     = rt->maxSlots;
+    info->reservedMachines  = rt->candidateMachines;  //TODO: copy to be able to use destructor
 
     r->info = info;
     return r;
@@ -147,8 +238,8 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 
 char *drmaa2_r_get_id(const drmaa2_r r)
 {
-    //TODO return copy
-    return (char *)r->id;
+    //returns copy since application should call drmaa2_string_free()
+    return (r->id != NULL) ? strdup(r->id) : DRMAA2_UNSET_STRING;
 }
 
 
@@ -174,30 +265,18 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             // parent
             drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
             j->id = NULL;
-            j->session_name = js->name;
+            j->session_name = (js->name != NULL) ? strdup(js->name) : DRMAA2_UNSET_STRING;
             j->pid = childpid;
 
-            //copy job template, work only with the copy 
+            // copy job template, work only with the copy 
             j->template = (drmaa2_jtemplate)malloc(sizeof(drmaa2_jtemplate_s));
             memcpy(j->template, jt, sizeof(drmaa2_jtemplate_s));
+            //TODO: deep copy
 
-            drmaa2_jinfo info = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
-            info->jobId = (char *)j->id;
-            info->exitStatus = DRMAA2_UNSET_NUM;
-            info->terminatingSignal = DRMAA2_UNSET_STRING;
-            info->annotation = DRMAA2_UNSET_STRING;
-            info->jobState = DRMAA2_UNDETERMINED;
-            info->jobSubState = DRMAA2_UNSET_STRING;
-            info->allocatedMachines = DRMAA2_UNSET_STRING;
-            info->submissionMachine = DRMAA2_UNSET_STRING;
-            info->jobOwner = DRMAA2_UNSET_STRING;
-            info->slots = DRMAA2_UNSET_NUM;
-            info->queueName = DRMAA2_UNSET_STRING;
-            info->wallclockTime = DRMAA2_UNSET_TIME;
-            info->cpuTime = DRMAA2_UNSET_NUM;
+            drmaa2_jinfo info = drmaa2_jinfo_create();
+            info->jobId = (j->id != NULL) ? strdup(j->id) : DRMAA2_UNSET_STRING;
             info->submissionTime = time(NULL);
             info->dispatchTime = time(NULL);
-            info->finishTime = DRMAA2_UNSET_TIME;
 
             j->info = info;
             return j;
@@ -207,13 +286,25 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 
 char *drmaa2_j_get_id(const drmaa2_j j)
 {
-    //TODO: return copy
-    return (char *)j->id;
+    // returns copy since application should call drmaa2_string_free()
+    return (j->id != NULL) ? strdup(j->id) : DRMAA2_UNSET_STRING;
 }
 
 
 drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 {
+    drmaa2_jinfo info = j->info;
+    drmaa2_jinfo i = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
+    memcpy(i, info, sizeof(drmaa2_jinfo_s));
+    i->jobId                = (i->jobId != NULL) ? strdup(info->jobId) : DRMAA2_UNSET_STRING;
+    i->terminatingSignal    = (i->terminatingSignal != NULL) ? strdup(info->terminatingSignal) : DRMAA2_UNSET_STRING;
+    i->annotation           = (i->annotation != NULL) ? strdup(info->annotation) : DRMAA2_UNSET_STRING;
+    i->jobSubState          = (i->jobSubState != NULL) ? strdup(info->jobSubState) : DRMAA2_UNSET_STRING;
+    i->allocatedMachines    = info->allocatedMachines;  //TODO: deep copy
+    i->submissionMachine    = (i->submissionMachine != NULL) ? strdup(info->submissionMachine) : DRMAA2_UNSET_STRING;
+    i->jobOwner             = (i->jobOwner != NULL) ? strdup(info->jobOwner) : DRMAA2_UNSET_STRING;
+    i->queueName            = (i->queueName != NULL) ? strdup(info->queueName): DRMAA2_UNSET_STRING;
+
     return j->info;
 }
 
@@ -257,9 +348,7 @@ drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession m
 
     // TODO: get real machine info
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
-    char *name = (char *)malloc(sizeof("my machine"));
-    strcpy(name, "my machine");
-    mi->name                = name;  
+    mi->name                = strdup("my machine");  
     mi->available           = 1;    
     mi->sockets             = 1;      
     mi->coresPerSocket      = 1;
@@ -288,19 +377,23 @@ drmaa2_version drmaa2_get_drms_version(void)
 
 char *drmaa2_get_drmaa_name(void)
 {
-    return "drmaa2-mock";
+    // returns copy since application should call drmaa2_string_free()
+    return strdup("drmaa2-mock");
 }
 
 drmaa2_version drmaa2_get_drmaa_version(void)
 {
-    if (version == NULL) {
-        version=malloc(sizeof(drmaa2_version_s));
-        version->major="2";
-        version->minor="0";
-    }
+    drmaa2_version version = (drmaa2_version)malloc(sizeof(drmaa2_version_s));
+    version->major = strdup("2");
+    version->minor = strdup("0");
     return version;
 }
 
+drmaa2_error drmaa2_version_free(drmaa2_version v)
+{
+    free(v->major);
+    free(v->minor);
+};
 
 drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 {
@@ -311,10 +404,11 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact)
 {
     // TODO: uniqueness test of name
+    // append to session list
     // handle empty names
     drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
-    js->name = session_name;
-    js->contact = contact;
+    if (session_name) js->name = strdup(session_name);
+    if (contact) js->contact = strdup(contact);
     return js;
 }
 
@@ -322,10 +416,11 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
 drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * contact)
 {
     // TODO: uniqueness test of name
+    // append to session list
     // handle empty names
     drmaa2_rsession rs = (drmaa2_rsession)malloc(sizeof(drmaa2_rsession_s));
-    rs->name = session_name;
-    rs->contact = contact;
+    if (session_name) rs->name = strdup(session_name);
+    if (contact) rs->contact = strdup(contact);
     return rs;
 }
 
@@ -340,9 +435,7 @@ drmaa2_msession drmaa2_open_msession(const char * session_name)
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
-    free(js);
-    // TODO: persist information (which??)
-    // TODO: cleanup
+    // nothing to do: session information stay until session is destroyed
     return DRMAA2_SUCCESS;
 }
 
@@ -356,30 +449,31 @@ drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 
 drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 {
-    // TODO: reap persistent information
-    // TODO: cleanup
+    // TODO: delete all job information of session
+
+    // TODO: find and free job session structure
     return DRMAA2_SUCCESS;
 }
 
 
 drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 {
-    // TODO: reap persistent information
-    // TODO: cleanup
+    // TODO: delete all job information of session
+
+    // TODO: find and free reservation session structure
     return DRMAA2_SUCCESS;
 }
 
 
 drmaa2_string_list drmaa2_get_jsession_names(void)
 {
-    //return only persistent data
+    //TODO: implement
     return NULL;
 }
 
 drmaa2_string_list drmaa2_get_rsession_names(void)
 {
-    //return only persistent data
-    //or set error
+    //TODO: implement
     return NULL;
 }
 
