@@ -2,3 +2,4 @@
 ./test_dict
 ./test
 ./large
+./test_sessions

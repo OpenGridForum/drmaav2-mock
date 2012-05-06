@@ -6,7 +6,19 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
+
+int lasterror           = DRMAA2_SUCCESS;
+char *lasterror_text    = NULL;
+
+
+// "persistent" drms information
+#define DRMAA2_LIST     6
+drmaa2_list jobs            = DRMAA2_UNSET_LIST;
+drmaa2_list reservations    = DRMAA2_UNSET_LIST;
+drmaa2_list j_sessions      = DRMAA2_UNSET_LIST;
+drmaa2_list r_sessions      = DRMAA2_UNSET_LIST;
 
 
 
@@ -50,6 +62,18 @@ typedef struct drmaa2_r_s
 drmaa2_error drmaa2_string_free(char* string)
 {
     free(string);
+}
+
+
+drmaa2_error drmaa2_lasterror(void)
+{
+    return lasterror;
+}
+
+
+char *drmaa2_lasterror_text(void)
+{
+    return NULL;
 }
 
 
@@ -256,8 +280,10 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         {
             // child
             char **args = NULL;
-            if (jt->args) 
-		        args = (char **)stringlist_get_array(jt->args);
+            if (jt->args)
+            {
+                args = (char **)stringlist_get_array(jt->args);
+            }
             execv(jt->remoteCommand, args);
         }
         else
@@ -403,25 +429,85 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 
 drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact)
 {
-    // TODO: uniqueness test of name
-    // append to session list
-    // handle empty names
+    if (j_sessions == DRMAA2_UNSET_LIST)
+    {
+        j_sessions = drmaa2_list_create(DRMAA2_LIST, NULL);
+    }
+    if (session_name == DRMAA2_UNSET_STRING)
+    {
+        // generate unique name
+        session_name = "TODO";
+    }
+    else
+    {
+        // TODO: uniqueness test of name
+    }
+
     drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
-    if (session_name) js->name = strdup(session_name);
+    assert(session_name != DRMAA2_UNSET_STRING);
+    js->name = strdup(session_name);
     if (contact) js->contact = strdup(contact);
+
+    drmaa2_list_add(j_sessions, js);
     return js;
 }
 
 
 drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * contact)
 {
-    // TODO: uniqueness test of name
+    if (r_sessions == DRMAA2_UNSET_LIST)
+    {
+        r_sessions = drmaa2_list_create(DRMAA2_LIST, NULL);
+    }
+    if (session_name == DRMAA2_UNSET_STRING)
+    {
+        // generate unique name
+        session_name = "TODO";
+    }
+    else
+    {
+        // TODO: uniqueness test of name
+    }
+
     // append to session list
     // handle empty names
     drmaa2_rsession rs = (drmaa2_rsession)malloc(sizeof(drmaa2_rsession_s));
-    if (session_name) rs->name = strdup(session_name);
+    assert(session_name != DRMAA2_UNSET_STRING);
+    rs->name = strdup(session_name);
     if (contact) rs->contact = strdup(contact);
+
+    drmaa2_list_add(r_sessions, rs);
     return rs;
+}
+
+
+drmaa2_jsession drmaa2_open_jsession(const char * session_name)
+{
+    if (j_sessions != DRMAA2_UNSET_LIST && session_name != DRMAA2_UNSET_STRING)
+    {
+        drmaa2_list_item current_item = j_sessions->head;
+        drmaa2_jsession js;
+        while (current_item != NULL)
+        {
+            js = (drmaa2_jsession)current_item->data;
+            if (strcmp(js->name, session_name) == 0)
+            {
+                return js;
+            }
+            current_item = current_item->next;
+        }
+    }
+
+    // no jobsession || empty session_name given || no match
+    lasterror = DRMAA2_INVALID_ARGUMENT;
+    lasterror_text = "No session with the given name.";
+    return NULL;
+}
+
+
+drmaa2_rsession drmaa2_open_rsession(const char * session_name)
+{
+    return NULL;
 }
 
 
@@ -449,10 +535,45 @@ drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 
 drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 {
-    // TODO: delete all job information of session
+    if (j_sessions != DRMAA2_UNSET_LIST)
+    {
+        drmaa2_list_item current_item = j_sessions->head;
+        // linked list -> we need to know the item before the one we want to delete
+        drmaa2_list_item before_current = NULL;
+        drmaa2_jsession js;
 
-    // TODO: find and free job session structure
-    return DRMAA2_SUCCESS;
+        if (current_item != NULL)
+        {
+            js = (drmaa2_jsession)current_item->data;
+            if (strcmp(js->name, session_name) == 0)
+            {
+                j_sessions->size--;
+                // session to destroy is first of list
+                //TODO: delete all job information of session
+                j_sessions->head = current_item->next;
+                return DRMAA2_SUCCESS;
+            }
+            // linked list -> we need to know the item before the one we want to delete
+            before_current = current_item;
+            current_item = current_item->next;
+        }
+
+        while (current_item != NULL)
+        {
+            js = (drmaa2_jsession)current_item->data;
+            if (strcmp(js->name, session_name) == 0)
+            {
+                j_sessions->size--;
+                // session to destroy found in the middle of list
+                //TODO: delete all job information of session
+                before_current->next = current_item->next;
+                return DRMAA2_SUCCESS;
+            }
+            before_current = current_item;
+            current_item = current_item->next;
+        }
+    }
+    return DRMAA2_INVALID_ARGUMENT;
 }
 
 
@@ -467,8 +588,19 @@ drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 
 drmaa2_string_list drmaa2_get_jsession_names(void)
 {
-    //TODO: implement
-    return NULL;
+    drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
+    if (j_sessions != DRMAA2_UNSET_LIST)
+    {
+        drmaa2_list_item current_item = j_sessions->head;
+        drmaa2_jsession js;
+        while (current_item != NULL)
+        {
+            js = (drmaa2_jsession)current_item->data;
+            drmaa2_list_add(session_names, strdup(js->name));
+            current_item = current_item->next;
+        }
+    }
+    return session_names;
 }
 
 drmaa2_string_list drmaa2_get_rsession_names(void)

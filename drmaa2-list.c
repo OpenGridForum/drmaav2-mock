@@ -151,6 +151,8 @@ drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entry
     case DRMAA2_RESERVATIONLIST:
         return (drmaa2_r_list)l;
         break;
+    default:
+        return l;
   }
 }
 
