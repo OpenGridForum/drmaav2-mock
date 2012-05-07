@@ -119,6 +119,8 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, long pos)
 
 long drmaa2_list_size (const drmaa2_list l)
 {
+    if (l == NULL)
+        return -1;
     return l->size;
 }
 

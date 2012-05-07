@@ -279,12 +279,23 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     else if (childpid == 0)
         {
             // child
-            char **args = NULL;
+            long args_size = 0;
+            if (jt->args)
+                args_size = drmaa2_list_size(jt->args);
+            char **argv = (char **)malloc(sizeof(char *) * (args_size + 2));
+            argv[0] = jt->remoteCommand;
             if (jt->args)
             {
-                args = (char **)stringlist_get_array(jt->args);
+                //TODO: refactor - get_array call not really useful
+                char **args = (char **)stringlist_get_array(jt->args);
+                int i;
+                for (i=0; i<args_size; i++)
+                {
+                    argv[i+1] = args[i];
+                }
             }
-            execv(jt->remoteCommand, args);
+            argv[args_size+1] = NULL;
+            execv(jt->remoteCommand, argv);
         }
         else
         {
