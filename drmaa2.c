@@ -438,6 +438,7 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 }
 
 
+//TODO: avoid code duplication
 drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact)
 {
     if (j_sessions == DRMAA2_UNSET_LIST)
@@ -518,6 +519,24 @@ drmaa2_jsession drmaa2_open_jsession(const char * session_name)
 
 drmaa2_rsession drmaa2_open_rsession(const char * session_name)
 {
+    if (r_sessions != DRMAA2_UNSET_LIST && session_name != DRMAA2_UNSET_STRING)
+    {
+        drmaa2_list_item current_item = r_sessions->head;
+        drmaa2_rsession rs;
+        while (current_item != NULL)
+        {
+            rs = (drmaa2_rsession)current_item->data;
+            if (strcmp(rs->name, session_name) == 0)
+            {
+                return rs;
+            }
+            current_item = current_item->next;
+        }
+    }
+
+    // no jobsession || empty session_name given || no match
+    lasterror = DRMAA2_INVALID_ARGUMENT;
+    lasterror_text = "No session with the given name.";
     return NULL;
 }
 
@@ -532,7 +551,14 @@ drmaa2_msession drmaa2_open_msession(const char * session_name)
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
-    // nothing to do: session information stay until session is destroyed
+    // nothing to do: session information stays until session is destroyed
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs)
+{
+    // nothing to do: session information stays until session is destroyed
     return DRMAA2_SUCCESS;
 }
 
@@ -590,10 +616,45 @@ drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 
 drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 {
-    // TODO: delete all job information of session
+    if (r_sessions != DRMAA2_UNSET_LIST)
+    {
+        drmaa2_list_item current_item = r_sessions->head;
+        // linked list -> we need to know the item before the one we want to delete
+        drmaa2_list_item before_current = NULL;
+        drmaa2_rsession rs;
 
-    // TODO: find and free reservation session structure
-    return DRMAA2_SUCCESS;
+        if (current_item != NULL)
+        {
+            rs = (drmaa2_rsession)current_item->data;
+            if (strcmp(rs->name, session_name) == 0)
+            {
+                r_sessions->size--;
+                // session to destroy is first of list
+                //TODO: delete all job information of session
+                r_sessions->head = current_item->next;
+                return DRMAA2_SUCCESS;
+            }
+            // linked list -> we need to know the item before the one we want to delete
+            before_current = current_item;
+            current_item = current_item->next;
+        }
+
+        while (current_item != NULL)
+        {
+            rs = (drmaa2_rsession)current_item->data;
+            if (strcmp(rs->name, session_name) == 0)
+            {
+                r_sessions->size--;
+                // session to destroy found in the middle of list
+                //TODO: delete all job information of session
+                before_current->next = current_item->next;
+                return DRMAA2_SUCCESS;
+            }
+            before_current = current_item;
+            current_item = current_item->next;
+        }
+    }
+    return DRMAA2_INVALID_ARGUMENT;
 }
 
 
@@ -616,7 +677,18 @@ drmaa2_string_list drmaa2_get_jsession_names(void)
 
 drmaa2_string_list drmaa2_get_rsession_names(void)
 {
-    //TODO: implement
-    return NULL;
+    drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
+    if (r_sessions != DRMAA2_UNSET_LIST)
+    {
+        drmaa2_list_item current_item = r_sessions->head;
+        drmaa2_rsession rs;
+        while (current_item != NULL)
+        {
+            rs = (drmaa2_rsession)current_item->data;
+            drmaa2_list_add(session_names, strdup(rs->name));
+            current_item = current_item->next;
+        }
+    }
+    return session_names;
 }
 
