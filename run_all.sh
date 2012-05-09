@@ -3,3 +3,4 @@
 ./test
 ./large
 ./test_sessions
+./test_jsession

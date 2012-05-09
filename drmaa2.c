@@ -15,8 +15,6 @@ char *lasterror_text    = NULL;
 
 // "persistent" drms information
 #define DRMAA2_LIST     6
-drmaa2_list jobs            = DRMAA2_UNSET_LIST;
-drmaa2_list reservations    = DRMAA2_UNSET_LIST;
 drmaa2_list j_sessions      = DRMAA2_UNSET_LIST;
 drmaa2_list r_sessions      = DRMAA2_UNSET_LIST;
 
@@ -26,7 +24,7 @@ typedef struct drmaa2_jsession_s
 {
     const char *contact;
     const char *name;
-    drmaa2_j jobs;
+    drmaa2_j_list jobs;
 } drmaa2_jsession_s;
 
 typedef struct drmaa2_rsession_s
@@ -267,6 +265,41 @@ char *drmaa2_r_get_id(const drmaa2_r r)
 }
 
 
+char *drmaa2_jsession_get_contact(const drmaa2_jsession js)
+{
+    if (js->contact) return strdup(js->contact);
+    return DRMAA2_UNSET_STRING;
+}
+
+
+char *drmaa2_jsession_get_session_name(const drmaa2_jsession js)
+{
+    return strdup(js->name);
+}
+
+
+drmaa2_string_list  drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
+{
+    //TODO: implement
+}
+
+
+drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_jinfo filter)
+{
+    drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
+
+    drmaa2_list_item current_item = js->jobs->head;
+    while (current_item != NULL)
+    {
+        //TODO: filter evaluation
+        drmaa2_list_add(jobs, current_item);
+        current_item = current_item->next;
+    }
+
+    return jobs;
+}
+
+
 drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
 {
     pid_t childpid;
@@ -316,6 +349,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             info->dispatchTime = time(NULL);
 
             j->info = info;
+            drmaa2_list_add(js->jobs, j);
             return j;
         }
 }
@@ -459,6 +493,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     js->name = strdup(session_name);
     if (contact) js->contact = strdup(contact);
+    js->jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
 
     drmaa2_list_add(j_sessions, js);
     return js;
@@ -544,7 +579,7 @@ drmaa2_rsession drmaa2_open_rsession(const char * session_name)
 drmaa2_msession drmaa2_open_msession(const char * session_name)
 {
     drmaa2_msession ms = (drmaa2_msession)malloc(sizeof(drmaa2_msession_s));
-    ms->name = session_name;
+    if (session_name) ms->name = strdup(session_name);
     return ms;
 }
 
@@ -565,6 +600,7 @@ drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs)
 
 drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 {
+    drmaa2_string_free((char *)ms->name);
     free(ms);
     return DRMAA2_SUCCESS;
 }

@@ -49,6 +49,11 @@ int main ()
     assert(drmaa2_list_size(sl) == 4);
     drmaa2_list_free(sl);
 
+    //test deletion of non existing session
+    error_code = drmaa2_destroy_jsession("non existing js");
+    assert(error_code == DRMAA2_INVALID_ARGUMENT);
+
+
     //test deletion of sessions
     error_code = drmaa2_destroy_jsession("js2");
     assert(error_code == DRMAA2_SUCCESS);
