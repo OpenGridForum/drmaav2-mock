@@ -38,6 +38,18 @@ int main ()
 
     drmaa2_j_wait_terminated(j1, DRMAA2_INFINITE_TIME);
     drmaa2_j_wait_terminated(j2, DRMAA2_INFINITE_TIME);
+
+
+    //test jobcategories
+    drmaa2_string_list jc = drmaa2_jsession_get_job_categories(js);
+    assert(stringlist_contains(jc, "Python"));
+    drmaa2_list_free(jc);
+
+
+    jt->jobCategory = strdup("Shell");
+    drmaa2_j j3 = drmaa2_jsession_run_job(js, jt);
+    assert(j3 == NULL);
+    assert(drmaa2_lasterror() == DRMAA2_INVALID_ARGUMENT);
     drmaa2_jtemplate_free(jt);
 
 

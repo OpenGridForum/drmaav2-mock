@@ -22,5 +22,7 @@ typedef struct drmaa2_list_s {
 const char **stringlist_get_array(drmaa2_list l);
 void stringlist_free_array(char **array);
 
+int stringlist_contains(drmaa2_string_list sl, char *string);	// not found: 0       found: !=0
+
 
 #endif DRMAA2_LIST_H

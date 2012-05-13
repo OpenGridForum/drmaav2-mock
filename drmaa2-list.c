@@ -25,6 +25,18 @@ void stringlist_free_array(char **array)
     free(array);
 }
 
+int stringlist_contains(drmaa2_string_list sl, char *string)
+{
+    drmaa2_list_item current_item = sl->head;
+    while (current_item != NULL)
+    {
+        if (strcmp((char *)current_item->data, string) == 0) return 1;
+        current_item = current_item->next;
+    }
+    return 0;
+}
+
+
 drmaa2_error drmaa2_list_free (drmaa2_list l)
 {
     if (l == NULL)

@@ -19,6 +19,19 @@ drmaa2_list j_sessions      = DRMAA2_UNSET_LIST;
 drmaa2_list r_sessions      = DRMAA2_UNSET_LIST;
 
 
+// supported jobcategories
+#define JOBCATEGORIES_LENGTH  3
+char *jobcategories[] = {"OpenMP", "Java", "Python"};
+
+int string_array_contains(char *array[], int len, char *string)
+{
+    int i;
+    for (i=0; i<len; i++)
+        if (strcmp(array[i], string) == 0) return 1;
+    return 0;
+}
+
+
 
 typedef struct drmaa2_jsession_s
 {
@@ -278,9 +291,15 @@ char *drmaa2_jsession_get_session_name(const drmaa2_jsession js)
 }
 
 
-drmaa2_string_list  drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
+drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
 {
-    //TODO: implement
+    drmaa2_string_list jc = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
+    int i;
+    for (i=0; i<JOBCATEGORIES_LENGTH; i++)
+    {
+        drmaa2_list_add(jc, strdup(jobcategories[i]));
+    }
+    return jc;
 }
 
 
@@ -302,6 +321,16 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 
 drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
 {
+    //TODO: complete template evaluation
+    int i;
+    if ((jt->jobCategory != DRMAA2_UNSET_STRING) && 
+        !string_array_contains(jobcategories, JOBCATEGORIES_LENGTH, jt->jobCategory))
+    {
+        lasterror = DRMAA2_INVALID_ARGUMENT;
+        lasterror_text = "Given job category is not supported.";
+        return NULL;
+    }
+
     pid_t childpid;
 
     if ((childpid = fork()) == -1)
