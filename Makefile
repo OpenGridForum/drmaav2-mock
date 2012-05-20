@@ -2,7 +2,7 @@ DRMAAOBJS = drmaa2.o drmaa2-list.o drmaa2-dict.o
 CC = gcc
 CFLAGS =
 
-all: test large test_dict test_list test_sessions test_jsession
+all: test large test_dict test_list test_sessions test_jsession test_msession
 
 test: $(DRMAAOBJS) test.o
 	$(CC) -o $@ $(DRMAAOBJS) test.o
@@ -22,8 +22,11 @@ test_sessions: $(DRMAAOBJS) test_sessions.o
 test_jsession: $(DRMAAOBJS) test_jsession.o
 	$(CC) -o $@ $(DRMAAOBJS) test_jsession.o
 
+test_msession: $(DRMAAOBJS) test_msession.o
+	$(CC) -o $@ $(DRMAAOBJS) test_msession.o
+
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f $(DRMAAOBJS) *.o test large test_list test_dict test_sessions test_jsession
+	rm -f $(DRMAAOBJS) *.o test large test_list test_dict test_sessions test_jsession test_msession

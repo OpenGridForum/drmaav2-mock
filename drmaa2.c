@@ -24,6 +24,7 @@ drmaa2_list r_sessions      = DRMAA2_UNSET_LIST;
 char *jobcategories[] = {"OpenMP", "Java", "Python"};
 
 int string_array_contains(char *array[], int len, char *string)
+// false: 0     true: != 0
 {
     int i;
     for (i=0; i<len; i++)
@@ -44,7 +45,7 @@ typedef struct drmaa2_rsession_s
 {
     const char *contact;
     const char *name;
-    //TODO: complete
+    drmaa2_r_list reservations;
 } drmaa2_rsession_s;
 
 typedef struct drmaa2_msession_s
@@ -267,6 +268,7 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
     info->reservedMachines  = rt->candidateMachines;  //TODO: copy to be able to use destructor
 
     r->info = info;
+    drmaa2_list_add(rs->reservations, r);
     return r;
 }
 
@@ -311,7 +313,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
     while (current_item != NULL)
     {
         //TODO: filter evaluation
-        drmaa2_list_add(jobs, current_item);
+        drmaa2_list_add(jobs, current_item->data);
         current_item = current_item->next;
     }
 
@@ -441,6 +443,48 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 }
 
 
+drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
+{
+    drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, DRMAA2_UNSET_CALLBACK);
+
+    if (r_sessions != DRMAA2_UNSET_LIST)
+    {
+        drmaa2_list_item current_session_item = r_sessions->head;
+        drmaa2_list_item current_item = NULL;       //reservation-item
+        drmaa2_rsession current_session = NULL;
+
+        while (current_session_item != NULL)
+        {
+            current_session = (drmaa2_rsession)current_session_item->data;
+            if (current_session->reservations->size != 0)
+            {
+                current_item = current_session->reservations->head;
+                while (current_item != NULL)
+                {
+                    drmaa2_list_add(reservations, current_item->data);
+                    current_item = current_item->next;
+                }
+            }
+            current_session_item = current_session_item->next;
+        }
+    }
+
+    return reservations;
+}
+
+
+drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter)
+{
+    return NULL;
+}
+
+
+drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names)
+{
+    return DRMAA2_UNSET_LIST;
+}
+
+
 drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
 {
     drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, NULL);
@@ -551,6 +595,7 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     rs->name = strdup(session_name);
     if (contact) rs->contact = strdup(contact);
+    rs->reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, DRMAA2_UNSET_CALLBACK);
 
     drmaa2_list_add(r_sessions, rs);
     return rs;
