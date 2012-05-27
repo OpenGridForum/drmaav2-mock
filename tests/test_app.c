@@ -1,6 +1,36 @@
 #include <stdio.h>
 #include <string.h>
-#include "drmaa2.h"
+#include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
+#include "../drmaa2-list.h"
+#include "../drmaa2.h"
+#include "test_app.h"
+
+
+void test_simple_app()
+{
+    drmaa2_jsession js;
+    drmaa2_jtemplate jt;
+    drmaa2_j j;
+
+    drmaa2_version version = drmaa2_get_drmaa_version();
+    char *name = drmaa2_get_drmaa_name();
+    
+    printf("This is %s version %s.%s\n", name, version->major, version->minor);
+    js = drmaa2_create_jsession("testsession", DRMAA2_UNSET_STRING);
+    jt = drmaa2_jtemplate_create();
+    jt->remoteCommand = strdup("/bin/date");
+    j = drmaa2_jsession_run_job(js, jt);
+    drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);
+    drmaa2_jtemplate_free(jt);
+    drmaa2_destroy_jsession("testsession");
+
+    drmaa2_version_free(version);
+    drmaa2_string_free(name);
+
+    CU_ASSERT(1);
+}
+
 
 void error_handler()
 {
@@ -11,9 +41,10 @@ void callback_free(void * entry)
     free(entry);
 }
 
-int main ()
+
+void test_advanced_app()
 {
-    drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
+        drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
     drmaa2_rtemplate        rt = drmaa2_rtemplate_create();
     drmaa2_string_list      cl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
     drmaa2_dict            env = drmaa2_dict_create(NULL);
@@ -62,4 +93,3 @@ int main ()
     drmaa2_destroy_jsession("myjsession");
     drmaa2_list_free(ml);
 }
-
