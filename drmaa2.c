@@ -566,6 +566,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     js->name = strdup(session_name);
     if (contact) js->contact = strdup(contact);
+    else js->contact = DRMAA2_UNSET_STRING;
     js->jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
 
     drmaa2_list_add(j_sessions, js);
@@ -595,6 +596,7 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     rs->name = strdup(session_name);
     if (contact) rs->contact = strdup(contact);
+    else rs->contact = DRMAA2_UNSET_STRING;
     rs->reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, DRMAA2_UNSET_CALLBACK);
 
     drmaa2_list_add(r_sessions, rs);

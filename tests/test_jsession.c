@@ -1,30 +1,36 @@
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include "drmaa2.h"
+#include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
+#include "../drmaa2.h"
+#include "../drmaa2-list.h"
+#include "test_jsession.h"
 
 
-int main ()
+void test_getter_methods()
 {
-    printf("======================= TEST_JSESSION ==========================\n");
-    drmaa2_error error_code;
-
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
     
     // test getter functions
     char *name = drmaa2_jsession_get_session_name(js);
-    assert(strcmp(name, "mysession") == 0);
+    CU_ASSERT_STRING_EQUAL(name, "mysession");
     drmaa2_string_free(name);
     char *contact = drmaa2_jsession_get_contact(js);
-    assert(contact == DRMAA2_UNSET_STRING);
+    CU_ASSERT_PTR_NULL(contact);
     drmaa2_string_free(contact);
 
+    drmaa2_destroy_jsession("mysession");
+}
+
+
+void test_job_list()
+{
+    drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
 
     //test empty joblist
     drmaa2_j_list jobs = drmaa2_jsession_get_jobs(js, NULL);
-    assert(drmaa2_list_size(jobs) == 0);
+    CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 0);
     drmaa2_list_free(jobs);
-
     
     //test joblist
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
@@ -33,34 +39,33 @@ int main ()
     drmaa2_j j2 = drmaa2_jsession_run_job(js, jt);
 
     jobs = drmaa2_jsession_get_jobs(js, NULL);
-    assert(drmaa2_list_size(jobs) == 2);
+    CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 2);
     drmaa2_list_free(jobs);
 
     drmaa2_j_wait_terminated(j1, DRMAA2_INFINITE_TIME);
     drmaa2_j_wait_terminated(j2, DRMAA2_INFINITE_TIME);
 
+    drmaa2_jtemplate_free(jt);
+    drmaa2_destroy_jsession("mysession");
+}
 
-    //test jobcategories
+
+void test_job_categories()
+{
+    drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
+
     drmaa2_string_list jc = drmaa2_jsession_get_job_categories(js);
-    assert(stringlist_contains(jc, "Python"));
+    CU_ASSERT_TRUE(stringlist_contains(jc, "Python"));
     drmaa2_list_free(jc);
 
-
+    drmaa2_jtemplate jt = drmaa2_jtemplate_create();
+    jt->remoteCommand = strdup("/bin/date");
     jt->jobCategory = strdup("Shell");
     drmaa2_j j3 = drmaa2_jsession_run_job(js, jt);
-    assert(j3 == NULL);
-    assert(drmaa2_lasterror() == DRMAA2_INVALID_ARGUMENT);
+    CU_ASSERT_PTR_NULL(j3);
+    CU_ASSERT_EQUAL(drmaa2_lasterror(), DRMAA2_INVALID_ARGUMENT);
     drmaa2_jtemplate_free(jt);
-
-
-
     drmaa2_destroy_jsession("mysession");
 
-
-
-
-    
-
-    printf("===================FINISHED TEST_JSESSION ======================\n");
 }
 

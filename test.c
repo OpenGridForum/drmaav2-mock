@@ -27,6 +27,9 @@
 #include "tests/test_app.h"
 #include "tests/test_dict.h"
 #include "tests/test_list.h"
+#include "tests/test_sessions.h"
+#include "tests/test_msession.h"
+#include "tests/test_jsession.h"
 
 
 
@@ -143,6 +146,61 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
+
+    // 4th Suite
+    pSuite = CU_add_suite("Session Management", NULL, NULL);
+    if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    /* add the tests to the suite */
+    if (NULL == CU_add_test(pSuite, "Get Empty Session List", test_empty_jsession_list)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }   
+    if (NULL == CU_add_test(pSuite, "Basic Session Handling", test_basic_session_methods)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Multiple Sessions", test_multiple_sessions)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+
+    // 5th Suite
+    pSuite = CU_add_suite("Job Session", NULL, NULL);
+    if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    /* add the tests to the suite */
+    if (NULL == CU_add_test(pSuite, "Getter Methods", test_getter_methods)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }   
+    if (NULL == CU_add_test(pSuite, "Job Lists", test_job_list)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Job Categories", test_job_categories)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+
+    // 6th Suite
+    pSuite = CU_add_suite("Monitoring Session", NULL, NULL);
+    if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    /* add the tests to the suite */
+    if (NULL == CU_add_test(pSuite, "Reservation Lists", test_reservation_lists)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
 
 
     CU_basic_set_mode(mode);

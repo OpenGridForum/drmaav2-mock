@@ -1,36 +1,21 @@
 DRMAAOBJS = drmaa2.o drmaa2-list.o drmaa2-dict.o
+TESTOBJS = test.o tests/test_app.o tests/test_dict.o tests/test_list.o tests/test_sessions.o tests/test_jsession.o tests/test_msession.o
+
 CC = gcc
 CFLAGS =
 
-all: test test_sessions test_jsession test_msession
+all: test
 
 
-test_sessions: $(DRMAAOBJS) test_sessions.o
-	$(CC) -o $@ $(DRMAAOBJS) test_sessions.o
+tests/%.o: tests/%.c tests/%.h
+	$(CC) -c $< -o $@
 
-test_jsession: $(DRMAAOBJS) test_jsession.o
-	$(CC) -o $@ $(DRMAAOBJS) test_jsession.o
-
-test_msession: $(DRMAAOBJS) test_msession.o
-	$(CC) -o $@ $(DRMAAOBJS) test_msession.o
-
-
-tests/test_app.o: tests/test_app.c
-	$(CC) -c tests/test_app.c -o tests/test_app.o	
-
-tests/test_dict.o: tests/test_dict.c
-	$(CC) -c tests/test_dict.c -o tests/test_dict.o
-
-tests/test_list.o: tests/test_list.c
-	$(CC) -c tests/test_list.c -o tests/test_list.o
-
-test: $(DRMAAOBJS) test.o tests/test_app.o tests/test_dict.o tests/test_list.o
-	$(CC) -lcunit -o $@ $(DRMAAOBJS) test.o tests/test_app.o tests/test_dict.o tests/test_list.o
-
+test: $(DRMAAOBJS) $(TESTOBJS)
+	$(CC) -lcunit -o $@ $(DRMAAOBJS) $(TESTOBJS)
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f $(DRMAAOBJS) *.o test test_sessions test_jsession test_msession
-	rm -f tests/*.o tests/teat_app tests/test_dict tests/test_list
+	rm -f *.o
+	rm -f tests/*.o test
