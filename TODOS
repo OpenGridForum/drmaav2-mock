@@ -1,0 +1,17 @@
+- split up implementation in multiple files
+
+- session invalidation after destruction
+
+- deep copy of structures (flat so far)
+
+- uniqueness and name generation for sessions
+
+- jobinfo filter
+
+- implement drmaa2_jtemplate_tostring
+
+- notifications
+
+- introspection
+
+- jobarray support

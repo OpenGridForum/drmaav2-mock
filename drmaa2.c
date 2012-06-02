@@ -248,6 +248,15 @@ drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 }
 
 
+drmaa2_error drmaa2_machineinfo_free(drmaa2_machineinfo mi)
+{
+    drmaa2_string_free(mi->name);
+    if (mi->machineOSVersion) drmaa2_version_free(mi->machineOSVersion);
+    free(mi);
+    return DRMAA2_SUCCESS;
+}
+
+
 drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
 {
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
@@ -475,20 +484,45 @@ drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
 
 drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter)
 {
-    return NULL;
+    drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
+
+    if (j_sessions != DRMAA2_UNSET_LIST)
+    {
+        drmaa2_list_item current_session_item = j_sessions->head;
+        drmaa2_list_item current_item = NULL;       //job-item
+        drmaa2_jsession current_session = NULL;
+
+        while (current_session_item != NULL)
+        {
+            current_session = (drmaa2_jsession)current_session_item->data;
+            if (current_session->jobs->size != 0)
+            {
+                current_item = current_session->jobs->head;
+                while (current_item != NULL)
+                {
+                    //TODO: filter
+                    drmaa2_list_add(jobs, current_item->data);
+                    current_item = current_item->next;
+                }
+            }
+            current_session_item = current_session_item->next;
+        }
+    }
+
+    return jobs;
 }
 
 
 drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names)
 {
+    //TODO: implement
     return DRMAA2_UNSET_LIST;
 }
 
 
 drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
 {
-    drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, NULL);
-    //TODO: set callback for cleanup
+    drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, (drmaa2_list_entryfree)drmaa2_machineinfo_free);
 
     // TODO: get real machine info
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
@@ -559,7 +593,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     }
     else
     {
-        // TODO: uniqueness test of name
+        //TODO: uniqueness test of name
     }
 
     drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
@@ -591,7 +625,6 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
     }
 
     // append to session list
-    // handle empty names
     drmaa2_rsession rs = (drmaa2_rsession)malloc(sizeof(drmaa2_rsession_s));
     assert(session_name != DRMAA2_UNSET_STRING);
     rs->name = strdup(session_name);
