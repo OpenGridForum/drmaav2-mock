@@ -7,13 +7,16 @@ CFLAGS =
 all: test
 
 
-tests/%.o: tests/%.c tests/%.h
-	$(CC) -c $< -o $@
-
 test: $(DRMAAOBJS) $(TESTOBJS)
 	$(CC) -lcunit -o $@ $(DRMAAOBJS) $(TESTOBJS)
 
+tests/%.o: tests/%.c tests/%.h $(DRMAAOBJS)
+	$(CC) -c $< -o $@
+
 %.o: %.c %.h
+	$(CC) $(CFLAGS) -c $<
+
+drmaa2.o: drmaa2.c drmaa2.h drmaa2-dict.o drmaa2-list.o
 	$(CC) $(CFLAGS) -c $<
 
 clean:
