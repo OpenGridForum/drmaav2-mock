@@ -1,5 +1,11 @@
 - split up implementation in multiple files
 
+- improve testsystem (execution of single tests)
+
+- prefix global variables
+
+
+
 - session invalidation after destruction
 
 - deep copy of structures (flat so far)

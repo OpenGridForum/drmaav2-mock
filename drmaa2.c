@@ -13,10 +13,14 @@ int lasterror           = DRMAA2_SUCCESS;
 char *lasterror_text    = NULL;
 
 
-// "persistent" drms information
 #define DRMAA2_LIST     6
+// "persistent" drms information
 drmaa2_list j_sessions      = DRMAA2_UNSET_LIST;
 drmaa2_list r_sessions      = DRMAA2_UNSET_LIST;
+
+
+unsigned long long drmaa2_last_reservation_id   = 0;
+unsigned long long drmaa2_last_job_id           = 0;
 
 
 // supported jobcategories
@@ -216,6 +220,12 @@ drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 }
 
 
+char* drmaa2_jtemplate_tostring(drmaa2_jtemplate jt)
+{
+    return DRMAA2_UNSET_STRING;
+}
+
+
 drmaa2_rtemplate drmaa2_rtemplate_create(void)
 {
     drmaa2_rtemplate rt = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
@@ -260,21 +270,31 @@ drmaa2_error drmaa2_machineinfo_free(drmaa2_machineinfo mi)
 drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
 {
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
-    r->id = NULL;
-    r->session_name = (rs->name != NULL) ? strdup(rs->name) : DRMAA2_UNSET_STRING;
-    // copy reservation template, work only with the copy
-    r->template = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
-    memcpy(r->template, rt, sizeof(drmaa2_rtemplate_s));
-    //TODO: deep copy
 
+    r->id = (char *)malloc(sizeof(char) * sizeof(long long) * 2 + 1); //alloc space for max long long hex
+    sprintf((char *)r->id, "%llx", drmaa2_last_reservation_id);
+    drmaa2_last_reservation_id++;
+    r->session_name = strdup(rs->name); // session_name cannot be NULL
+
+    // copy reservation template, work only with the copy
+    drmaa2_rtemplate template = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
+    memcpy(template, rt, sizeof(drmaa2_rtemplate_s)); //copies scalar values
+    //deep copy
+    template->reservationName   = (rt->reservationName != NULL) ? strdup(rt->reservationName) : DRMAA2_UNSET_STRING;
+    template->jobCategory       = (rt->jobCategory != NULL) ? strdup(rt->jobCategory) : DRMAA2_UNSET_STRING;
+    template->usersACL          = drmaa2_list_create_copy(rt->usersACL, (drmaa2_list_entryfree)drmaa2_string_free, (drmaa2_copy_data_callback)strdup);
+    template->candidateMachines = drmaa2_list_create_copy(rt->candidateMachines, (drmaa2_list_entryfree)drmaa2_string_free, (drmaa2_copy_data_callback)strdup);
+    r->template = template;
+
+    //no deep copy, since information is already saved 
     drmaa2_rinfo info = drmaa2_rinfo_create();
-    info->reservationId     = (r->id != NULL) ? strdup(r->id) : DRMAA2_UNSET_STRING;
-    info->reservationName   = (r->session_name != NULL) ? strdup(r->session_name) : DRMAA2_UNSET_STRING;
+    info->reservationId     = (char *)r->id;
+    info->reservationName   = (char *)r->session_name;
     info->reservedStartTime = rt->startTime;
     info->reservedEndTime   = rt->endTime;
-    info->usersACL          = rt->usersACL; //TODO: copy to be able to use destructor
+    info->usersACL          = rt->usersACL;
     info->reservedSlots     = rt->maxSlots;
-    info->reservedMachines  = rt->candidateMachines;  //TODO: copy to be able to use destructor
+    info->reservedMachines  = rt->candidateMachines;
 
     r->info = info;
     drmaa2_list_add(rs->reservations, r);

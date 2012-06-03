@@ -53,3 +53,46 @@ void testList()
 
     CU_ASSERT(1);
 }
+
+
+void testCreateCopy()
+{
+
+    drmaa2_list l = DRMAA2_UNSET_LIST;
+    drmaa2_list copy = drmaa2_list_create_copy(l, NULL, NULL);
+    CU_ASSERT_PTR_NULL(copy);
+
+    l = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
+    copy = drmaa2_list_create_copy(l, NULL, NULL);
+    CU_ASSERT_EQUAL(drmaa2_list_size(l), drmaa2_list_size(copy));
+    CU_ASSERT_EQUAL(l->type, copy->type);
+
+    drmaa2_list_free(copy);
+    drmaa2_list_add(l, "hello");
+    drmaa2_list_add(l, "world");
+
+    printf("hlalo\n");
+
+    copy = drmaa2_list_create_copy(l, NULL, NULL);
+    printf("hlalo\n");
+    CU_ASSERT_EQUAL(drmaa2_list_size(l), drmaa2_list_size(copy));
+    printf("hlalo\n");
+    CU_ASSERT_EQUAL(l->type, copy->type);
+    printf("hlalo\n");
+    CU_ASSERT_STRING_EQUAL(drmaa2_list_get(copy, 0), "hello");
+    CU_ASSERT_STRING_EQUAL(drmaa2_list_get(copy, 1), "world");
+
+    drmaa2_list_free(copy);
+
+    copy = drmaa2_list_create_copy(l, (drmaa2_list_entryfree)drmaa2_string_free, (drmaa2_copy_data_callback)strdup);
+    drmaa2_list_add(copy, strdup("ich"));
+    CU_ASSERT_STRING_EQUAL(drmaa2_list_get(copy, 2), "ich");
+    drmaa2_list_free(copy);
+
+    CU_PASS("test finished")
+
+
+}
+
+
+

@@ -25,4 +25,9 @@ void stringlist_free_array(char **array);
 int stringlist_contains(drmaa2_string_list sl, char *string);	// false: 0       true: !=0
 
 
+typedef void *(*drmaa2_copy_data_callback)(const void *data);
+
+drmaa2_list drmaa2_list_create_copy(drmaa2_list l, const drmaa2_list_entryfree callback, const drmaa2_copy_data_callback copy);
+
+
 #endif DRMAA2_LIST_H
