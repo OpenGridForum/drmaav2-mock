@@ -6,13 +6,14 @@
 
 
 
-- session invalidation after destruction
-
-- deep copy of structures (flat so far)
 
 - uniqueness and name generation for sessions
 
 - jobinfo filter
+
+- session invalidation after destruction
+
+- deep copy of structures (flat so far)
 
 - implement drmaa2_jtemplate_tostring
 
