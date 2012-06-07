@@ -21,6 +21,7 @@ void test_simple_app()
     jt = drmaa2_jtemplate_create();
     jt->remoteCommand = strdup("/bin/date");
     j = drmaa2_jsession_run_job(js, jt);
+    
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);
     drmaa2_jtemplate_free(jt);
     drmaa2_destroy_jsession("testsession");
@@ -44,7 +45,7 @@ void callback_free(void * entry)
 
 void test_advanced_app()
 {
-        drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
+    drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
     drmaa2_rtemplate        rt = drmaa2_rtemplate_create();
     drmaa2_string_list      cl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
     drmaa2_dict            env = drmaa2_dict_create(NULL);
@@ -81,14 +82,14 @@ void test_advanced_app()
     // Wait for termination and print exit status
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);
     ji = drmaa2_j_get_info(j);
-    printf("Job terminated with exit status %u\n",ji->exitStatus);
-    printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
+    //printf("Job terminated with exit status %u\n",ji->exitStatus);
+    //printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup
     drmaa2_jtemplate_free(jt);  // includes free of env
     drmaa2_rtemplate_free(rt);  // includes free of cl
     drmaa2_jinfo_free(ji);
-    drmaa2_close_msession(ms);  
+    drmaa2_close_msession(ms);
     drmaa2_destroy_rsession("myrsession");
     drmaa2_destroy_jsession("myjsession");
     drmaa2_list_free(ml);

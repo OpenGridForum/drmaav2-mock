@@ -8,6 +8,12 @@
 #include <string.h>
 #include <assert.h>
 
+//#include <sqlite3.h>
+#include "persistence.h"
+
+
+#define DB_NAME "drmaa.sqlite"
+
 
 int lasterror           = DRMAA2_SUCCESS;
 char *lasterror_text    = NULL;
@@ -36,7 +42,7 @@ int string_array_contains(char *array[], int len, char *string)
     return 0;
 }
 
-
+/*
 
 typedef struct drmaa2_jsession_s
 {
@@ -73,7 +79,7 @@ typedef struct drmaa2_r_s
     drmaa2_rtemplate template;
     drmaa2_rinfo info;
 } drmaa2_r_s;
-
+*/
 
 drmaa2_error drmaa2_string_free(char* string)
 {
@@ -118,6 +124,7 @@ drmaa2_jinfo drmaa2_jinfo_create(void)
 
 drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
 {
+    /*
     drmaa2_string_free(ji->jobId);
     drmaa2_string_free(ji->terminatingSignal);
     drmaa2_string_free(ji->annotation);
@@ -127,6 +134,7 @@ drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
     drmaa2_string_free(ji->jobOwner);
     drmaa2_string_free(ji->queueName);
     free(ji);
+    */
     return DRMAA2_SUCCESS;
 }
 
@@ -338,13 +346,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 {
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
 
-    drmaa2_list_item current_item = js->jobs->head;
-    while (current_item != NULL)
-    {
-        //TODO: filter evaluation
-        drmaa2_list_add(jobs, current_item->data);
-        current_item = current_item->next;
-    }
+    jobs = get_jobs(DB_NAME, js->name, jobs);
 
     return jobs;
 }
@@ -361,6 +363,10 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         lasterror_text = "Given job category is not supported.";
         return NULL;
     }
+
+    long long template_id = save_jtemplate(DB_NAME, jt);
+
+    long long id = save_job(DB_NAME, js->name, template_id); 
 
     pid_t childpid;
 
@@ -394,10 +400,12 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         {
             // parent
             drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
-            j->id = NULL;
-            j->session_name = (js->name != NULL) ? strdup(js->name) : DRMAA2_UNSET_STRING;
-            j->pid = childpid;
+            char *cid = (char *)malloc(21);
+            sprintf(cid, "%lld\n", id);
+            j->id = cid; //already allocated
+            j->session_name = strdup(js->name);
 
+            /*
             // copy job template, work only with the copy 
             j->template = (drmaa2_jtemplate)malloc(sizeof(drmaa2_jtemplate_s));
             memcpy(j->template, jt, sizeof(drmaa2_jtemplate_s));
@@ -410,6 +418,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 
             j->info = info;
             drmaa2_list_add(js->jobs, j);
+            */
             return j;
         }
 }
@@ -418,12 +427,13 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 char *drmaa2_j_get_id(const drmaa2_j j)
 {
     // returns copy since application should call drmaa2_string_free()
-    return (j->id != NULL) ? strdup(j->id) : DRMAA2_UNSET_STRING;
+    return strdup(j->id);
 }
 
 
 drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 {
+    /*
     drmaa2_jinfo info = j->info;
     drmaa2_jinfo i = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
     memcpy(i, info, sizeof(drmaa2_jinfo_s));
@@ -437,6 +447,8 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
     i->queueName            = (i->queueName != NULL) ? strdup(info->queueName): DRMAA2_UNSET_STRING;
 
     return j->info;
+    */
+    return NULL;
 }
 
 
@@ -445,12 +457,12 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
     pid_t child;
     int status;
 
-    child = waitpid(j->pid, &status, 0);
+    //child = waitpid(j->pid, &status, 0);
 
     if (WIFEXITED(status))
     {
-        j->info->exitStatus = WEXITSTATUS(status);
-        j->info->finishTime = time(NULL);
+        //j->info->exitStatus = WEXITSTATUS(status);
+        //j->info->finishTime = time(NULL);
 
         printf("Process terminated normally by a call to _exit(2) or exit(3).\n");
         printf("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
@@ -602,13 +614,9 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 //TODO: avoid code duplication
 drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact)
 {
-    if (j_sessions == DRMAA2_UNSET_LIST)
-    {
-        j_sessions = drmaa2_list_create(DRMAA2_LIST, NULL);
-    }
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        // generate unique name
+        //TODO generate unique name
         session_name = "TODO";
     }
     else
@@ -619,11 +627,11 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
     assert(session_name != DRMAA2_UNSET_STRING);
     js->name = strdup(session_name);
-    if (contact) js->contact = strdup(contact);
-    else js->contact = DRMAA2_UNSET_STRING;
-    js->jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
+    js->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
+    //js->jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
 
-    drmaa2_list_add(j_sessions, js);
+    save_jsession(DB_NAME, contact, session_name);
+
     return js;
 }
 
@@ -659,19 +667,12 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
 
 drmaa2_jsession drmaa2_open_jsession(const char * session_name)
 {
-    if (j_sessions != DRMAA2_UNSET_LIST && session_name != DRMAA2_UNSET_STRING)
+    if (session_name != DRMAA2_UNSET_STRING)
     {
-        drmaa2_list_item current_item = j_sessions->head;
-        drmaa2_jsession js;
-        while (current_item != NULL)
-        {
-            js = (drmaa2_jsession)current_item->data;
-            if (strcmp(js->name, session_name) == 0)
-            {
-                return js;
-            }
-            current_item = current_item->next;
-        }
+        drmaa2_jsession js = get_jsession(DB_NAME, session_name);
+        if (js)
+            return js;
+        
     }
 
     // no jobsession || empty session_name given || no match
@@ -708,14 +709,16 @@ drmaa2_rsession drmaa2_open_rsession(const char * session_name)
 drmaa2_msession drmaa2_open_msession(const char * session_name)
 {
     drmaa2_msession ms = (drmaa2_msession)malloc(sizeof(drmaa2_msession_s));
-    if (session_name) ms->name = strdup(session_name);
+    ms->name = session_name ? strdup(session_name) : NULL;
     return ms;
 }
 
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
-    // nothing to do: session information stays until session is destroyed
+    free((char *)js->contact);
+    free((char *)js->name);
+    free(js);
     return DRMAA2_SUCCESS;
 }
 
@@ -729,7 +732,7 @@ drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs)
 
 drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 {
-    drmaa2_string_free((char *)ms->name);
+    if (ms->name) drmaa2_string_free((char *)ms->name);
     free(ms);
     return DRMAA2_SUCCESS;
 }
@@ -737,43 +740,10 @@ drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 
 drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 {
-    if (j_sessions != DRMAA2_UNSET_LIST)
+    if (session_name != NULL)
     {
-        drmaa2_list_item current_item = j_sessions->head;
-        // linked list -> we need to know the item before the one we want to delete
-        drmaa2_list_item before_current = NULL;
-        drmaa2_jsession js;
-
-        if (current_item != NULL)
-        {
-            js = (drmaa2_jsession)current_item->data;
-            if (strcmp(js->name, session_name) == 0)
-            {
-                j_sessions->size--;
-                // session to destroy is first of list
-                //TODO: delete all job information of session
-                j_sessions->head = current_item->next;
-                return DRMAA2_SUCCESS;
-            }
-            // linked list -> we need to know the item before the one we want to delete
-            before_current = current_item;
-            current_item = current_item->next;
-        }
-
-        while (current_item != NULL)
-        {
-            js = (drmaa2_jsession)current_item->data;
-            if (strcmp(js->name, session_name) == 0)
-            {
-                j_sessions->size--;
-                // session to destroy found in the middle of list
-                //TODO: delete all job information of session
-                before_current->next = current_item->next;
-                return DRMAA2_SUCCESS;
-            }
-            before_current = current_item;
-            current_item = current_item->next;
-        }
+        int status = delete_jsession(DB_NAME, session_name);
+        return status;
     }
     return DRMAA2_INVALID_ARGUMENT;
 }
@@ -826,17 +796,7 @@ drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 drmaa2_string_list drmaa2_get_jsession_names(void)
 {
     drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
-    if (j_sessions != DRMAA2_UNSET_LIST)
-    {
-        drmaa2_list_item current_item = j_sessions->head;
-        drmaa2_jsession js;
-        while (current_item != NULL)
-        {
-            js = (drmaa2_jsession)current_item->data;
-            drmaa2_list_add(session_names, strdup(js->name));
-            current_item = current_item->next;
-        }
-    }
+    session_names = get_jsession_names(DB_NAME, session_names);
     return session_names;
 }
 

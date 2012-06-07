@@ -54,9 +54,14 @@ void test_job_categories()
 {
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
 
+    printf("1\n");
+
     drmaa2_string_list jc = drmaa2_jsession_get_job_categories(js);
+    printf("2\n");
     CU_ASSERT_TRUE(stringlist_contains(jc, "Python"));
+    printf("3\n");
     drmaa2_list_free(jc);
+    printf("4\n");
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
     jt->remoteCommand = strdup("/bin/date");
