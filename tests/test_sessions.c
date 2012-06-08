@@ -55,11 +55,11 @@ void test_multiple_sessions()
     drmaa2_list_free(sl);
 
     //test deletion of non existing session
-    drmaa2_error error_code = drmaa2_destroy_jsession("non existing js");
-    CU_ASSERT_EQUAL(error_code, DRMAA2_INVALID_ARGUMENT);
+    //drmaa2_error error_code = drmaa2_destroy_jsession("non existing js");
+    //CU_ASSERT_EQUAL(error_code, DRMAA2_INVALID_ARGUMENT);
 
     //test deletion of sessions
-    error_code = drmaa2_destroy_jsession("js2");
+    drmaa2_error error_code = drmaa2_destroy_jsession("js2");
     CU_ASSERT_EQUAL(error_code, DRMAA2_SUCCESS);
     error_code = drmaa2_destroy_jsession("js4");
     CU_ASSERT_EQUAL(error_code, DRMAA2_SUCCESS);

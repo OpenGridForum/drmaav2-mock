@@ -4,12 +4,14 @@
 #include <CUnit/CUnit.h>
 #include "../drmaa2.h"
 #include "test_msession.h"
+#include "../persistence.h"
 
 
 
 
 void test_reservation_lists()
 {
+    drmaa2_reset_db(DB_NAME);
     drmaa2_error error_code;
 
     //test empty reservation list
@@ -59,10 +61,13 @@ void test_reservation_lists()
 
 void test_job_lists()
 {
+    drmaa2_reset_db(DB_NAME);
     drmaa2_error error_code;
 
     //test empty job list
+    printf("0\n");
     drmaa2_msession ms = drmaa2_open_msession("my_msession");
+    printf("3\n");
     drmaa2_j_list jobs = drmaa2_msession_get_all_jobs(ms, NULL);
     CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 0);
     drmaa2_list_free(jobs);

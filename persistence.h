@@ -2,47 +2,14 @@
 #define DRMAA2_PERSISTENCE_H
 
 #include "drmaa2.h"
-//#include <sys/types.h>
-//#include <sys/wait.h>
-//#include <unistd.h>
+
+#define DB_NAME "drmaa.sqlite"
 
 
+int drmaa2_setup_db(char *name);
 
-typedef struct drmaa2_jsession_s
-{
-    const char *contact;
-    const char *name;
-    drmaa2_j_list jobs;
-} drmaa2_jsession_s;
+int drmaa2_reset_db(char *name);
 
-typedef struct drmaa2_rsession_s
-{
-    const char *contact;
-    const char *name;
-    drmaa2_r_list reservations;
-} drmaa2_rsession_s;
-
-typedef struct drmaa2_msession_s
-{
-    const char *name;
-} drmaa2_msession_s;
-
-typedef struct drmaa2_j_s
-{
-    const char *id;
-    const char *session_name;
-    //pid_t pid;
-    //drmaa2_jtemplate template;
-    //drmaa2_jinfo info;
-} drmaa2_j_s;
-
-typedef struct drmaa2_r_s
-{
-    const char *id;
-    const char *session_name;
-    drmaa2_rtemplate template;
-    drmaa2_rinfo info;
-} drmaa2_r_s;
 
 
 
@@ -58,8 +25,24 @@ long long save_jtemplate(char *db_name, drmaa2_jtemplate jt);
 
 drmaa2_string_list get_jsession_names(char *db_name, drmaa2_string_list session_names);
 
-drmaa2_j_list get_jobs(char *db_name, const char *session_name, drmaa2_j_list jobs);
+drmaa2_j_list get_session_jobs(char *db_name, drmaa2_j_list jobs, const char *session_name);
 
+drmaa2_j_list get_jobs(char *db_name, drmaa2_j_list jobs, drmaa2_jinfo filter);
+
+
+int save_rsession(char *db_name, const char *contact, const char *session);
+
+int delete_rsession(char *db_name, const char *session_name);
+
+drmaa2_rsession get_rsession(char *db_name, const char *session_name);
+
+long long save_reservation(char *db_name, const char *session_name, long long template_id);
+
+long long save_rtemplate(char *db_name, drmaa2_rtemplate rt);
+
+drmaa2_string_list get_rsession_names(char *db_name, drmaa2_string_list session_names);
+
+drmaa2_r_list get_reservations(char *db_name, drmaa2_r_list reservations);
 
 
 #endif DRMAA2_PERSISTENCE_H
