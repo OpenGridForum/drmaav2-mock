@@ -24,7 +24,7 @@ typedef enum drmaa2_os {
   DRMAA2_IRIX                        =  5,
   DRMAA2_MACOS                       =  6,
   DRMAA2_SUNOS                       =  7,
-  DRMAA2_TRUE64                      =  8,
+  DRMAA2_TRU64                       =  8,
   DRMAA2_UNIXWARE                    =  9,
   DRMAA2_WIN                         = 10,
   DRMAA2_WINNT                       = 11
@@ -162,7 +162,8 @@ drmaa2_error       drmaa2_dict_set    (      drmaa2_dict d, const char * key, co
 #define  DRMAA2_UNSET_LIST      NULL
 #define  DRMAA2_UNSET_DICT      NULL
 #define  DRMAA2_UNSET_TIME      ((time_t) -3)
-#define  DRMAA2_UNSET_CALLBACK  NULL    
+#define  DRMAA2_UNSET_CALLBACK  NULL
+#define  DRMAA2_UNSET_JINFO     NULL
 
 
 typedef struct {
@@ -245,7 +246,6 @@ typedef drmaa2_jtemplate_s * drmaa2_jtemplate;
 
 drmaa2_jtemplate drmaa2_jtemplate_create   (void);
 drmaa2_error     drmaa2_jtemplate_free     (drmaa2_jtemplate jt);
-char*            drmaa2_jtemplate_tostring (drmaa2_jtemplate jt);
 
 typedef struct {
   char *             reservationName;          
@@ -335,6 +335,13 @@ typedef struct drmaa2_msession_s * drmaa2_msession;
 typedef struct drmaa2_j_s        * drmaa2_j;
 typedef struct drmaa2_jarray_s   * drmaa2_jarray;
 typedef struct drmaa2_r_s        * drmaa2_r;
+
+drmaa2_error drmaa2_jsession_free(drmaa2_jsession js);
+drmaa2_error drmaa2_rsession_free(drmaa2_rsession rs);
+drmaa2_error drmaa2_msession_free(drmaa2_msession ms);
+drmaa2_error drmaa2_j_free(drmaa2_j j);
+drmaa2_error drmaa2_jarray_free(drmaa2_jarray ja);
+drmaa2_error drmaa2_r_free(drmaa2_r r);
 
 char *         drmaa2_rsession_get_contact          (const drmaa2_rsession rs);
 char *         drmaa2_rsession_get_session_name     (const drmaa2_rsession rs); 
