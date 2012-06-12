@@ -45,4 +45,7 @@ drmaa2_string_list get_rsession_names(char *db_name, drmaa2_string_list session_
 drmaa2_r_list get_reservations(char *db_name, drmaa2_r_list reservations);
 
 
+int drmaa2_get_job_status(char *db_name, drmaa2_j j);
+
+
 #endif DRMAA2_PERSISTENCE_H

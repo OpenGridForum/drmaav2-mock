@@ -10,6 +10,7 @@
 
 #include "drmaa2-mock.h"
 #include "persistence.h"
+#include "drmaa2-debug.h"
 
 
 int lasterror           = DRMAA2_SUCCESS;
@@ -17,17 +18,14 @@ char *lasterror_text    = NULL;
 
 
 #define DRMAA2_LIST     6
-// "persistent" drms information
 
-drmaa2_list r_sessions      = DRMAA2_UNSET_LIST;
-
-
-unsigned long long drmaa2_last_reservation_id   = 0;
 
 
 // supported jobcategories
 #define JOBCATEGORIES_LENGTH  3
 char *jobcategories[] = {"OpenMP", "Java", "Python"};
+// TODO: Programmatic
+
 
 int string_array_contains(char *array[], int len, char *string)
 // false: 0     true: != 0
@@ -317,23 +315,10 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     else if (childpid == 0)
         {
             // child
-            long args_size = 0;
-            if (jt->args)
-                args_size = drmaa2_list_size(jt->args);
-            char **argv = (char **)malloc(sizeof(char *) * (args_size + 2));
-            argv[0] = jt->remoteCommand;
-            if (jt->args)
-            {
-                //TODO: refactor - get_array call not really useful
-                char **args = (char **)stringlist_get_array(jt->args);
-                int i;
-                for (i=0; i<args_size; i++)
-                {
-                    argv[i+1] = args[i];
-                }
-            }
-            argv[args_size+1] = NULL;
-            execv(jt->remoteCommand, argv);
+            char *id_c;
+            asprintf(&id_c, "%lld", id);
+            char *args[] = {"./wrapper", DB_NAME, id_c, NULL};
+            execv(args[0], args);
         }
         else
         {
@@ -378,32 +363,14 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 
 drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 {
-    pid_t child;
-    int status;
-
-    //child = waitpid(j->pid, &status, 0);
-
-    if (WIFEXITED(status))
+    DRMAA2_DEBUG_PRINT("wait for job with id: %s\n", j->id);
+    int status = -1;
+    while (status == -1)
     {
-        //j->info->exitStatus = WEXITSTATUS(status);
-        //j->info->finishTime = time(NULL);
-
-        printf("Process terminated normally by a call to _exit(2) or exit(3).\n");
-        printf("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
+        sleep(1);
+        status = drmaa2_get_job_status(DB_NAME, j);
     }
-    if (WIFSIGNALED(status))
-    {
-        printf("Process terminated due to receipt of a signal.\n");
-        printf("%d  - evaluates to the number of the signal that caused the termination of the process.\n", WTERMSIG(status));
-        printf("%d  - evaluates as true if the termination of the process was accompanied by the creation of a core \
-             file containing an image of the process when the signal was received.\n", WCOREDUMP(status));
-    }
-    if (WIFSTOPPED(status))
-    {
-        printf("Process has not terminated, but has stopped and can be restarted.  This macro can be true only if the wait call \
-             specified the WUNTRACED option or if the child process is being traced (see ptrace(2)).\n");
-        printf("%d  - evaluates to the number of the signal that caused the process to stop.\n", WSTOPSIG(status));
-    }
+    
     return j;
 }
 
@@ -636,7 +603,7 @@ drmaa2_error drmaa2_destroy_jsession(const char * session_name)
         return DRMAA2_INVALID_ARGUMENT;
 
     int status = delete_jsession(DB_NAME, session_name);
-        return status;
+    return status;
 }
 
 
