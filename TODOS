@@ -7,18 +7,20 @@
 
 
 
-- uniqueness and name generation for sessions
 
-- jobinfo filter
+- complete jobinfo filter
 
 - session invalidation after destruction
-
-- deep copy of structures (flat so far)
-
-- implement drmaa2_jtemplate_tostring
 
 - notifications
 
 - introspection
 
 - jobarray support
+
+
+to fix:
+
+- free of returned jobs
+
+- free session with free methods (instead of using close)

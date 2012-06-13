@@ -3,6 +3,7 @@
 #include "../drmaa2-list.h"
 #include "../drmaa2.h"
 #include "test_list.h"
+#include "../drmaa2-debug.h"
 
 
 void testFreeNullList()
@@ -44,7 +45,7 @@ void testList()
     const char **array = stringlist_get_array(sl);
     int i;
     for (i = 0; i < sl->size; i++)
-        printf("%s (%li)\n", array[i], strlen(array[i]));
+        DRMAA2_DEBUG_PRINT("%s (%li)\n", array[i], strlen(array[i]));
     // TODO: cleanup array
 
 
@@ -71,14 +72,10 @@ void testCreateCopy()
     drmaa2_list_add(l, "hello");
     drmaa2_list_add(l, "world");
 
-    printf("hlalo\n");
 
     copy = drmaa2_list_create_copy(l, NULL, NULL);
-    printf("hlalo\n");
     CU_ASSERT_EQUAL(drmaa2_list_size(l), drmaa2_list_size(copy));
-    printf("hlalo\n");
     CU_ASSERT_EQUAL(l->type, copy->type);
-    printf("hlalo\n");
     CU_ASSERT_STRING_EQUAL(drmaa2_list_get(copy, 0), "hello");
     CU_ASSERT_STRING_EQUAL(drmaa2_list_get(copy, 1), "world");
 

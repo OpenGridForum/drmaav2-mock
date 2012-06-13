@@ -346,8 +346,8 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
     int status = -1;
     while (status == -1)
     {
-        sleep(1);
         status = drmaa2_get_job_status(DB_NAME, j);
+        sleep(1);
     }
     
     return j;
