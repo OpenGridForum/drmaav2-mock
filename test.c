@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
       return CU_get_error();
     }
 
-/*
+
     // 6th Suite
     pSuite = CU_add_suite("Monitoring Session", NULL, NULL);
     if (NULL == pSuite) {
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
       return CU_get_error();
     }
     /* add the tests to the suite */
-   /* if (NULL == CU_add_test(pSuite, "Reservation Lists", test_reservation_lists)) {
+    if (NULL == CU_add_test(pSuite, "Reservation Lists", test_reservation_lists)) {
       CU_cleanup_registry();
       return CU_get_error();
     }
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
-    */
+    
 
 
 

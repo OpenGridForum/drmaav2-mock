@@ -5,6 +5,7 @@
 #include "../drmaa2-list.h"
 #include "../drmaa2.h"
 #include "test_app.h"
+#include "../drmaa2-debug.h"
 
 
 void test_simple_app()
@@ -82,9 +83,8 @@ void test_advanced_app()
     // Wait for termination and print exit status
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);
     ji = drmaa2_j_get_info(j);
-    //printf("Job terminated with exit status %u\n",ji->exitStatus);
-    //printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
-
+    DRMAA2_DEBUG_PRINT("Job terminated with exit status %u\n",ji->exitStatus);
+    DRMAA2_DEBUG_PRINT("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
     // close sessions, cleanup
     drmaa2_jtemplate_free(jt);  // includes free of env
     drmaa2_rtemplate_free(rt);  // includes free of cl

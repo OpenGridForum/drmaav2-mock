@@ -8,131 +8,12 @@
 #include <sqlite3.h>
 
 #include "drmaa2-debug.h"
+#include "persistence.h"
 
 
 void usage()
 {
 	printf("Usage: ./wrapper DATABASE JOB_ID\n");
-}
-
-
-
-static int cmd_callback(char **ptr, int argc, char **argv, char **azColName)
-{
-    assert(argc == 1);
-    char *command = strdup(argv[0]);
-    *ptr = command;
-    return 0;
-}
-
-char *get_command(char *db_name, long long row_id)
-{
-    sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc;
-    rc = sqlite3_open(db_name, &db);
-    if( rc )
-    {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        usage();
-        exit(1);
-    }
-
-
-    char *stmt = sqlite3_mprintf("SELECT remoteCommand FROM jobs, job_templates \
-    	WHERE jobs.rowid = %lld AND job_templates.rowid = jobs.template_id", row_id);
-    DEBUG_PRINT("%s\n", stmt);
-
-    char *command = NULL;
-    rc = -1;
-    while (rc != SQLITE_OK)
-    {
-        rc = sqlite3_exec(db, stmt, cmd_callback, &command, &zErrMsg);
-        if( rc!=SQLITE_OK )
-        {
-            fprintf(stderr, "SQL error: %s\n", zErrMsg);
-            sqlite3_free(zErrMsg);
-            sleep(1);
-        }
-    }
-    sqlite3_free(stmt);
-
-    sqlite3_close(db);
-    return command;
-}
-
-
-int drmaa2_save_pid(char *db_name, long long row_id, pid_t pid)
-{
-	sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc;
-    rc = sqlite3_open(db_name, &db);
-    if( rc )
-    {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        usage();
-        exit(1);
-    }
-
-
-    char *stmt = sqlite3_mprintf("BEGIN IMMEDIATE; UPDATE jobs SET pid = %d WHERE rowid = %lld; END;", pid, row_id);
-    DEBUG_PRINT("%s\n", stmt);
-
-    rc = -1;
-    while (rc != SQLITE_OK)
-    {
-        rc = sqlite3_exec(db, stmt, NULL, NULL, &zErrMsg);
-        if( rc != SQLITE_OK )
-        {
-            fprintf(stderr, "SQL error: %s\n", zErrMsg);
-            sqlite3_free(zErrMsg);
-            sleep(1);
-        }
-    }
-
-    sqlite3_free(stmt);
-    sqlite3_close(db);
-    return rc;
-}
-
-
-int drmaa2_save_exit_status(char *db_name, long long row_id, int status)
-{
-	sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc;
-    rc = sqlite3_open(db_name, &db);
-    if( rc )
-    {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        usage();
-        exit(1);
-    }
-
-    char *stmt = sqlite3_mprintf("BEGIN IMMEDIATE; UPDATE jobs SET exit_status = %d WHERE rowid = %lld; END;", status, row_id);
-    DEBUG_PRINT("%s\n", stmt);
-
-    while (1)
-    {
-    	rc = sqlite3_exec(db, stmt, NULL, NULL, &zErrMsg);
-    	if (rc == SQLITE_OK)
-    		break;
-    	sleep(1);
-    }
-    	
-    sqlite3_free(stmt);
-
-    if( rc!=SQLITE_OK )
-    {
-        fprintf(stderr, "SQL error: %s\n", zErrMsg);
-        sqlite3_free(zErrMsg);
-    }
-    sqlite3_close(db);
-    return rc;
 }
 
 
@@ -154,6 +35,12 @@ int main(int argc, char *argv[])
 	}
 
 	char *cmd = get_command(argv[1], row_id);
+    if (cmd == NULL)
+    {
+        fprintf(stderr, "Error: Could not read job command\n");
+        exit(1);
+    }
+
 	pid_t childpid;
 
 	if ((childpid = fork()) == -1)
@@ -182,9 +69,6 @@ int main(int argc, char *argv[])
 
 		if (WIFEXITED(status))
 	    {
-	        //j->info->exitStatus = WEXITSTATUS(status);
-	        //j->info->finishTime = time(NULL);
-
 	        DRMAA2_DEBUG_PRINT("Process terminated normally by a call to _exit(2) or exit(3).\n");
 	        DRMAA2_DEBUG_PRINT("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
 	    }

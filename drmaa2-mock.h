@@ -1,3 +1,7 @@
+#ifndef DRMAA2_MOCK_H
+#define DRMAA2_MOCK_H
+
+
 typedef struct drmaa2_jsession_s
 {
     const char *contact;
@@ -21,9 +25,6 @@ typedef struct drmaa2_j_s
 {
     const char *id;
     const char *session_name;
-    //pid_t pid;
-    //drmaa2_jtemplate template;
-    //drmaa2_jinfo info;
 } drmaa2_j_s;
 
 typedef struct drmaa2_r_s
@@ -33,3 +34,6 @@ typedef struct drmaa2_r_s
     drmaa2_rtemplate template;
     drmaa2_rinfo info;
 } drmaa2_r_s;
+
+
+#endif DRMAA2_MOCK_H

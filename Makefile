@@ -4,18 +4,24 @@ TESTOBJS = test.o tests/test_app.o tests/test_dict.o tests/test_list.o tests/tes
 CC = gcc
 CFLAGS =
 
-all: test setup app wrapper
+all: test setup wrapper 
 
-app: app.o $(DRMAAOBJS)
-	$(CC) -o $@ app.o $(DRMAAOBJS)
+local: large test_app
 
-wrapper: wrapper.o sqlite3.o
-	$(CC) $< sqlite3.o -o $@
+test_app: test_app.o $(DRMAAOBJS)
+	$(CC) -o $@ test_app.o $(DRMAAOBJS)
+
+large: large.o $(DRMAAOBJS)
+	$(CC) -o $@ large.o $(DRMAAOBJS)
+
+
+wrapper: wrapper.o persistence.o sqlite3.o drmaa2-list.o
+	$(CC) $< sqlite3.o persistence.o drmaa2-list.o -o $@
 
 setup: setup_db.o $(DRMAAOBJS)
 	$(CC) -o $@ setup_db.o $(DRMAAOBJS)
 
-test: $(DRMAAOBJS) $(TESTOBJS)
+test: $(DRMAAOBJS) $(TESTOBJS) wrapper.o
 	$(CC) -lcunit -o $@ $(DRMAAOBJS) $(TESTOBJS)
 
 tests/%.o: tests/%.c tests/%.h $(DRMAAOBJS)
@@ -27,7 +33,7 @@ tests/%.o: tests/%.c tests/%.h $(DRMAAOBJS)
 drmaa2.o: drmaa2.c drmaa2.h drmaa2-mock.h drmaa2-dict.h drmaa2-list.h persistence.h drmaa2-debug.h
 	$(CC) $(CFLAGS) -c $<
 
-persistence.o: persistence.c persistence.h drmaa2-mock.h sqlite3.h drmaa2.h drmaa2-debug.h
+persistence.o: persistence.c persistence.h drmaa2-mock.h drmaa2.h drmaa2-debug.h
 	$(CC) $(CFLAGS) -c $<
 
 wrapper.o: wrapper.c drmaa2-debug.h
@@ -36,5 +42,6 @@ wrapper.o: wrapper.c drmaa2-debug.h
 
 clean:
 	rm -f *.o
-	rm setup
+	rm setup wrapper
 	rm -f tests/*.o test
+	rm -f app large test_app

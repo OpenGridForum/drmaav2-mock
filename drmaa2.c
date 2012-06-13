@@ -13,18 +13,14 @@
 #include "drmaa2-debug.h"
 
 
-int lasterror           = DRMAA2_SUCCESS;
-char *lasterror_text    = NULL;
-
-
-#define DRMAA2_LIST     6
-
-
+// internal global error variables
+int drmaa2_lasterror_v          = DRMAA2_SUCCESS;
+char *drmaa2_lasterror_text_v   = NULL;
 
 // supported jobcategories
+// TODO: Programmatic
 #define JOBCATEGORIES_LENGTH  3
 char *jobcategories[] = {"OpenMP", "Java", "Python"};
-// TODO: Programmatic
 
 
 int string_array_contains(char *array[], int len, char *string)
@@ -47,13 +43,13 @@ drmaa2_error drmaa2_string_free(char* string)
 
 drmaa2_error drmaa2_lasterror(void)
 {
-    return lasterror;
+    return drmaa2_lasterror_v;
 }
 
 
 char *drmaa2_lasterror_text(void)
 {
-    return NULL;
+    return drmaa2_lasterror_text_v ? strdup(drmaa2_lasterror_text_v) : NULL;
 }
 
 
@@ -82,7 +78,6 @@ drmaa2_jinfo drmaa2_jinfo_create(void)
 
 drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
 {
-    /*
     drmaa2_string_free(ji->jobId);
     drmaa2_string_free(ji->terminatingSignal);
     drmaa2_string_free(ji->annotation);
@@ -92,14 +87,13 @@ drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
     drmaa2_string_free(ji->jobOwner);
     drmaa2_string_free(ji->queueName);
     free(ji);
-    */
     return DRMAA2_SUCCESS;
 }
 
 
+// no drmaa function - only used by implementation
 drmaa2_rinfo drmaa2_rinfo_create(void)
 {
-    // no drmaa function - only used by implementation
     drmaa2_rinfo ri = (drmaa2_rinfo) malloc(sizeof(drmaa2_rinfo_s));
     ri->reservationId       = DRMAA2_UNSET_STRING;
     ri->reservationName     = DRMAA2_UNSET_STRING;
@@ -186,12 +180,6 @@ drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 }
 
 
-char* drmaa2_jtemplate_tostring(drmaa2_jtemplate jt)
-{
-    return DRMAA2_UNSET_STRING;
-}
-
-
 drmaa2_rtemplate drmaa2_rtemplate_create(void)
 {
     drmaa2_rtemplate rt = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
@@ -227,7 +215,7 @@ drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 drmaa2_error drmaa2_machineinfo_free(drmaa2_machineinfo mi)
 {
     drmaa2_string_free(mi->name);
-    if (mi->machineOSVersion) drmaa2_version_free(mi->machineOSVersion);
+    drmaa2_version_free(mi->machineOSVersion);
     free(mi);
     return DRMAA2_SUCCESS;
 }
@@ -296,8 +284,8 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     if ((jt->jobCategory != DRMAA2_UNSET_STRING) && 
         !string_array_contains(jobcategories, JOBCATEGORIES_LENGTH, jt->jobCategory))
     {
-        lasterror = DRMAA2_INVALID_ARGUMENT;
-        lasterror_text = "Given job category is not supported.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "Given job category is not supported.";
         return NULL;
     }
 
@@ -342,22 +330,13 @@ char *drmaa2_j_get_id(const drmaa2_j j)
 
 drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 {
-    /*
-    drmaa2_jinfo info = j->info;
-    drmaa2_jinfo i = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
-    memcpy(i, info, sizeof(drmaa2_jinfo_s));
-    i->jobId                = (i->jobId != NULL) ? strdup(info->jobId) : DRMAA2_UNSET_STRING;
-    i->terminatingSignal    = (i->terminatingSignal != NULL) ? strdup(info->terminatingSignal) : DRMAA2_UNSET_STRING;
-    i->annotation           = (i->annotation != NULL) ? strdup(info->annotation) : DRMAA2_UNSET_STRING;
-    i->jobSubState          = (i->jobSubState != NULL) ? strdup(info->jobSubState) : DRMAA2_UNSET_STRING;
-    i->allocatedMachines    = info->allocatedMachines;  //TODO: deep copy
-    i->submissionMachine    = (i->submissionMachine != NULL) ? strdup(info->submissionMachine) : DRMAA2_UNSET_STRING;
-    i->jobOwner             = (i->jobOwner != NULL) ? strdup(info->jobOwner) : DRMAA2_UNSET_STRING;
-    i->queueName            = (i->queueName != NULL) ? strdup(info->queueName): DRMAA2_UNSET_STRING;
-
-    return j->info;
-    */
-    return NULL;
+    drmaa2_jinfo ji = drmaa2_jinfo_create();
+    ji->jobId = strdup(j->id);
+    
+    ji = get_job_info(DB_NAME, ji); // exitStatus, terminating signal and *_time are set
+    
+    //TODO set: jobSubState, allocatedMachines, i->submissionMachine, jobOwner, queueName 
+    return ji;
 }
 
 
@@ -447,13 +426,35 @@ drmaa2_version drmaa2_get_drmaa_version(void)
 
 drmaa2_error drmaa2_version_free(drmaa2_version v)
 {
-    free(v->major);
-    free(v->minor);
+    if (v)
+    {
+        free(v->major);
+        free(v->minor);
+        free(v);
+    }
+    return DRMAA2_SUCCESS;
 };
 
 drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 {
     return DRMAA2_FALSE;
+}
+
+
+char *drmaa2_generate_unique_name(char* prefix)
+{
+    //TODO: use uuid
+    srand(time(NULL));
+    int r = rand();
+    char *name;
+    if (asprintf(&name, "%s%i", prefix, r) == -1)
+    {
+        printf("BAD ALLOCATION\n");
+        drmaa2_lasterror_v = DRMAA2_OUT_OF_RESOURCE;
+        drmaa2_lasterror_text_v = "Could not allocate enough memory.";
+        return NULL;
+    };
+    return name;
 }
 
 
@@ -464,17 +465,9 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
 
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        //TODO: use uuid
-        srand(time(NULL));
-        int r = rand();
-        char *name;
-        if (asprintf(&name, "jsession%i", r) == -1)
-        {
-            printf("BAD ALLOCATION\n");
-            lasterror = DRMAA2_OUT_OF_RESOURCE;
-            lasterror_text = "Could not allocate enough memory.";
+        char *name = drmaa2_generate_unique_name("jseesion");
+        if (name == NULL)
             return NULL;
-        };
         js->name = name;
     }
     else
@@ -485,8 +478,8 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
 
     if (save_jsession(DB_NAME, contact, session_name) != 0)
     {
-        lasterror = DRMAA2_INVALID_ARGUMENT;
-        lasterror_text = "Could not store session information.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "Could not store session information.";
         return NULL;
     }
 
@@ -500,17 +493,9 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
 
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        //TODO: use uuid
-        srand(time(NULL));
-        int r = rand();
-        char *name;
-        if (asprintf(&name, "rsession%i", r) == -1)
-        {
-            printf("BAD ALLOCATION\n");
-            lasterror = DRMAA2_OUT_OF_RESOURCE;
-            lasterror_text = "Could not allocate enough memory.";
+        char *name = drmaa2_generate_unique_name("jseesion");
+        if (name == NULL)
             return NULL;
-        };
         rs->name = name;
     }
     else
@@ -521,8 +506,8 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
 
     if (save_rsession(DB_NAME, contact, session_name) != 0)
     {
-        lasterror = DRMAA2_INVALID_ARGUMENT;
-        lasterror_text = "Could not store session information.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "Could not store session information.";
         return NULL;
     }
 
@@ -540,8 +525,8 @@ drmaa2_jsession drmaa2_open_jsession(const char * session_name)
     }
 
     // empty session_name given || no match
-    lasterror = DRMAA2_INVALID_ARGUMENT;
-    lasterror_text = "No session with the given name.";
+    drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+    drmaa2_lasterror_text_v = "No session with the given name.";
     return NULL;
 }
 
@@ -556,8 +541,8 @@ drmaa2_rsession drmaa2_open_rsession(const char * session_name)
     }
 
     // empty session_name given || no match
-    lasterror = DRMAA2_INVALID_ARGUMENT;
-    lasterror_text = "No session with the given name.";
+    drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+    drmaa2_lasterror_text_v = "No session with the given name.";
     return NULL;
 }
 

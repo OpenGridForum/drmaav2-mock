@@ -2,13 +2,9 @@
 #define DRMAA2_PERSISTENCE_H
 
 #include "drmaa2.h"
+#include <unistd.h>
 
 #define DB_NAME "drmaa.sqlite"
-
-
-int drmaa2_setup_db(char *name);
-
-int drmaa2_reset_db(char *name);
 
 
 
@@ -46,6 +42,18 @@ drmaa2_r_list get_reservations(char *db_name, drmaa2_r_list reservations);
 
 
 int drmaa2_get_job_status(char *db_name, drmaa2_j j);
+
+drmaa2_jinfo get_job_info(char *db_name, drmaa2_jinfo ji);
+
+
+
+//queries for wrapper
+
+char *get_command(char *db_name, long long row_id);
+
+int drmaa2_save_pid(char *db_name, long long row_id, pid_t pid);
+
+int drmaa2_save_exit_status(char *db_name, long long row_id, int status);
 
 
 #endif DRMAA2_PERSISTENCE_H
