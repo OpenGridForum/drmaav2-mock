@@ -24,3 +24,5 @@ to fix:
 - free of returned jobs
 
 - free session with free methods (instead of using close)
+
+- Reset database automatically before running tests
