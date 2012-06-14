@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "drmaa2.h"
+#include "../drmaa2.h"
 
 
 
