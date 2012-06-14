@@ -11,7 +11,9 @@ local: examples test_app
 test_app: test_app.o $(DRMAAOBJS)
 	$(CC) -o $@ test_app.o $(DRMAAOBJS)
 
-examples: large.o $(DRMAAOBJS)
+examples: large
+
+large: large.o $(DRMAAOBJS)
 	$(CC) -o $@ large.o $(DRMAAOBJS)
 
 
