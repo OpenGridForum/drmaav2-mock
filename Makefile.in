@@ -42,6 +42,6 @@ wrapper.o: wrapper.c drmaa2-debug.h
 
 clean:
 	rm -f *.o
-	rm setup wrapper
+	rm -f setup wrapper
 	rm -f tests/*.o test
 	rm -f app large test_app
