@@ -182,7 +182,7 @@ drmaa2_list drmaa2_list_create_copy(drmaa2_list l, const drmaa2_list_entryfree c
     drmaa2_list_item current_item, new_item;
     drmaa2_list_item *p_to_set;
     current_item = l->head;
-    p_to_set = &(list->head);
+    p_to_set = (drmaa2_list_item*)&(list->head);
     while (current_item != NULL)
     {
         new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item));
