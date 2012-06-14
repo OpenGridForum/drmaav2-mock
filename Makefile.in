@@ -4,14 +4,14 @@ TESTOBJS = test.o tests/test_app.o tests/test_dict.o tests/test_list.o tests/tes
 CC = gcc
 CFLAGS =
 
-all: test setup wrapper 
+all: setup wrapper 
 
-local: large test_app
+local: examples test_app
 
 test_app: test_app.o $(DRMAAOBJS)
 	$(CC) -o $@ test_app.o $(DRMAAOBJS)
 
-large: large.o $(DRMAAOBJS)
+examples: large.o $(DRMAAOBJS)
 	$(CC) -o $@ large.o $(DRMAAOBJS)
 
 
@@ -27,6 +27,9 @@ test: $(DRMAAOBJS) $(TESTOBJS) wrapper.o
 tests/%.o: tests/%.c tests/%.h $(DRMAAOBJS)
 	$(CC) -c $< -o $@
 
+large.o: examples/large.c
+	$(CC) $(CFLAGS) -c $<
+
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
 
@@ -39,6 +42,8 @@ persistence.o: persistence.c persistence.h drmaa2-mock.h drmaa2.h drmaa2-debug.h
 wrapper.o: wrapper.c drmaa2-debug.h
 	$(CC) $(CFLAGS) -c $<
 
+sqlite3.o: lib/sqlite3.c lib/sqlite3.h
+	$(CC) $(CFLAGS) -c $<
 
 clean:
 	rm -f *.o
