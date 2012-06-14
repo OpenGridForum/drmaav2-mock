@@ -340,7 +340,7 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 }
 
 
-drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
+drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 {
     DRMAA2_DEBUG_PRINT("wait for job with id: %s\n", j->id);
     int status = -1;
@@ -350,7 +350,7 @@ drmaa2_j drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
         sleep(1);
     }
     
-    return j;
+    return DRMAA2_SUCCESS;
 }
 
 

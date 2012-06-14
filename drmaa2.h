@@ -397,8 +397,8 @@ drmaa2_error       drmaa2_j_release           (drmaa2_j j);
 drmaa2_error       drmaa2_j_terminate         (drmaa2_j j); 
 drmaa2_jstate      drmaa2_j_get_state         (const drmaa2_j j, char ** substate); 
 drmaa2_jinfo       drmaa2_j_get_info          (const drmaa2_j j);
-drmaa2_j           drmaa2_j_wait_started      (const drmaa2_j j, const time_t timeout); 
-drmaa2_j           drmaa2_j_wait_terminated   (const drmaa2_j j, const time_t timeout); 
+drmaa2_error       drmaa2_j_wait_started      (const drmaa2_j j, const time_t timeout); 
+drmaa2_error       drmaa2_j_wait_terminated   (const drmaa2_j j, const time_t timeout); 
 
 drmaa2_r_list            drmaa2_msession_get_all_reservations  (const drmaa2_msession ms);
 drmaa2_j_list            drmaa2_msession_get_all_jobs          (const drmaa2_msession ms, 
