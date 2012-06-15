@@ -4,7 +4,7 @@ all: drmaa examples
 ifeq (@SQLITE3_EXISTS@,1)
 drmaa: drmaa2.so setup wrapper
 else
-drmaa: drmaa2.so setup wrapper sqlite3
+drmaa: drmaa2.so setup wrapper sqlite3.o
 endif
 tests: test_app
 examples: large
