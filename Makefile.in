@@ -1,44 +1,46 @@
 TESTOBJS = test.o tests/test_app.o tests/test_dict.o tests/test_list.o tests/test_sessions.o tests/test_jsession.o tests/test_msession.o
-INCLUDES = @SQLITE_CFLAGS@
-LIBS = @SQLITE_LIBS@
 
 all: drmaa examples
+ifeq (@SQLITE3_EXISTS@,1)
 drmaa: drmaa2.so setup wrapper
+else
+drmaa: drmaa2.so setup wrapper sqlite3
+endif
 tests: test_app
 examples: large
 
 drmaa2.so: persistence.o drmaa2.o drmaa2-list.o drmaa2-dict.o
-	$(CC) -o $@ -shared $(LIBS) $^
+	@CC@ -o $@ -shared @LIBS@ $^
 
 setup: setup_db.o drmaa2.so 
-	$(CC) -o $@ $(LIBS) $^
+	@CC@ -o $@ @LIBS@ $^
 
 wrapper: wrapper.o drmaa2.so
-	$(CC) -o $@ $(LIBS) $^
+	@CC@ -o $@ @LIBS@ $^
 
 persistence.o: persistence.c drmaa2-list.c 
-	$(CC) $(CFLAGS) $(INCLUDES) -c $^
+	@CC@ @CFLAGS@ -c $^
 
 test_app: test_app.o 
-	$(CC) -o $@ $(LIBS) $^
+	@CC@ -o $@ @LIBS@ $^
 
 large: large.o drmaa2.so
-	$(CC) -o $@ $(LIBS) $^
+	@CC@ -o $@ @LIBS@ $^
 
 large.o: examples/large.c
-	$(CC) $(INCLUDES) -c $^
+	@CC@ -c $^
 
 %.o: %.c
-	$(CC) $(INCLUDES) -c $<
+	@CC@ -c $<
 
 test: $(TESTOBJS) wrapper.o
-	$(CC) -lcunit -o $@ 
+	@CC@ -lcunit -o $@ 
 
 tests/%.o: tests/%.c tests/%.h 
-	$(CC) -c $< -o $@
+	@CC@ -c $< -o $@
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
-	$(CC) $(CFLAGS) -c $<
+	@CC@ @CFLAGS@ -c $<
 
 clean:
 	rm -f setup wrapper

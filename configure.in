@@ -10,8 +10,13 @@ AC_INIT([DRMAAv2 Reference Implementation], [0.1], [drmaa-wg@ogf.org])
 AC_PROG_CC
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lcunit':
 AC_CHECK_LIB([cunit], [main])
+
+# Check for SQLite3 library
+AC_CHECK_HEADER([sqlite3.h])
+AC_CHECK_LIB([sqlite3], [sqlite3_open])
+AS_IF([test "$ac_cv_header_sqlite3_h" = yes], [SQLITE3_EXISTS=1], [SQLITE3_EXISTS=0])
+AC_SUBST([SQLITE3_EXISTS])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
@@ -27,20 +32,20 @@ AC_FUNC_MKTIME
 AC_CHECK_FUNCS([strdup])
 
 # Checks for SQLite
-AC_ARG_WITH([sqlite-include-path],
-  [AS_HELP_STRING([--with-sqlite-include-path],
-                  [location of the SQLite headers, defaults to /usr/include])],
-  [SQLITE_CFLAGS="-I$withval"],
-  [SQLITE_CFLAGS='-I/usr/include'])
+#AC_ARG_WITH([sqlite-include-path],
+#  [AS_HELP_STRING([--with-sqlite-include-path],
+#                  [location of the SQLite headers, defaults to /usr/include])],
+#  [SQLITE_CFLAGS="-I$withval"],
+#  [SQLITE_CFLAGS='-I/usr/include'])
 
-AC_SUBST([SQLITE_CFLAGS])
+#AC_SUBST([SQLITE_CFLAGS])
 
-AC_ARG_WITH([sqlite-lib-path],
-  [AS_HELP_STRING([--with-sqlite-lib-path], [location of the SQLite libraries])],
-  [SQLITE_LIBS="-L$withval -lsqlite3"],
-  [SQLITE_LIBS='-lsqlite3'])
+#AC_ARG_WITH([sqlite-lib-path],
+#  [AS_HELP_STRING([--with-sqlite-lib-path], [location of the SQLite libraries])],
+#  [SQLITE_LIBS="-L$withval -lsqlite3"],
+#  [SQLITE_LIBS='-lsqlite3'])
 		
-AC_SUBST([SQLITE_LIBS])
+#AC_SUBST([SQLITE_LIBS])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
