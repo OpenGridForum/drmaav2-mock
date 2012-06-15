@@ -1,13 +1,12 @@
-TESTOBJS = test.o tests/test_app.o tests/test_dict.o tests/test_list.o tests/test_sessions.o tests/test_jsession.o tests/test_msession.o
-
 all: drmaa examples
+examples: large
 ifeq (@SQLITE3_EXISTS@,1)
 drmaa: drmaa2.so setup wrapper
 else
 drmaa: drmaa2.so setup wrapper sqlite3.o
 endif
-tests: test_app
-examples: large
+tests: force_look
+	cd tests; $(MAKE) $(MFLAGS) 
 
 drmaa2.so: persistence.o drmaa2.o drmaa2-list.o drmaa2-dict.o
 	@CC@ -o $@ -shared @LIBS@ $^
@@ -21,23 +20,17 @@ wrapper: wrapper.o drmaa2.so
 persistence.o: persistence.c drmaa2-list.c 
 	@CC@ @CFLAGS@ -c $^
 
-test_app: test_app.o 
-	@CC@ -o $@ @LIBS@ $^
-
 large: large.o drmaa2.so
 	@CC@ -o $@ @LIBS@ $^
 
 large.o: examples/large.c
 	@CC@ -c $^
 
+force_look:
+	true
+
 %.o: %.c
 	@CC@ -c $<
-
-test: $(TESTOBJS) wrapper.o
-	@CC@ -lcunit -o $@ 
-
-tests/%.o: tests/%.c tests/%.h 
-	@CC@ -c $< -o $@
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ @CFLAGS@ -c $<

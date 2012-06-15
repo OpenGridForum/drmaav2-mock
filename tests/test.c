@@ -24,12 +24,12 @@
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 
-#include "tests/test_app.h"
-#include "tests/test_dict.h"
-#include "tests/test_list.h"
-#include "tests/test_sessions.h"
-#include "tests/test_msession.h"
-#include "tests/test_jsession.h"
+#include "test_app.h"
+#include "test_dict.h"
+#include "test_list.h"
+#include "test_sessions.h"
+#include "test_msession.h"
+#include "test_jsession.h"
 
 
 
