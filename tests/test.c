@@ -23,6 +23,7 @@
 
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
+#include <CUnit/TestDB.h>
 
 #include "test_app.h"
 #include "test_dict.h"
