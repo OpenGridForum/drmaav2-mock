@@ -36,4 +36,4 @@ typedef struct drmaa2_r_s
 } drmaa2_r_s;
 
 
-#endif DRMAA2_MOCK_H
+#endif 

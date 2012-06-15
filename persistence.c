@@ -65,7 +65,8 @@ DELETE FROM job_templates;\
 DELETE FROM reservation_templates;\
 ";
 
-
+// sqlite3 callback function signature
+typedef int (*sqlite3_callback)(void*, int, char**, char**);
 
 // sqlite3 helper functions
 
@@ -116,7 +117,7 @@ int drmaa2_reset_db(char *name)
 }
 
 
-int drmaa2_db_query(char *db_name, char *stmt, int (*callback)(void*, int, char**, char**), void *args)
+int drmaa2_db_query(char *db_name, char *stmt, sqlite3_callback callback, void *args)
 {
     sqlite3 *db = open_db(db_name);
     char *zErrMsg = 0;
@@ -187,7 +188,7 @@ drmaa2_jsession get_jsession(char *db_name, const char *session_name)
 {
 	drmaa2_jsession js = NULL;
     char *stmt = sqlite3_mprintf("SELECT * FROM job_sessions WHERE name = %Q", session_name);
-    int rc = drmaa2_db_query(db_name, stmt, get_jsession_callback, &js);
+    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_jsession_callback, &js);
     sqlite3_free(stmt);
     if (js == NULL) printf("no such jobsession\n");
     return js;
@@ -340,7 +341,7 @@ drmaa2_rsession get_rsession(char *db_name, const char *session_name)
 {
     drmaa2_rsession rs = NULL;
     char *stmt = sqlite3_mprintf("SELECT * FROM reservation_sessions WHERE name = %Q", session_name);
-    int rc = drmaa2_db_query(db_name, stmt, get_rsession_callback, &rs);
+    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_rsession_callback, &rs);
     sqlite3_free(stmt);
     if (rs == NULL) printf("no such reservation session\n");
     return rs;
@@ -429,7 +430,7 @@ int drmaa2_get_job_status(char *db_name, drmaa2_j j)
     int status = -1;
     long long rowid = atoll(j->id);
     char *stmt = sqlite3_mprintf("SELECT exit_status FROM jobs WHERE rowid = %lld", rowid);
-    int rc = drmaa2_db_query(db_name, stmt, get_status_callback, &status);
+    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_status_callback, &status);
     sqlite3_free(stmt);
     return status;
 }
@@ -452,7 +453,7 @@ static int get_jobinfo_callback(drmaa2_jinfo ji, int argc, char **argv, char **a
             struct tm tm;
             time_t epoch;
             // convert time string to unix time stamp
-            if ( strptime(argv[i], "%Y-%m-%d %H:%M:%S", &tm) != NULL )
+            if ( strptime(argv[i], "%Y-%m-%d %H:%M:%S", &tm) != 0 )
                 epoch = mktime(&tm);
             else
             {
@@ -477,7 +478,7 @@ drmaa2_jinfo get_job_info(char *db_name, drmaa2_jinfo ji)
     long long rowid = atoll(ji->jobId);
     char *stmt = sqlite3_mprintf("SELECT exit_status, terminating_signal, submission_time, dispatch_time, finish_time\
         FROM jobs WHERE rowid = %lld", rowid);
-    int rc = drmaa2_db_query(db_name, stmt, get_jobinfo_callback, ji);
+    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_jobinfo_callback, ji);
     sqlite3_free(stmt);
     if (rc != SQLITE_OK) return NULL;
     return ji;
@@ -502,7 +503,7 @@ char *get_command(char *db_name, long long row_id)
     char *stmt = sqlite3_mprintf("SELECT remoteCommand FROM jobs, job_templates \
         WHERE jobs.rowid = %lld AND job_templates.rowid = jobs.template_id", row_id);
     char *command = NULL;
-    int rc = drmaa2_db_query(db_name, stmt, cmd_callback, &command);
+    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)cmd_callback, &command);
     sqlite3_free(stmt);
     return command;
 }

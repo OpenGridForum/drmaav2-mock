@@ -56,4 +56,4 @@ int drmaa2_save_pid(char *db_name, long long row_id, pid_t pid);
 int drmaa2_save_exit_status(char *db_name, long long row_id, int status);
 
 
-#endif DRMAA2_PERSISTENCE_H
+#endif 

@@ -16,4 +16,4 @@ typedef struct drmaa2_dict_s {
 	drmaa2_dict_item head;
 } drmaa2_dict_s;
 
-#endif DRMAA2_DICT_H
+#endif 

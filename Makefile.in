@@ -1,54 +1,48 @@
-DRMAAOBJS = drmaa2.o drmaa2-list.o drmaa2-dict.o sqlite3.o persistence.o
 TESTOBJS = test.o tests/test_app.o tests/test_dict.o tests/test_list.o tests/test_sessions.o tests/test_jsession.o tests/test_msession.o
+INCLUDES = @SQLITE_CFLAGS@
+LIBS = @SQLITE_LIBS@
 
-CC = gcc
-CFLAGS =
-
-all: setup wrapper 
-
-local: examples test_app
-
-test_app: test_app.o $(DRMAAOBJS)
-	$(CC) -o $@ test_app.o $(DRMAAOBJS)
-
+all: drmaa examples
+drmaa: drmaa2.so setup wrapper
+tests: test_app
 examples: large
 
-large: large.o $(DRMAAOBJS)
-	$(CC) -o $@ large.o $(DRMAAOBJS)
+drmaa2.so: persistence.o drmaa2.o drmaa2-list.o drmaa2-dict.o
+	$(CC) -o $@ -shared $(LIBS) $^
 
+setup: setup_db.o drmaa2.so 
+	$(CC) -o $@ $(LIBS) $^
 
-wrapper: wrapper.o persistence.o sqlite3.o drmaa2-list.o
-	$(CC) $< sqlite3.o persistence.o drmaa2-list.o -o $@
+wrapper: wrapper.o drmaa2.so
+	$(CC) -o $@ $(LIBS) $^
 
-setup: setup_db.o $(DRMAAOBJS)
-	$(CC) -o $@ setup_db.o $(DRMAAOBJS)
+persistence.o: persistence.c drmaa2-list.c 
+	$(CC) $(CFLAGS) $(INCLUDES) -c $^
 
-test: $(DRMAAOBJS) $(TESTOBJS) wrapper.o
-	$(CC) -lcunit -o $@ $(DRMAAOBJS) $(TESTOBJS)
+test_app: test_app.o 
+	$(CC) -o $@ $(LIBS) $^
 
-tests/%.o: tests/%.c tests/%.h $(DRMAAOBJS)
-	$(CC) -c $< -o $@
+large: large.o drmaa2.so
+	$(CC) -o $@ $(LIBS) $^
 
 large.o: examples/large.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(INCLUDES) -c $^
 
-%.o: %.c %.h
-	$(CC) $(CFLAGS) -c $<
+%.o: %.c
+	$(CC) $(INCLUDES) -c $<
 
-drmaa2.o: drmaa2.c drmaa2.h drmaa2-mock.h drmaa2-dict.h drmaa2-list.h persistence.h drmaa2-debug.h
-	$(CC) $(CFLAGS) -c $<
+test: $(TESTOBJS) wrapper.o
+	$(CC) -lcunit -o $@ 
 
-persistence.o: persistence.c persistence.h drmaa2-mock.h drmaa2.h drmaa2-debug.h
-	$(CC) $(CFLAGS) -c $<
-
-wrapper.o: wrapper.c drmaa2-debug.h
-	$(CC) $(CFLAGS) -c $<
+tests/%.o: tests/%.c tests/%.h 
+	$(CC) -c $< -o $@
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f *.o
 	rm -f setup wrapper
+	rm -f *.o
+	rm -f *.so
 	rm -f tests/*.o test
 	rm -f app large test_app
