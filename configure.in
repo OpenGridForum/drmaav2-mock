@@ -4,7 +4,7 @@
 #AC_PREREQ([2.68])
 AC_INIT([DRMAAv2 Reference Implementation], [0.1], [drmaa-wg@ogf.org])
 #AC_CONFIG_SRCDIR([drmaa2-debug.h])
-#AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CC
@@ -20,6 +20,13 @@ AC_CHECK_LIB([sqlite3], [sqlite3_open])
 AS_IF([test "$ac_cv_header_sqlite3_h" = yes], [SQLITE3_EXISTS=1], [SQLITE3_EXISTS=0])
 AC_SUBST([SQLITE3_EXISTS])
 
+# Add option for renaming the persistency database file
+AC_ARG_WITH([database-file],
+   [AS_HELP_STRING([--with-database-file],
+                   [location of the DRMAA library persistency DB, defaults to ./drmaa2.sqlite])],
+   AC_DEFINE([DRMAA_DBFILE],["$withval"],["DRMAA library persistency DB"]),
+   AC_DEFINE([DRMAA_DBFILE],["drmaa2.sqlite"],["DRMAA library persistency DB"]),
+)
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
 

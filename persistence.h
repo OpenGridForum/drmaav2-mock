@@ -3,11 +3,9 @@
 
 #include "drmaa2.h"
 #include <unistd.h>
+#include "config.h"
 
-#define DB_NAME "drmaa.sqlite"
-
-
-
+#define DB_NAME DRMAA_DBFILE
 
 int save_jsession(char *db_name, const char *contact, const char *session);
 
