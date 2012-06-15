@@ -39,5 +39,5 @@ clean:
 	rm -f setup wrapper
 	rm -f *.o
 	rm -f *.so
-	rm -f tests/*.o test
+	rm -f tests/*.o tests/test
 	rm -f app large test_app
