@@ -35,7 +35,7 @@ int string_array_contains(char *array[], int len, char *string)
 
 
 
-drmaa2_error drmaa2_string_free(char* string)
+void drmaa2_string_free(char* string)
 {
     free(string);
 }
@@ -76,7 +76,7 @@ drmaa2_jinfo drmaa2_jinfo_create(void)
 }
 
 
-drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
+void drmaa2_jinfo_free(drmaa2_jinfo ji)
 {
     drmaa2_string_free(ji->jobId);
     drmaa2_string_free(ji->terminatingSignal);
@@ -87,7 +87,6 @@ drmaa2_error drmaa2_jinfo_free(drmaa2_jinfo ji)
     drmaa2_string_free(ji->jobOwner);
     drmaa2_string_free(ji->queueName);
     free(ji);
-    return DRMAA2_SUCCESS;
 }
 
 
@@ -106,14 +105,13 @@ drmaa2_rinfo drmaa2_rinfo_create(void)
 }
 
 
-drmaa2_error drmaa2_rinfo_free(drmaa2_rinfo ri)
+void drmaa2_rinfo_free(drmaa2_rinfo ri)
 {
     drmaa2_string_free(ri->reservationId);
     drmaa2_string_free(ri->reservationName);
     drmaa2_list_free(ri->usersACL);
     drmaa2_list_free(ri->reservedMachines);
     free(ri);
-    return DRMAA2_SUCCESS;
 }
 
 
@@ -154,7 +152,7 @@ drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 }
 
 
-drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
+void drmaa2_jtemplate_free(drmaa2_jtemplate jt)
 {
     // free fields
     free(jt->remoteCommand);
@@ -176,7 +174,6 @@ drmaa2_error drmaa2_jtemplate_free(drmaa2_jtemplate jt)
     free(jt->accountingId);
     // free container
     free(jt);
-    return DRMAA2_SUCCESS;
 }
 
 
@@ -199,7 +196,7 @@ drmaa2_rtemplate drmaa2_rtemplate_create(void)
 }
 
 
-drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
+void drmaa2_rtemplate_free(drmaa2_rtemplate rt)
 {
     // free fields
     free(rt->reservationName);          
@@ -208,16 +205,14 @@ drmaa2_error drmaa2_rtemplate_free(drmaa2_rtemplate rt)
     drmaa2_list_free(rt->candidateMachines);
     // free container 
     free(rt);
-    return DRMAA2_SUCCESS;
 }
 
 
-drmaa2_error drmaa2_machineinfo_free(drmaa2_machineinfo mi)
+void drmaa2_machineinfo_free(drmaa2_machineinfo mi)
 {
     drmaa2_string_free(mi->name);
     drmaa2_version_free(mi->machineOSVersion);
     free(mi);
-    return DRMAA2_SUCCESS;
 }
 
 
@@ -424,7 +419,7 @@ drmaa2_version drmaa2_get_drmaa_version(void)
     return version;
 }
 
-drmaa2_error drmaa2_version_free(drmaa2_version v)
+void drmaa2_version_free(drmaa2_version v)
 {
     if (v)
     {
@@ -432,7 +427,6 @@ drmaa2_error drmaa2_version_free(drmaa2_version v)
         free(v->minor);
         free(v);
     }
-    return DRMAA2_SUCCESS;
 };
 
 drmaa2_bool drmaa2_supports(const drmaa2_capability c)

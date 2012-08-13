@@ -37,11 +37,11 @@ int stringlist_contains(drmaa2_string_list sl, char *string)
 }
 
 
-drmaa2_error drmaa2_list_free (drmaa2_list l)
+void drmaa2_list_free (drmaa2_list l)
 {
     if (l == NULL)
     {
-        return DRMAA2_SUCCESS;
+        return;
     }
 
     drmaa2_list_item head = (drmaa2_list_item)l->head;
@@ -54,7 +54,6 @@ drmaa2_error drmaa2_list_free (drmaa2_list l)
         free(tmp);
     }
     free(l);
-    return DRMAA2_SUCCESS;
 }
 
 

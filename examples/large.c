@@ -43,7 +43,7 @@ int main()
     rt->candidateMachines = cl;
     r = drmaa2_rsession_request_reservation(rs, rt);
 
-    jt->remoteCommand = "/bin/date";                                     // submit job 
+    jt->remoteCommand = strdup("/bin/date");                                     // submit job 
     jt->reservationId = drmaa2_r_get_id(r);
     drmaa2_dict_set(env, "FOO", "BAR");
     jt->jobEnvironment = env;
