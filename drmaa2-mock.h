@@ -31,8 +31,8 @@ typedef struct drmaa2_r_s
 {
     const char *id;
     const char *session_name;
-    drmaa2_rtemplate template;
-    drmaa2_rinfo info;
+    //drmaa2_rtemplate template;
+    //drmaa2_rinfo info;
 } drmaa2_r_s;
 
 

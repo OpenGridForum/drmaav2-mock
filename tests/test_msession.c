@@ -26,6 +26,8 @@ void test_reservation_lists()
     drmaa2_rsession rs = drmaa2_create_rsession("my_rsession", NULL);
     drmaa2_r r = drmaa2_rsession_request_reservation(rs, rt);
     drmaa2_close_rsession(rs);
+    drmaa2_rsession_free(rs);
+    drmaa2_r_free(r);
 
     reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 1);
@@ -33,9 +35,11 @@ void test_reservation_lists()
 
     //test more reservations
     rs = drmaa2_open_rsession("my_rsession");
-    r = drmaa2_rsession_request_reservation(rs, rt);
-    r = drmaa2_rsession_request_reservation(rs, rt);
+    drmaa2_r_free(drmaa2_rsession_request_reservation(rs, rt));\
+    drmaa2_r_free(drmaa2_rsession_request_reservation(rs, rt));
     drmaa2_close_rsession(rs);
+    drmaa2_rsession_free(rs);
+
 
     reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 3);
@@ -44,8 +48,9 @@ void test_reservation_lists()
 
     //test multiple reservation_sessions
     rs = drmaa2_create_rsession("my_rsession2", NULL);
-    r = drmaa2_rsession_request_reservation(rs, rt);
+    drmaa2_r_free(drmaa2_rsession_request_reservation(rs, rt));
     drmaa2_close_rsession(rs);
+    drmaa2_rsession_free(rs);
 
     reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 4);
@@ -53,6 +58,7 @@ void test_reservation_lists()
 
 
     drmaa2_close_msession(ms);
+    drmaa2_msession_free(ms);
     drmaa2_destroy_rsession("my_rsession");
     drmaa2_destroy_rsession("my_rsession2");
     drmaa2_rtemplate_free(rt);

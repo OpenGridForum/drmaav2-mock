@@ -73,7 +73,6 @@ typedef int (*sqlite3_callback)(void*, int, char**, char**);
 sqlite3 *open_db(char *name)
 {
 	sqlite3 *db;
-    char *zErrMsg = 0;
     int rc;
     rc = sqlite3_open(name, &db);
     sqlite3_busy_timeout(db, 30000);

@@ -35,7 +35,7 @@ int string_array_contains(char *array[], int len, char *string)
 
 
 
-void drmaa2_string_free(char* string)
+void drmaa2_string_free(drmaa2_string string)
 {
     free(string);
 }
@@ -47,7 +47,7 @@ drmaa2_error drmaa2_lasterror(void)
 }
 
 
-char *drmaa2_lasterror_text(void)
+drmaa2_string drmaa2_lasterror_text(void)
 {
     return drmaa2_lasterror_text_v ? strdup(drmaa2_lasterror_text_v) : NULL;
 }
@@ -216,6 +216,46 @@ void drmaa2_machineinfo_free(drmaa2_machineinfo mi)
 }
 
 
+void drmaa2_jsession_free(drmaa2_jsession js)
+{
+    free((char *)js->contact);
+    free((char *)js->name);
+    free(js);
+}
+
+void drmaa2_rsession_free(drmaa2_rsession rs)
+{
+    free((char *)rs->contact);
+    free((char *)rs->name);
+    free(rs);
+}
+
+void drmaa2_msession_free(drmaa2_msession ms)
+{
+    drmaa2_string_free((char *)ms->name);
+    free(ms);
+}
+
+void drmaa2_j_free(drmaa2_j j)
+{
+    drmaa2_string_free((char *)j->id);
+    drmaa2_string_free((char *)j->session_name);
+    free(j);
+}
+
+void drmaa2_jarray_free(drmaa2_jarray ja)
+{
+
+}
+
+void drmaa2_r_free(drmaa2_r r)
+{
+    drmaa2_string_free((char *)r->id);
+    drmaa2_string_free((char *)r->session_name);
+    free(r);
+}
+
+
 drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
 {
     long long template_id = save_rtemplate(DB_NAME, rt);
@@ -231,21 +271,21 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 }
 
 
-char *drmaa2_r_get_id(const drmaa2_r r)
+drmaa2_string drmaa2_r_get_id(const drmaa2_r r)
 {
     //returns copy since application should call drmaa2_string_free()
     return (r->id != NULL) ? strdup(r->id) : DRMAA2_UNSET_STRING;
 }
 
 
-char *drmaa2_jsession_get_contact(const drmaa2_jsession js)
+drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
 {
     if (js->contact) return strdup(js->contact);
     return DRMAA2_UNSET_STRING;
 }
 
 
-char *drmaa2_jsession_get_session_name(const drmaa2_jsession js)
+drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js)
 {
     return strdup(js->name);
 }
@@ -316,7 +356,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 }
 
 
-char *drmaa2_j_get_id(const drmaa2_j j)
+drmaa2_string drmaa2_j_get_id(const drmaa2_j j)
 {
     // returns copy since application should call drmaa2_string_free()
     return strdup(j->id);
@@ -395,7 +435,7 @@ drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession m
 }
 
 
-char *drmaa2_get_drms_name(void)
+drmaa2_string drmaa2_get_drms_name(void)
 {
     return NULL;
 }
@@ -405,7 +445,7 @@ drmaa2_version drmaa2_get_drms_version(void)
     return NULL;
 }
 
-char *drmaa2_get_drmaa_name(void)
+drmaa2_string drmaa2_get_drmaa_name(void)
 {
     // returns copy since application should call drmaa2_string_free()
     return strdup("drmaa2-mock");
@@ -551,27 +591,18 @@ drmaa2_msession drmaa2_open_msession(const char * session_name)
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
-    free((char *)js->contact);
-    free((char *)js->name);
-    free(js);
     return DRMAA2_SUCCESS;
 }
 
 
 drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs)
 {
-    free((char *)rs->contact);
-    free((char *)rs->name);
-    free(rs);
-    return DRMAA2_SUCCESS;
     return DRMAA2_SUCCESS;
 }
 
 
 drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
 {
-    drmaa2_string_free((char *)ms->name);
-    free(ms);
     return DRMAA2_SUCCESS;
 }
 

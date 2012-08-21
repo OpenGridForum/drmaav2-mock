@@ -4,6 +4,8 @@
 
 - prefix global variables
 
+- use test database (implementation should allow multiple databases)
+
 
 
 
@@ -18,11 +20,3 @@
 
 - jobarray support
 
-
-to fix:
-
-- free of returned jobs
-
-- free session with free methods (instead of using close)
-
-- Reset database automatically before running tests

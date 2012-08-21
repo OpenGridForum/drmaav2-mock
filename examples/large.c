@@ -29,11 +29,25 @@ int main()
     drmaa2_dict            env = drmaa2_dict_create(NULL);
 
     drmaa2_jsession js = drmaa2_create_jsession("myjsession", NULL);     // open sessions to DRM system
+    if (js == NULL)
+    {
+        printf("%s\n", drmaa2_lasterror_text()); //error msg should be freed for long running applications
+        exit(1);
+    }
     drmaa2_rsession rs = drmaa2_create_rsession("myrsession", NULL);
+    if (rs == NULL)
+    {
+        printf("%s\n", drmaa2_lasterror_text()); //error msg should be freed for long running applications
+        exit(1);
+    }
     drmaa2_msession ms = drmaa2_open_msession(NULL);
 
     ml = drmaa2_msession_get_all_machines(ms, DRMAA2_UNSET_LIST);        // determine name of first machine
-    if (drmaa2_list_size(ml) < 1) error_handler();
+    if (drmaa2_list_size(ml) < 1)
+    {
+        printf("No machines to assign jobs to.\n");
+        exit(1);
+    }
     m = (drmaa2_machineinfo)drmaa2_list_get(ml, 0);
     drmaa2_list_add(cl, m->name);
 
@@ -57,12 +71,16 @@ int main()
     // close sessions, cleanup
     drmaa2_jtemplate_free(jt);  // includes free of env
     drmaa2_rtemplate_free(rt);  // includes free of cl
-    printf("1\n");
     drmaa2_jinfo_free(ji);
-    printf("2\n");
+    drmaa2_j_free(j);
+    drmaa2_r_free(r);
+
     drmaa2_close_msession(ms);
-    printf("3\n");
     drmaa2_close_rsession(rs);
     drmaa2_close_jsession(js);
+    drmaa2_msession_free(ms);
+    drmaa2_rsession_free(rs);
+    drmaa2_jsession_free(js);
+
     drmaa2_list_free(ml);
 }
