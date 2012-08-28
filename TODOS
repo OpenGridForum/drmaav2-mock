@@ -9,10 +9,14 @@
 
 
 
+- rsession interface
+
+- reservation interface
 
 - complete jobinfo filter
 
 - session invalidation after destruction
+  job info deletion
 
 - notifications
 
@@ -20,3 +24,18 @@
 
 - jobarray support
 
+- job categories
+
+- machine info
+
+
+
+- slot info
+
+
+
+questions:
+
+- j/rsession destroy semantic
+
+- queue implementation

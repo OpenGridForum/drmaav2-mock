@@ -454,8 +454,8 @@ drmaa2_string drmaa2_get_drmaa_name(void)
 drmaa2_version drmaa2_get_drmaa_version(void)
 {
     drmaa2_version version = (drmaa2_version)malloc(sizeof(drmaa2_version_s));
-    version->major = strdup("2");
-    version->minor = strdup("0");
+    version->major = strdup("0");
+    version->minor = strdup("1");
     return version;
 }
 
@@ -499,7 +499,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
 
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        char *name = drmaa2_generate_unique_name("jseesion");
+        char *name = drmaa2_generate_unique_name("jsession");
         if (name == NULL)
             return NULL;
         js->name = name;
@@ -527,7 +527,7 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
 
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        char *name = drmaa2_generate_unique_name("jseesion");
+        char *name = drmaa2_generate_unique_name("rsession");
         if (name == NULL)
             return NULL;
         rs->name = name;
