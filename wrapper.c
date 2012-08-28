@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     	//child
     	char *args[] = {cmd, NULL};
     	execv(args[0], args);
-
+    	return 0;			// dead code, just to avoid GCC warning
     }
     else
     {
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	             specified the WUNTRACED option or if the child process is being traced (see ptrace(2)).\n");
 	        DRMAA2_DEBUG_PRINT("%d  - evaluates to the number of the signal that caused the process to stop.\n", WSTOPSIG(status));
 	    }
+	    return 0;
     }
-
 
 }

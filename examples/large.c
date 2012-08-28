@@ -69,18 +69,19 @@ int main()
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup
-    drmaa2_jtemplate_free(jt);  // includes free of env
-    drmaa2_rtemplate_free(rt);  // includes free of cl
-    drmaa2_jinfo_free(ji);
-    drmaa2_j_free(j);
-    drmaa2_r_free(r);
+    drmaa2_jtemplate_free(&jt);  // includes free of env
+    drmaa2_rtemplate_free(&rt);  // includes free of cl
+    drmaa2_jinfo_free(&ji);
+    drmaa2_j_free(&j);
+    drmaa2_r_free(&r);
 
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);
     drmaa2_close_jsession(js);
-    drmaa2_msession_free(ms);
-    drmaa2_rsession_free(rs);
-    drmaa2_jsession_free(js);
+    drmaa2_msession_free(&ms);
+    drmaa2_rsession_free(&rs);
+    drmaa2_jsession_free(&js);
 
-    drmaa2_list_free(ml);
+    // TODO: leads to double free crash due to some bug in the implementation: 
+    drmaa2_list_free(&ml);
 }

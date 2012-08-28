@@ -34,22 +34,25 @@ typedef enum drmaa2_cpu {
   DRMAA2_OTHER_CPU                   =  0,
   DRMAA2_ALPHA                       =  1,
   DRMAA2_ARM                         =  2,
-  DRMAA2_CELL                        =  3,
-  DRMAA2_PARISC                      =  4,
-  DRMAA2_X86                         =  5,
-  DRMAA2_X64                         =  6,
-  DRMAA2_IA64                        =  7,
-  DRMAA2_MIPS                        =  8,
-  DRMAA2_PPC                         =  9,
-  DRMAA2_PPC64                       = 10,
-  DRMAA2_SPARC                       = 11,
-  DRMAA2_SPARC64                     = 12
+  DRMAA2_ARM64                       =  3,
+  DRMAA2_CELL                        =  4,
+  DRMAA2_PARISC                      =  5,
+  DRMAA2_PARISC64                    =  6,
+  DRMAA2_X86                         =  7,
+  DRMAA2_X64                         =  8,
+  DRMAA2_IA64                        =  9,
+  DRMAA2_MIPS                        = 10,
+  DRMAA2_MIPS64                      = 11,
+  DRMAA2_PPC                         = 12,
+  DRMAA2_PPC64                       = 13,
+  DRMAA2_SPARC                       = 14,
+  DRMAA2_SPARC64                     = 15
 } drmaa2_cpu;
 
 typedef enum drmaa2_limit {
   DRMAA2_CORE_FILE_SIZE              =  0,
   DRMAA2_CPU_TIME                    =  1,
-  DRMAA2_DATA_SEG_SIZE               =  2,
+  DRMAA2_DATA_SIZE                   =  2,
   DRMAA2_FILE_SIZE                   =  3,
   DRMAA2_OPEN_FILES                  =  4,
   DRMAA2_STACK_SIZE                  =  5,
@@ -109,7 +112,7 @@ typedef enum drmaa2_error {
 } drmaa2_error;
 
 typedef char * drmaa2_string;
-void drmaa2_string_free(drmaa2_string);
+void drmaa2_string_free(drmaa2_string *);
 
 drmaa2_error  drmaa2_lasterror(void);
 drmaa2_string drmaa2_lasterror_text(void);
@@ -134,7 +137,7 @@ typedef enum drmaa2_listtype {
 
 typedef void (*drmaa2_list_entryfree)(void * value);
 drmaa2_list  drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback);
-void         drmaa2_list_free   (      drmaa2_list l); 
+void         drmaa2_list_free   (      drmaa2_list * l); 
 const void * drmaa2_list_get    (const drmaa2_list l, long pos);
 drmaa2_error drmaa2_list_add    (      drmaa2_list l, const void * value);
 drmaa2_error drmaa2_list_del    (      drmaa2_list l, long pos);
@@ -145,10 +148,10 @@ typedef struct drmaa2_dict_s * drmaa2_dict;
 
 typedef void (*drmaa2_dict_entryfree)(char * key, char * val);
 drmaa2_dict         drmaa2_dict_create (const drmaa2_dict_entryfree callback);
-void                drmaa2_dict_free   (drmaa2_dict d); 
+void                drmaa2_dict_free   (      drmaa2_dict * d); 
 drmaa2_string_list  drmaa2_dict_list   (const drmaa2_dict d);            
 drmaa2_bool         drmaa2_dict_has    (const drmaa2_dict d, const char * key);
-const drmaa2_string drmaa2_dict_get    (const drmaa2_dict d, const char * key);
+const char *        drmaa2_dict_get    (const drmaa2_dict d, const char * key);
 drmaa2_error        drmaa2_dict_del    (      drmaa2_dict d, const char * key);
 drmaa2_error        drmaa2_dict_set    (      drmaa2_dict d, const char * key, const char * val);
 
@@ -163,7 +166,7 @@ drmaa2_error        drmaa2_dict_set    (      drmaa2_dict d, const char * key, c
 #define  DRMAA2_UNSET_LIST      NULL
 #define  DRMAA2_UNSET_DICT      NULL
 #define  DRMAA2_UNSET_TIME      ((time_t) -3)
-#define  DRMAA2_UNSET_CALLBACK  NULL
+#define  DRMAA2_UNSET_CALLBACK  NULL    
 #define  DRMAA2_UNSET_JINFO     NULL
 
 
@@ -188,7 +191,7 @@ typedef struct {
 typedef drmaa2_jinfo_s * drmaa2_jinfo;
 
 drmaa2_jinfo drmaa2_jinfo_create (void);
-void         drmaa2_jinfo_free   (drmaa2_jinfo ji);
+void         drmaa2_jinfo_free   (drmaa2_jinfo * ji);
 
 typedef struct {
   drmaa2_string        machineName; 
@@ -196,7 +199,7 @@ typedef struct {
 } drmaa2_slotinfo_s;
 typedef drmaa2_slotinfo_s * drmaa2_slotinfo;
 
-void drmaa2_slotinfo_free   (drmaa2_slotinfo si);
+void drmaa2_slotinfo_free   (drmaa2_slotinfo * si);
 
 typedef struct {
   drmaa2_string        reservationId;
@@ -209,7 +212,7 @@ typedef struct {
 } drmaa2_rinfo_s;
 typedef drmaa2_rinfo_s * drmaa2_rinfo;
 
-void drmaa2_rinfo_free   (drmaa2_rinfo ri);
+void drmaa2_rinfo_free   (drmaa2_rinfo * ri);
 
 typedef struct {
   drmaa2_string      remoteCommand;          
@@ -241,13 +244,12 @@ typedef struct {
   drmaa2_dict        stageInFiles;        
   drmaa2_dict        stageOutFiles;        
   drmaa2_dict        resourceLimits;      
-  drmaa2_string      accountingId;       
-  drmaa2_dict        implSpec;   
+  drmaa2_string      accountingId;          
 } drmaa2_jtemplate_s;
 typedef drmaa2_jtemplate_s * drmaa2_jtemplate;
 
 drmaa2_jtemplate drmaa2_jtemplate_create   (void);
-void             drmaa2_jtemplate_free     (drmaa2_jtemplate jt);
+void             drmaa2_jtemplate_free     (drmaa2_jtemplate * jt);
 
 typedef struct {
   drmaa2_string      reservationName;          
@@ -266,7 +268,7 @@ typedef struct {
 typedef drmaa2_rtemplate_s * drmaa2_rtemplate;
 
 drmaa2_rtemplate     drmaa2_rtemplate_create (void);
-void                 drmaa2_rtemplate_free   (drmaa2_rtemplate rt);
+void                 drmaa2_rtemplate_free   (drmaa2_rtemplate * rt);
 
 typedef struct {
   drmaa2_event   event;
@@ -276,14 +278,14 @@ typedef struct {
 } drmaa2_notification_s;
 typedef drmaa2_notification_s * drmaa2_notification;
 
-void drmaa2_notification_free   (drmaa2_notification n);
+void drmaa2_notification_free   (drmaa2_notification * n);
 
 typedef struct {
   drmaa2_string                name;
 } drmaa2_queueinfo_s;
 typedef drmaa2_queueinfo_s * drmaa2_queueinfo;
 
-void drmaa2_queueinfo_free   (drmaa2_queueinfo qi);
+void drmaa2_queueinfo_free   (drmaa2_queueinfo * qi);
 
 typedef struct {
   drmaa2_string                major; 
@@ -291,7 +293,7 @@ typedef struct {
 } drmaa2_version_s;
 typedef drmaa2_version_s * drmaa2_version;
 
-void drmaa2_version_free   (drmaa2_version v);
+void drmaa2_version_free   (drmaa2_version * v);
 
 typedef struct {
   drmaa2_string   name;  
@@ -308,7 +310,7 @@ typedef struct {
 } drmaa2_machineinfo_s;
 typedef drmaa2_machineinfo_s * drmaa2_machineinfo;
 
-void drmaa2_machineinfo_free   (drmaa2_machineinfo mi);
+void drmaa2_machineinfo_free   (drmaa2_machineinfo * mi);
 
 drmaa2_string_list drmaa2_jtemplate_impl_spec     (void);
 drmaa2_string_list drmaa2_jinfo_impl_spec         (void);
@@ -338,12 +340,12 @@ typedef struct drmaa2_j_s        * drmaa2_j;
 typedef struct drmaa2_jarray_s   * drmaa2_jarray;
 typedef struct drmaa2_r_s        * drmaa2_r;
 
-void drmaa2_jsession_free(drmaa2_jsession js);
-void drmaa2_rsession_free(drmaa2_rsession rs);
-void drmaa2_msession_free(drmaa2_msession ms);
-void drmaa2_j_free(drmaa2_j j);
-void drmaa2_jarray_free(drmaa2_jarray ja);
-void drmaa2_r_free(drmaa2_r r);
+void drmaa2_jsession_free(drmaa2_jsession * js);
+void drmaa2_rsession_free(drmaa2_rsession * rs);
+void drmaa2_msession_free(drmaa2_msession * ms);
+void drmaa2_j_free       (drmaa2_j * j);
+void drmaa2_jarray_free  (drmaa2_jarray * ja);
+void drmaa2_r_free       (drmaa2_r * r);
 
 drmaa2_string  drmaa2_rsession_get_contact          (const drmaa2_rsession rs);
 drmaa2_string  drmaa2_rsession_get_session_name     (const drmaa2_rsession rs); 
