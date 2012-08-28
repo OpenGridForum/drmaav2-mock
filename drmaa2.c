@@ -35,10 +35,12 @@ int string_array_contains(char *array[], int len, char *string)
 
 
 
-void drmaa2_string_free(drmaa2_string * string)
+void drmaa2_string_free(drmaa2_string * sRef)
 {
-    free(*string);
-    *string = NULL;
+    if (*sRef != NULL) {        
+        free(*sRef);
+        *sRef = NULL;
+    }
 }
 
 
@@ -80,16 +82,18 @@ drmaa2_jinfo drmaa2_jinfo_create(void)
 void drmaa2_jinfo_free(drmaa2_jinfo * jiRef)
 {
     drmaa2_jinfo ji = *jiRef;
-    drmaa2_string_free(&(ji->jobId));
-    drmaa2_string_free(&(ji->terminatingSignal));
-    drmaa2_string_free(&(ji->annotation));
-    drmaa2_string_free(&(ji->jobSubState));
-    drmaa2_list_free  (&(ji->allocatedMachines));
-    drmaa2_string_free(&(ji->submissionMachine));
-    drmaa2_string_free(&(ji->jobOwner));
-    drmaa2_string_free(&(ji->queueName));
-    free(ji);
-    *jiRef = NULL;
+    if (ji != NULL) {
+        drmaa2_string_free(&(ji->jobId));
+        drmaa2_string_free(&(ji->terminatingSignal));
+        drmaa2_string_free(&(ji->annotation));
+        drmaa2_string_free(&(ji->jobSubState));
+        drmaa2_list_free  (&(ji->allocatedMachines));
+        drmaa2_string_free(&(ji->submissionMachine));
+        drmaa2_string_free(&(ji->jobOwner));
+        drmaa2_string_free(&(ji->queueName));
+        free(ji);
+        *jiRef = NULL;
+    }
 }
 
 
@@ -111,12 +115,14 @@ drmaa2_rinfo drmaa2_rinfo_create(void)
 void drmaa2_rinfo_free(drmaa2_rinfo * riRef)
 {
     drmaa2_rinfo ri = *riRef;
-    drmaa2_string_free(&(ri->reservationId));
-    drmaa2_string_free(&(ri->reservationName));
-    drmaa2_list_free  (&(ri->usersACL));
-    drmaa2_list_free  (&(ri->reservedMachines));
-    free(ri);
-    *riRef = NULL;
+    if (ri != NULL) {
+        drmaa2_string_free(&(ri->reservationId));
+        drmaa2_string_free(&(ri->reservationName));
+        drmaa2_list_free  (&(ri->usersACL));
+        drmaa2_list_free  (&(ri->reservedMachines));
+        free(ri);
+        *riRef = NULL;
+    }
 }
 
 
@@ -160,25 +166,27 @@ drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 void drmaa2_jtemplate_free(drmaa2_jtemplate * jtRef)
 {
     drmaa2_jtemplate jt = *jtRef;
-    drmaa2_string_free(&(jt->remoteCommand));
-    drmaa2_list_free(&(jt->args));          
-    drmaa2_dict_free(&(jt->jobEnvironment));
-    drmaa2_string_free(&(jt->workingDirectory));        
-    drmaa2_string_free(&(jt->jobCategory));            
-    drmaa2_list_free(&(jt->email));
-    drmaa2_string_free(&(jt->jobName));              
-    drmaa2_string_free(&(jt->inputPath));
-    drmaa2_string_free(&(jt->outputPath));
-    drmaa2_string_free(&(jt->errorPath));
-    drmaa2_string_free(&(jt->reservationId));
-    drmaa2_string_free(&(jt->queueName));
-    drmaa2_list_free(&(jt->candidateMachines));
-    drmaa2_dict_free(&(jt->stageInFiles)); 
-    drmaa2_dict_free(&(jt->stageOutFiles));
-    drmaa2_dict_free(&(jt->resourceLimits));
-    drmaa2_string_free(&(jt->accountingId));
-    free(jt);
-    *jtRef = NULL;
+    if (jt != NULL) {
+        drmaa2_string_free(&(jt->remoteCommand));
+        drmaa2_list_free(&(jt->args));          
+        drmaa2_dict_free(&(jt->jobEnvironment));
+        drmaa2_string_free(&(jt->workingDirectory));        
+        drmaa2_string_free(&(jt->jobCategory));            
+        drmaa2_list_free(&(jt->email));
+        drmaa2_string_free(&(jt->jobName));              
+        drmaa2_string_free(&(jt->inputPath));
+        drmaa2_string_free(&(jt->outputPath));
+        drmaa2_string_free(&(jt->errorPath));
+        drmaa2_string_free(&(jt->reservationId));
+        drmaa2_string_free(&(jt->queueName));
+        drmaa2_list_free(&(jt->candidateMachines));
+        drmaa2_dict_free(&(jt->stageInFiles)); 
+        drmaa2_dict_free(&(jt->stageOutFiles));
+        drmaa2_dict_free(&(jt->resourceLimits));
+        drmaa2_string_free(&(jt->accountingId));
+        free(jt);
+        *jtRef = NULL;
+    }
 }
 
 
@@ -204,53 +212,65 @@ drmaa2_rtemplate drmaa2_rtemplate_create(void)
 void drmaa2_rtemplate_free(drmaa2_rtemplate * rtRef)
 {
     drmaa2_rtemplate rt = *rtRef;
-    drmaa2_string_free(&(rt->reservationName));          
-    drmaa2_string_free(&(rt->jobCategory));
-    drmaa2_list_free(&(rt->usersACL));            
-    drmaa2_list_free(&(rt->candidateMachines));
-    free(rt);
-    *rtRef = NULL;
+    if (rt != NULL) {
+        drmaa2_string_free(&(rt->reservationName));          
+        drmaa2_string_free(&(rt->jobCategory));
+        drmaa2_list_free(&(rt->usersACL));            
+        drmaa2_list_free(&(rt->candidateMachines));
+        free(rt);
+        *rtRef = NULL;
+    }
 }
 
 
 void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef)
 {
-    drmaa2_string_free (&((*miRef)->name));
-    drmaa2_version_free(&((*miRef)->machineOSVersion));
-    free(*miRef);
-    *miRef = NULL;
+    if (*miRef != NULL) {
+        drmaa2_string_free (&((*miRef)->name));
+        drmaa2_version_free(&((*miRef)->machineOSVersion));
+        free(*miRef);
+        *miRef = NULL;
+    }
 }
 
 
 void drmaa2_jsession_free(drmaa2_jsession * jsRef)
 {
-    drmaa2_string_free(&((*jsRef)->contact));
-    drmaa2_string_free(&((*jsRef)->name));
-    free(*jsRef);
-    *jsRef = NULL;
+    if (*jsRef != NULL) {
+        drmaa2_string_free(&((*jsRef)->contact));
+        drmaa2_string_free(&((*jsRef)->name));
+        free(*jsRef);
+        *jsRef = NULL;
+    }
 }
 
 void drmaa2_rsession_free(drmaa2_rsession * rsRef)
 {
-    drmaa2_string_free(&((*rsRef)->contact));
-    drmaa2_string_free(&((*rsRef)->name));
-    free(*rsRef);
-    *rsRef = NULL;
+    if (*rsRef != NULL) {
+        drmaa2_string_free(&((*rsRef)->contact));
+        drmaa2_string_free(&((*rsRef)->name));
+        free(*rsRef);
+        *rsRef = NULL;
+    }
 }
 
 void drmaa2_msession_free(drmaa2_msession * msRef)
 {
-    drmaa2_string_free(&((*msRef)->name));
-    free(*msRef);
-    *msRef = NULL;
+    if (*msRef != NULL) {
+        drmaa2_string_free(&((*msRef)->name));
+        free(*msRef);
+        *msRef = NULL;
+    }
 }
 
 void drmaa2_j_free(drmaa2_j * jRef)
 {
-    drmaa2_string_free(&((*jRef)->id));
-    drmaa2_string_free(&((*jRef)->session_name));
-    free(*jRef);
-    *jRef=NULL;
+    if (*jRef != NULL) {
+        drmaa2_string_free(&((*jRef)->id));
+        drmaa2_string_free(&((*jRef)->session_name));
+        free(*jRef);
+        *jRef=NULL;
+    }
 }
 
 void drmaa2_jarray_free(drmaa2_jarray * jaRef)
@@ -260,10 +280,12 @@ void drmaa2_jarray_free(drmaa2_jarray * jaRef)
 
 void drmaa2_r_free(drmaa2_r * rRef)
 {
-    drmaa2_string_free(&((*rRef)->id));
-    drmaa2_string_free(&((*rRef)->session_name));
-    free(*rRef);
-    *rRef=NULL;
+    if (*rRef != NULL) {
+        drmaa2_string_free(&((*rRef)->id));
+        drmaa2_string_free(&((*rRef)->session_name));
+        free(*rRef);
+        *rRef=NULL;
+    }
 }
 
 
@@ -472,10 +494,12 @@ drmaa2_version drmaa2_get_drmaa_version(void)
 
 void drmaa2_version_free(drmaa2_version * vRef)
 {
-    drmaa2_string_free(&((*vRef)->major));
-    drmaa2_string_free(&((*vRef)->minor));
-    free(*vRef);
-    *vRef=NULL;
+    if (*vRef != NULL) {
+        drmaa2_string_free(&((*vRef)->major));
+        drmaa2_string_free(&((*vRef)->minor));
+        free(*vRef);
+        *vRef=NULL;
+    }
 };
 
 drmaa2_bool drmaa2_supports(const drmaa2_capability c)

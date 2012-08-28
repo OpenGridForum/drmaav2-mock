@@ -82,5 +82,6 @@ int main()
     drmaa2_rsession_free(&rs);
     drmaa2_jsession_free(&js);
 
-    // TODO: leads to double free due to some bug in the implementation: drmaa2_list_free(&ml);
+    // TODO: leads to double free crash due to some bug in the implementation: 
+    drmaa2_list_free(&ml);
 }
