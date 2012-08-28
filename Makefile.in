@@ -30,7 +30,7 @@ force_look:
 	true
 
 %.o: %.c
-	@CC@ -c $<
+	@CC@ -Wall -c $<
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ @CFLAGS@ -c $<
