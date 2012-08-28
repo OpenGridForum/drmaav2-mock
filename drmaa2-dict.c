@@ -13,23 +13,25 @@ drmaa2_dict drmaa2_dict_create(const drmaa2_dict_entryfree callback)
 }
 
 
-void drmaa2_dict_free(drmaa2_dict d)
+void drmaa2_dict_free(drmaa2_dict * dRef)
 {
-    if (d == NULL)
+    if (*dRef == NULL)
     {
         return;
     }
 
-    drmaa2_dict_item head = d->head;
+    drmaa2_dict_item head = (*dRef)->head;
     drmaa2_dict_item tmp;
     while (head != NULL)
     {
         tmp = head;
         head = head->next;
-        if (d->free_entry != NULL) d->free_entry((char *)tmp->key, (char *)tmp->value);
+        if ((*dRef)->free_entry != NULL) 
+            (*dRef)->free_entry((char *)tmp->key, (char *)tmp->value);
         free(tmp);
     }
-    free(d);
+    free(*dRef);
+    *dRef=NULL;
 } 
 
 
@@ -56,7 +58,7 @@ drmaa2_bool drmaa2_dict_has(const drmaa2_dict d, const char * key)
 }
 
 
-const drmaa2_string drmaa2_dict_get(const drmaa2_dict d, const char * key)
+const char * drmaa2_dict_get(const drmaa2_dict d, const char * key)
 {
     drmaa2_dict_item current_item = d->head;
     while (current_item != NULL)

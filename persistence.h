@@ -43,6 +43,10 @@ int drmaa2_get_job_status(char *db_name, drmaa2_j j);
 
 drmaa2_jinfo get_job_info(char *db_name, drmaa2_jinfo ji);
 
+int drmaa2_setup_db(char *name);
+
+int drmaa2_reset_db(char *name);
+
 
 
 //queries for wrapper

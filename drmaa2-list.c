@@ -37,8 +37,9 @@ int stringlist_contains(drmaa2_string_list sl, char *string)
 }
 
 
-void drmaa2_list_free (drmaa2_list l)
+void drmaa2_list_free (drmaa2_list * listref)
 {
+    drmaa2_list l = *listref;
     if (l == NULL)
     {
         return;
@@ -54,6 +55,7 @@ void drmaa2_list_free (drmaa2_list l)
         free(tmp);
     }
     free(l);
+    *listref = NULL;
 }
 
 
