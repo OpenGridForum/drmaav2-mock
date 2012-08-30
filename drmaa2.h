@@ -135,7 +135,7 @@ typedef enum drmaa2_listtype {
   DRMAA2_RESERVATIONLIST
 } drmaa2_listtype;
 
-typedef void (*drmaa2_list_entryfree)(void * value);
+typedef void (*drmaa2_list_entryfree)(void **value);
 drmaa2_list  drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback);
 void         drmaa2_list_free   (      drmaa2_list * l); 
 const void * drmaa2_list_get    (const drmaa2_list l, long pos);
@@ -146,7 +146,7 @@ long         drmaa2_list_size   (const drmaa2_list l);
 struct drmaa2_dict_s;        /*forward*/
 typedef struct drmaa2_dict_s * drmaa2_dict;
 
-typedef void (*drmaa2_dict_entryfree)(char * key, char * val);
+typedef void (*drmaa2_dict_entryfree)(char **key, char **val);
 drmaa2_dict         drmaa2_dict_create (const drmaa2_dict_entryfree callback);
 void                drmaa2_dict_free   (      drmaa2_dict * d); 
 drmaa2_string_list  drmaa2_dict_list   (const drmaa2_dict d);            

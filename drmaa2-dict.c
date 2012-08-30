@@ -15,23 +15,24 @@ drmaa2_dict drmaa2_dict_create(const drmaa2_dict_entryfree callback)
 
 void drmaa2_dict_free(drmaa2_dict * dRef)
 {
-    if (*dRef == NULL)
+    drmaa2_dict d = *dRef;
+    if (d == NULL)
     {
         return;
     }
 
-    drmaa2_dict_item head = (*dRef)->head;
+    drmaa2_dict_item head = d->head;
     drmaa2_dict_item tmp;
     while (head != NULL)
     {
         tmp = head;
         head = head->next;
-        if ((*dRef)->free_entry != NULL) 
-            (*dRef)->free_entry((char *)tmp->key, (char *)tmp->value);
+        if (d->free_entry != NULL) 
+            d->free_entry((char **)&(tmp->key), (char **)&(tmp->value));
         free(tmp);
     }
-    free(*dRef);
-    *dRef=NULL;
+    free(d);
+    *dRef = NULL;
 } 
 
 
@@ -92,7 +93,7 @@ drmaa2_error drmaa2_dict_del(drmaa2_dict d, const char * key)
             {
                 d->head = current_item->next;
             }
-            if (d->free_entry != NULL) d->free_entry((char *)current_item->key, (char *)current_item->value);
+            if (d->free_entry != NULL) d->free_entry((char **)&(current_item->key), (char **)&(current_item->value));
             free(current_item);
             return DRMAA2_SUCCESS;
         }
@@ -121,7 +122,7 @@ drmaa2_error drmaa2_dict_set(drmaa2_dict d, const char * key, const char * val)
         if (!strcmp(current_item->key, key))
         {
             // found -> replace
-            if (d->free_entry != NULL) d->free_entry(NULL, (char *)current_item->value);
+            if (d->free_entry != NULL) d->free_entry(NULL, (char **)&(current_item->value));
             current_item->value = val;
             return DRMAA2_SUCCESS;
         }

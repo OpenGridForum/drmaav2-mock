@@ -51,7 +51,7 @@ void drmaa2_list_free (drmaa2_list * listref)
     {
         tmp = head;
         head = tmp->next;
-        if (l->free_entry != NULL) l->free_entry((void *)tmp->data);
+        if (l->free_entry != NULL) l->free_entry((void **)&(tmp->data));
         free(tmp);
     }
     free(l);
