@@ -18,7 +18,7 @@ void test_reservation_lists()
     drmaa2_msession ms = drmaa2_open_msession("my_msession");
     drmaa2_r_list reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 0);
-    drmaa2_list_free(reservations);
+    drmaa2_list_free(&reservations);
 
 
     //test single reservation
@@ -26,42 +26,45 @@ void test_reservation_lists()
     drmaa2_rsession rs = drmaa2_create_rsession("my_rsession", NULL);
     drmaa2_r r = drmaa2_rsession_request_reservation(rs, rt);
     drmaa2_close_rsession(rs);
-    drmaa2_rsession_free(rs);
-    drmaa2_r_free(r);
+    drmaa2_rsession_free(&rs);
+    drmaa2_r_free(&r);
 
     reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 1);
-    drmaa2_list_free(reservations);
+    drmaa2_list_free(&reservations);
 
     //test more reservations
     rs = drmaa2_open_rsession("my_rsession");
-    drmaa2_r_free(drmaa2_rsession_request_reservation(rs, rt));\
-    drmaa2_r_free(drmaa2_rsession_request_reservation(rs, rt));
+    r = drmaa2_rsession_request_reservation(rs, rt);
+    drmaa2_r_free(&r);
+    r = drmaa2_rsession_request_reservation(rs, rt);
+    drmaa2_r_free(&r);
     drmaa2_close_rsession(rs);
-    drmaa2_rsession_free(rs);
+    drmaa2_rsession_free(&rs);
 
 
     reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 3);
-    drmaa2_list_free(reservations);
+    drmaa2_list_free(&reservations);
 
 
     //test multiple reservation_sessions
     rs = drmaa2_create_rsession("my_rsession2", NULL);
-    drmaa2_r_free(drmaa2_rsession_request_reservation(rs, rt));
+    r = drmaa2_rsession_request_reservation(rs, rt);
+    drmaa2_r_free(&r);
     drmaa2_close_rsession(rs);
-    drmaa2_rsession_free(rs);
+    drmaa2_rsession_free(&rs);
 
     reservations = drmaa2_msession_get_all_reservations(ms);
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 4);
-    drmaa2_list_free(reservations);
+    drmaa2_list_free(&reservations);
 
 
     drmaa2_close_msession(ms);
-    drmaa2_msession_free(ms);
+    drmaa2_msession_free(&ms);
     drmaa2_destroy_rsession("my_rsession");
     drmaa2_destroy_rsession("my_rsession2");
-    drmaa2_rtemplate_free(rt);
+    drmaa2_rtemplate_free(&rt);
 }
 
 
@@ -74,7 +77,7 @@ void test_job_lists()
     drmaa2_msession ms = drmaa2_open_msession("my_msession");
     drmaa2_j_list jobs = drmaa2_msession_get_all_jobs(ms, NULL);
     CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 0);
-    drmaa2_list_free(jobs);
+    drmaa2_list_free(&jobs);
 
 
     //test single job
@@ -86,7 +89,7 @@ void test_job_lists()
 
     jobs = drmaa2_msession_get_all_jobs(ms, NULL);
     CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 1);
-    drmaa2_list_free(jobs);
+    drmaa2_list_free(&jobs);
 
     //test more jobs
     js = drmaa2_open_jsession("my_jsession");
@@ -96,7 +99,7 @@ void test_job_lists()
 
     jobs = drmaa2_msession_get_all_jobs(ms, NULL);
     CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 3);
-    drmaa2_list_free(jobs);
+    drmaa2_list_free(&jobs);
 
 
     //test multiple job_sessions
@@ -112,12 +115,12 @@ void test_job_lists()
     {
         drmaa2_j_wait_terminated((drmaa2_j)drmaa2_list_get(jobs, i), DRMAA2_INFINITE_TIME);
     }
-    drmaa2_list_free(jobs);
+    drmaa2_list_free(&jobs);
 
     drmaa2_close_msession(ms);
     drmaa2_destroy_jsession("my_jsession");
     drmaa2_destroy_jsession("my_jsession2");
-    drmaa2_jtemplate_free(jt);
+    drmaa2_jtemplate_free(&jt);
 }
 
 

@@ -32,14 +32,14 @@ void test_simple_app()
     j = drmaa2_jsession_run_job(js, jt);
     
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);
-    drmaa2_jtemplate_free(jt);
+    drmaa2_jtemplate_free(&jt);
     drmaa2_destroy_jsession("testsession");
 
-    drmaa2_j_free(j);
-    drmaa2_jsession_free(js);
+    drmaa2_j_free(&j);
+    drmaa2_jsession_free(&js);
 
-    drmaa2_version_free(version);
-    drmaa2_string_free(name);
+    drmaa2_version_free(&version);
+    drmaa2_string_free(&name);
 
     CU_ASSERT(1);
 }
@@ -102,20 +102,20 @@ void test_advanced_app()
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup
-    drmaa2_jtemplate_free(jt);  // includes free of env
-    drmaa2_rtemplate_free(rt);  // includes free of cl
-    drmaa2_jinfo_free(ji);
-    drmaa2_j_free(j);
-    drmaa2_r_free(r);
+    drmaa2_jtemplate_free(&jt);  // includes free of env
+    drmaa2_rtemplate_free(&rt);  // includes free of cl
+    drmaa2_jinfo_free(&ji);
+    drmaa2_j_free(&j);
+    drmaa2_r_free(&r);
 
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);
     drmaa2_close_jsession(js);
-    drmaa2_msession_free(ms);
-    drmaa2_rsession_free(rs);
-    drmaa2_jsession_free(js);
+    drmaa2_msession_free(&ms);
+    drmaa2_rsession_free(&rs);
+    drmaa2_jsession_free(&js);
 
-    drmaa2_list_free(ml);
+    drmaa2_list_free(&ml);
 
     CU_ASSERT(1);
 }
