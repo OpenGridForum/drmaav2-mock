@@ -349,7 +349,7 @@ void drmaa2_r_free       (drmaa2_r * r);
 
 drmaa2_string  drmaa2_rsession_get_contact          (const drmaa2_rsession rs);
 drmaa2_string  drmaa2_rsession_get_session_name     (const drmaa2_rsession rs); 
-drmaa2_r       drmaa2_rsession_get_reservation      (const drmaa2_rsession rs, const char * reservation_id);
+drmaa2_r       drmaa2_rsession_get_reservation      (const drmaa2_rsession rs, const drmaa2_string reservationId);
 drmaa2_r       drmaa2_rsession_request_reservation  (const drmaa2_rsession rs, const drmaa2_rtemplate rt);
 drmaa2_r_list  drmaa2_rsession_get_reservations     (const drmaa2_rsession rs);
 
