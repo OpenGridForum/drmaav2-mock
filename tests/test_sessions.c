@@ -12,7 +12,7 @@ void test_empty_jsession_list()
     drmaa2_reset_db(DRMAA_DBFILE);
     drmaa2_string_list sl = drmaa2_get_jsession_names();
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 0);
-    drmaa2_list_free(sl);
+    drmaa2_list_free(&sl);
 }
 
 void test_basic_session_methods()
@@ -21,7 +21,7 @@ void test_basic_session_methods()
     drmaa2_jsession js = drmaa2_create_jsession("js1", NULL);
     CU_ASSERT_PTR_NOT_NULL(js);
     drmaa2_close_jsession(js);
-    drmaa2_jsession_free(js);
+    drmaa2_jsession_free(&js);
 
 
     js = drmaa2_open_jsession("js1");
@@ -29,14 +29,14 @@ void test_basic_session_methods()
     drmaa2_string_list sl = drmaa2_get_jsession_names();
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 1);
     CU_ASSERT_STRING_EQUAL((char *)drmaa2_list_get(sl, 0), "js1");
-    drmaa2_list_free(sl);
+    drmaa2_list_free(&sl);
 
     //test deletion of single session
     drmaa2_error error_code = drmaa2_destroy_jsession("js1");
     CU_ASSERT_EQUAL(error_code, DRMAA2_SUCCESS);
     sl = drmaa2_get_jsession_names();
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 0);
-    drmaa2_list_free(sl);
+    drmaa2_list_free(&sl);
 
     //test of opening non existing session
     js = drmaa2_open_jsession("js1");
@@ -55,7 +55,7 @@ void test_multiple_sessions()
 
     drmaa2_string_list sl = drmaa2_get_jsession_names();
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 4);
-    drmaa2_list_free(sl);
+    drmaa2_list_free(&sl);
 
     //test deletion of non existing session
     //drmaa2_error error_code = drmaa2_destroy_jsession("non existing js");
@@ -70,9 +70,9 @@ void test_multiple_sessions()
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 2);
     CU_ASSERT_STRING_EQUAL((char *)drmaa2_list_get(sl, 1), "js3");
 
-    drmaa2_jsession_free(js1);
-    drmaa2_jsession_free(js2);
-    drmaa2_jsession_free(js3);
-    drmaa2_jsession_free(js4);
+    drmaa2_jsession_free(&js1);
+    drmaa2_jsession_free(&js2);
+    drmaa2_jsession_free(&js3);
+    drmaa2_jsession_free(&js4);
 
 }

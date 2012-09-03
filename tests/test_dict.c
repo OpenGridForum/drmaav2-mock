@@ -33,7 +33,7 @@ void testBasicDict()
     v = drmaa2_dict_get(d, "language");
     CU_ASSERT_STRING_EQUAL(v, "c");
 
-    drmaa2_dict_free(d);
+    drmaa2_dict_free(&d);
     CU_ASSERT(1);
 }
 
@@ -62,5 +62,5 @@ void testDict()
     CU_ASSERT_EQUAL(drmaa2_dict_has(d, "version"), DRMAA2_FALSE);
     CU_ASSERT_EQUAL(drmaa2_dict_has(d, "new_version"), DRMAA2_TRUE);
 
-    drmaa2_dict_free(d);
+    drmaa2_dict_free(&d);
 }
