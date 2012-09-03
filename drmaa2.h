@@ -349,7 +349,7 @@ void drmaa2_r_free       (drmaa2_r * r);
 
 drmaa2_string  drmaa2_rsession_get_contact          (const drmaa2_rsession rs);
 drmaa2_string  drmaa2_rsession_get_session_name     (const drmaa2_rsession rs); 
-drmaa2_r       drmaa2_rsession_get_reservation      (const drmaa2_rsession rs, const drmaa2_string reservation_id);
+drmaa2_r       drmaa2_rsession_get_reservation      (const drmaa2_rsession rs, const drmaa2_string reservationId);
 drmaa2_r       drmaa2_rsession_request_reservation  (const drmaa2_rsession rs, const drmaa2_rtemplate rt);
 drmaa2_r_list  drmaa2_rsession_get_reservations     (const drmaa2_rsession rs);
 
@@ -375,7 +375,7 @@ drmaa2_string_list  drmaa2_jsession_get_job_categories  (const drmaa2_jsession j
 drmaa2_j_list       drmaa2_jsession_get_jobs            (const drmaa2_jsession js, 
                                                          const drmaa2_jinfo filter);
 drmaa2_jarray       drmaa2_jsession_get_job_array       (const drmaa2_jsession js, 
-                                                         const drmaa2_string jobarray_id);
+                                                         const char * jobarray_id);
 drmaa2_j            drmaa2_jsession_run_job             (const drmaa2_jsession js, 
                                                          const drmaa2_jtemplate jt);
 drmaa2_jarray       drmaa2_jsession_run_bulk_jobs       (const drmaa2_jsession js, 
