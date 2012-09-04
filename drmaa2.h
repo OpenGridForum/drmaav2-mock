@@ -375,7 +375,7 @@ drmaa2_string_list  drmaa2_jsession_get_job_categories  (const drmaa2_jsession j
 drmaa2_j_list       drmaa2_jsession_get_jobs            (const drmaa2_jsession js, 
                                                          const drmaa2_jinfo filter);
 drmaa2_jarray       drmaa2_jsession_get_job_array       (const drmaa2_jsession js, 
-                                                         const char * jobarray_id);
+                                                         const drmaa2_string jobarrayId);
 drmaa2_j            drmaa2_jsession_run_job             (const drmaa2_jsession js, 
                                                          const drmaa2_jtemplate jt);
 drmaa2_jarray       drmaa2_jsession_run_bulk_jobs       (const drmaa2_jsession js, 
