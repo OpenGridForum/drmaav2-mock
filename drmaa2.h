@@ -60,19 +60,13 @@ typedef enum drmaa2_limit {
   DRMAA2_WALLCLOCK_TIME              =  7
 } drmaa2_limit;
 
-typedef enum drmaa2_jtemplate_placeholder {
-  DRMAA2_HOME_DIRECTORY              =  0,
-  DRMAA2_WORKING_DIRECTORY           =  1,
-  DRMAA2_PARAMETRIC_INDEX            =  2
-} drmaa2_jtemplate_placeholder;
-
 typedef enum drmaa2_event {
   DRMAA2_NEW_STATE                   =  0,
   DRMAA2_MIGRATED                    =  1,
   DRMAA2_ATTRIBUTE_CHANGE            =  2
 } drmaa2_event;
 
-typedef enum {
+typedef enum drmaa2_capability {
   DRMAA2_ADVANCE_RESERVATION         =  0,
   DRMAA2_RESERVE_SLOTS               =  1,
   DRMAA2_CALLBACK                    =  2,
@@ -158,6 +152,9 @@ drmaa2_error        drmaa2_dict_set    (      drmaa2_dict d, const char * key, c
 #define  DRMAA2_ZERO_TIME       ((time_t)  0)
 #define  DRMAA2_INFINITE_TIME   ((time_t) -1)
 #define  DRMAA2_NOW             ((time_t) -2)
+#define  DRMAA2_HOME_DIR        "$DRMAA2_HOME_DIR$"
+#define  DRMAA2_WORKING_DIR     "$DRMAA2_WORKING_DIR$"
+#define  DRMAA2_INDEX           "$DRMAA2_INDEX$"
 
 #define  DRMAA2_UNSET_BOOL      DRMAA2_FALSE
 #define  DRMAA2_UNSET_STRING    NULL   
@@ -375,7 +372,7 @@ drmaa2_string_list  drmaa2_jsession_get_job_categories  (const drmaa2_jsession j
 drmaa2_j_list       drmaa2_jsession_get_jobs            (const drmaa2_jsession js, 
                                                          const drmaa2_jinfo filter);
 drmaa2_jarray       drmaa2_jsession_get_job_array       (const drmaa2_jsession js, 
-                                                         const char * jobarray_id);
+                                                         const drmaa2_string jobarrayId);
 drmaa2_j            drmaa2_jsession_run_job             (const drmaa2_jsession js, 
                                                          const drmaa2_jtemplate jt);
 drmaa2_jarray       drmaa2_jsession_run_bulk_jobs       (const drmaa2_jsession js, 
