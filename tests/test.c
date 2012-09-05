@@ -31,6 +31,7 @@
 #include "test_sessions.h"
 #include "test_msession.h"
 #include "test_jsession.h"
+#include "test_rsession.h"
 
 
 
@@ -180,7 +181,11 @@ int main(int argc, char* argv[])
       return CU_get_error();
     }
     /* add the tests to the suite */
-    if (NULL == CU_add_test(pSuite, "Getter Methods", test_getter_methods)) {
+    if (NULL == CU_add_test(pSuite, "Session Invalidation", test_jsession_invalidation)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Getter Methods", test_jsession_getter_methods)) {
       CU_cleanup_registry();
       return CU_get_error();
     }   
@@ -209,7 +214,23 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
-    
+
+
+    // 7th Suite
+    pSuite = CU_add_suite("Reservation Session", NULL, NULL);
+    if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    /* add the tests to the suite */
+    if (NULL == CU_add_test(pSuite, "Session Invalidation", test_rsession_invalidation)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Getter Methods", test_rsession_getter_methods)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
 
 
 

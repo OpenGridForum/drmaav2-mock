@@ -13,9 +13,12 @@ int delete_jsession(char *db_name, const char *session_name);
 
 drmaa2_jsession get_jsession(char *db_name, const char *session_name);
 
+int drmaa2_jsession_is_valid(const char *session_name);
+int drmaa2_rsession_is_valid(const char *session_name);
+
 long long save_job(char *db_name, const char *session_name, long long template_id);
 
-long long save_jtemplate(char *db_name, drmaa2_jtemplate jt);
+long long save_jtemplate(char *db_name, drmaa2_jtemplate jt, const char *session_name);
 
 drmaa2_string_list get_jsession_names(char *db_name, drmaa2_string_list session_names);
 

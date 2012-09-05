@@ -1,5 +1,7 @@
 
-void test_getter_methods();
+void test_jsession_invalidation();
+
+void test_jsession_getter_methods();
 
 void test_job_list();
 

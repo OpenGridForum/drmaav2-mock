@@ -15,9 +15,6 @@
 
 - complete jobinfo filter
 
-- session invalidation after destruction
-  job info deletion
-
 - notifications
 
 - introspection

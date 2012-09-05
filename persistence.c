@@ -47,6 +47,7 @@ reservedMachines TEXT\
 );\
 \
 CREATE TABLE job_templates(\
+session_name TEXT,\
 remoteCommand TEXT,\
 args TEXT\
 );\
@@ -157,7 +158,11 @@ int save_jsession(char *db_name, const char *contact, const char *session_name)
 
 int delete_jsession(char *db_name, const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; DELETE FROM job_sessions WHERE name = %Q; COMMIT;", session_name);
+    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
+        DELETE FROM job_sessions WHERE name = %Q;\
+        DELETE FROM job_templates WHERE session_name = %Q;\
+        DELETE FROM jobs WHERE session_name = %Q;\
+        COMMIT;", session_name, session_name, session_name);
     int rc = drmaa2_db_query(db_name, stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
@@ -194,6 +199,35 @@ drmaa2_jsession get_jsession(char *db_name, const char *session_name)
 }
 
 
+static int drmaa2_entry_exists_callback(void *ptr, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    DEBUG_PRINT("%s = %s\n", azColName[0], argv[0] ? argv[0] : "NULL");
+    *((int *)ptr) = atoi(argv[0]);
+    return 0;
+}
+
+int drmaa2_session_is_valid(int session_type, const char *session_name)
+{
+    char *session_type_name = (session_type == 0) ? "job_sessions": "reservation_sessions";
+    char *stmt = sqlite3_mprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE name = %Q LIMIT 1);", session_type_name, session_name);
+    int exists = 0;
+    int rc = drmaa2_db_query(DRMAA_DBFILE, stmt, (sqlite3_callback)drmaa2_entry_exists_callback, &exists);
+    sqlite3_free(stmt);
+    return exists;
+}
+
+int drmaa2_jsession_is_valid(const char *session_name)
+{
+    return drmaa2_session_is_valid(0, session_name);
+}
+
+int drmaa2_rsession_is_valid(const char *session_name)
+{
+    return drmaa2_session_is_valid(1, session_name);
+}
+
+
 long long save_job(char *db_name, const char *session_name, long long template_id)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO jobs \
@@ -204,9 +238,9 @@ long long save_job(char *db_name, const char *session_name, long long template_i
 }
 
 
-long long save_jtemplate(char *db_name, drmaa2_jtemplate jt)
+long long save_jtemplate(char *db_name, drmaa2_jtemplate jt, const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("INSERT INTO job_templates VALUES(%Q, %Q)", jt->remoteCommand, jt->args);
+    char *stmt = sqlite3_mprintf("INSERT INTO job_templates VALUES(%Q, %Q, %Q)", session_name, jt->remoteCommand, jt->args);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(db_name, stmt);
     sqlite3_free(stmt);
     return row_id;

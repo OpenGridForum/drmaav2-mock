@@ -77,7 +77,9 @@ int main()
 
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);
-    drmaa2_close_jsession(js);
+    drmaa2_destroy_jsession("myjsession");
+
+
     drmaa2_msession_free(&ms);
     drmaa2_rsession_free(&rs);
     drmaa2_jsession_free(&js);

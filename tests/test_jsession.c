@@ -7,7 +7,20 @@
 #include "test_jsession.h"
 
 
-void test_getter_methods()
+void test_jsession_invalidation()
+{
+    drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
+    drmaa2_destroy_jsession("mysession");
+    CU_ASSERT_PTR_NULL(drmaa2_jsession_get_contact(js));
+    CU_ASSERT_PTR_NULL(drmaa2_jsession_get_session_name(js));
+    CU_ASSERT_PTR_NULL(drmaa2_jsession_get_jobs(js, NULL));
+    CU_ASSERT_PTR_NULL(drmaa2_jsession_get_job_categories(js));
+    CU_ASSERT_EQUAL(drmaa2_lasterror(), DRMAA2_INVALID_SESSION);
+    drmaa2_jsession_free(&js);
+}
+
+
+void test_jsession_getter_methods()
 {
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
     

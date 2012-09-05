@@ -289,8 +289,56 @@ void drmaa2_r_free(drmaa2_r * rRef)
 }
 
 
+drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs)
+{
+    if (!drmaa2_rsession_is_valid(rs->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Reservation session is invalid.";
+        return NULL;
+    }
+    
+    if (rs->contact) return strdup(rs->contact);
+            return DRMAA2_UNSET_STRING;
+}
+
+
+drmaa2_string drmaa2_rsession_get_session_name(const drmaa2_rsession rs)
+{
+    if (!drmaa2_rsession_is_valid(rs->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Reservation session is invalid.";
+        return NULL;
+    }
+
+    return strdup(rs->name);
+}
+
+
+drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_string reservationId)
+{
+    if (!drmaa2_rsession_is_valid(rs->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Reservation session is invalid.";
+        return NULL;
+    }
+
+    //TODO: implement
+    return NULL;    
+}
+
+
 drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
 {
+    if (!drmaa2_rsession_is_valid(rs->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Reservation session is invalid.";
+        return NULL;
+    }
+
     long long template_id = save_rtemplate(DB_NAME, rt);
     long long id = save_reservation(DB_NAME, rs->name, template_id); 
 
@@ -304,6 +352,20 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 }
 
 
+drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs)
+{
+        if (!drmaa2_rsession_is_valid(rs->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Reservation session is invalid.";
+        return NULL;
+    }
+
+    //TODO: implement
+    return NULL; 
+}
+
+
 drmaa2_string drmaa2_r_get_id(const drmaa2_r r)
 {
     //returns copy since application should call drmaa2_string_free()
@@ -313,19 +375,40 @@ drmaa2_string drmaa2_r_get_id(const drmaa2_r r)
 
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
 {
+    if (!drmaa2_jsession_is_valid(js->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Job session is invalid.";
+        return NULL;
+    }
+    
     if (js->contact) return strdup(js->contact);
-    return DRMAA2_UNSET_STRING;
+            return DRMAA2_UNSET_STRING;
 }
 
 
 drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js)
 {
+    if (!drmaa2_jsession_is_valid(js->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Job session is invalid.";
+        return NULL;
+    }
+
     return strdup(js->name);
 }
 
 
 drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
 {
+    if (!drmaa2_jsession_is_valid(js->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Job session is invalid.";
+        return NULL;
+    }
+
     drmaa2_string_list jc = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
     int i;
     for (i=0; i<JOBCATEGORIES_LENGTH; i++)
@@ -338,6 +421,13 @@ drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
 
 drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_jinfo filter)
 {
+    if (!drmaa2_jsession_is_valid(js->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Job session is invalid.";
+        return NULL;
+    }
+
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
     jobs = get_session_jobs(DB_NAME, jobs, js->name);
 
@@ -347,6 +437,13 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 
 drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
 {
+    if (!drmaa2_jsession_is_valid(js->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Job session is invalid.";
+        return NULL;
+    }
+
     //TODO: complete template evaluation
     if ((jt->jobCategory != DRMAA2_UNSET_STRING) && 
         !string_array_contains(jobcategories, JOBCATEGORIES_LENGTH, jt->jobCategory))
@@ -356,7 +453,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         return NULL;
     }
 
-    long long template_id = save_jtemplate(DB_NAME, jt);
+    long long template_id = save_jtemplate(DB_NAME, jt, js->name);
 
     long long id = save_job(DB_NAME, js->name, template_id); 
 
@@ -624,7 +721,10 @@ drmaa2_msession drmaa2_open_msession(const char * session_name)
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 {
-    return DRMAA2_SUCCESS;
+    if (drmaa2_jsession_is_valid(js->name))
+        return DRMAA2_SUCCESS;
+    else
+        return DRMAA2_INVALID_SESSION;
 }
 
 
