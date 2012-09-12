@@ -339,8 +339,8 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
         return NULL;
     }
 
-    long long template_id = save_rtemplate(DB_NAME, rt);
-    long long id = save_reservation(DB_NAME, rs->name, template_id); 
+    long long template_id = save_rtemplate(rt, rs->name);
+    long long id = save_reservation(rs->name, template_id); 
 
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
     char *cid;
@@ -429,7 +429,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
     }
 
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
-    jobs = get_session_jobs(DB_NAME, jobs, js->name);
+    jobs = get_session_jobs(jobs, js->name);
 
     return jobs;
 }
@@ -453,9 +453,9 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         return NULL;
     }
 
-    long long template_id = save_jtemplate(DB_NAME, jt, js->name);
+    long long template_id = save_jtemplate(jt, js->name);
 
-    long long id = save_job(DB_NAME, js->name, template_id); 
+    long long id = save_job(js->name, template_id); 
 
     pid_t childpid;
 
@@ -469,7 +469,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             // child
             char *id_c;
             asprintf(&id_c, "%lld", id);
-            char *args[] = {"./wrapper", DB_NAME, id_c, NULL};
+            char *args[] = {"./wrapper", id_c, NULL};
             execv(args[0], args);
             return NULL;        // dead code, just to avoid a GCC warning about control end reach
         }
@@ -498,7 +498,7 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
     drmaa2_jinfo ji = drmaa2_jinfo_create();
     ji->jobId = strdup(j->id);
     
-    ji = get_job_info(DB_NAME, ji); // exitStatus, terminating signal and *_time are set
+    ji = get_job_info(ji); // exitStatus, terminating signal and *_time are set
     
     //TODO set: jobSubState, allocatedMachines, i->submissionMachine, jobOwner, queueName 
     return ji;
@@ -511,7 +511,7 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
     int status = -1;
     while (status == -1)
     {
-        status = drmaa2_get_job_status(DB_NAME, j);
+        status = drmaa2_get_job_status(j);
         sleep(1);
     }
     
@@ -522,7 +522,7 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
 {
     drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, DRMAA2_UNSET_CALLBACK);
-    reservations = get_reservations(DB_NAME, reservations);
+    reservations = get_reservations(reservations);
     return reservations;
 }
 
@@ -530,7 +530,7 @@ drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
 drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter)
 {
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
-    jobs = get_jobs(DB_NAME, jobs, filter);
+    jobs = get_jobs(jobs, filter);
     return jobs;
 }
 
@@ -640,7 +640,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     js->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_jsession(DB_NAME, contact, session_name) != 0)
+    if (save_jsession(contact, session_name) != 0)
     {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
@@ -668,7 +668,7 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     rs->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_rsession(DB_NAME, contact, session_name) != 0)
+    if (save_rsession(contact, session_name) != 0)
     {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
@@ -683,7 +683,7 @@ drmaa2_jsession drmaa2_open_jsession(const char * session_name)
 {
     if (session_name != DRMAA2_UNSET_STRING)
     {
-        drmaa2_jsession js = get_jsession(DB_NAME, session_name);
+        drmaa2_jsession js = get_jsession(session_name);
         if (js)
             return js;
     }
@@ -699,7 +699,7 @@ drmaa2_rsession drmaa2_open_rsession(const char * session_name)
 {
     if (session_name != DRMAA2_UNSET_STRING)
     {
-        drmaa2_rsession rs = get_rsession(DB_NAME, session_name);
+        drmaa2_rsession rs = get_rsession(session_name);
         if (rs)
             return rs;
     }
@@ -745,7 +745,7 @@ drmaa2_error drmaa2_destroy_jsession(const char * session_name)
     if (session_name == NULL)
         return DRMAA2_INVALID_ARGUMENT;
 
-    int status = delete_jsession(DB_NAME, session_name);
+    int status = delete_jsession(session_name);
     return status;
 }
 
@@ -755,7 +755,7 @@ drmaa2_error drmaa2_destroy_rsession(const char * session_name)
     if (session_name == NULL)
         return DRMAA2_INVALID_ARGUMENT;
 
-    int status = delete_rsession(DB_NAME, session_name);
+    int status = delete_rsession(session_name);
         return status;
 }
 
@@ -763,7 +763,7 @@ drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 drmaa2_string_list drmaa2_get_jsession_names(void)
 {
     drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
-    session_names = get_jsession_names(DB_NAME, session_names);
+    session_names = get_jsession_names(session_names);
     return session_names;
 }
 
@@ -771,7 +771,7 @@ drmaa2_string_list drmaa2_get_jsession_names(void)
 drmaa2_string_list drmaa2_get_rsession_names(void)
 {
     drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
-    session_names = get_rsession_names(DB_NAME, session_names);
+    session_names = get_rsession_names(session_names);
     return session_names;
 }
 

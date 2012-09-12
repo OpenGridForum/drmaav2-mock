@@ -20,21 +20,21 @@ void usage()
 
 int main(int argc, char *argv[])
 {
-	if (argc != 3)
+	if (argc != 2)
 	{
 		usage();
 		exit(1);
 	}
 
-	long long row_id = atoll(argv[2]);
+	long long row_id = atoll(argv[1]);
 	if (row_id < 1)
 	{
-		fprintf(stderr, "No valid row_id: %s\n", argv[2]);
+		fprintf(stderr, "No valid row_id: %s\n", argv[1]);
 		usage();
 		exit(1);
 	}
 
-	char *cmd = get_command(argv[1], row_id);
+	char *cmd = get_command(row_id);
     if (cmd == NULL)
     {
         fprintf(stderr, "Error: Could not read job command\n");
@@ -59,13 +59,13 @@ int main(int argc, char *argv[])
     else
     {
     	// parent
-    	drmaa2_save_pid(argv[1], row_id, childpid);
+    	drmaa2_save_pid(row_id, childpid);
 
     	pid_t child;
     	int status;
 		child = waitpid(childpid, &status, 0);
 
-		drmaa2_save_exit_status(argv[1], row_id, status);
+		drmaa2_save_exit_status(row_id, status);
 
 		if (WIFEXITED(status))
 	    {

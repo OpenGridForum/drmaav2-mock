@@ -53,6 +53,7 @@ args TEXT\
 );\
 \
 CREATE TABLE reservation_templates(\
+session_name TEXT,\
 candidate_machines TEXT\
 );\
 ";
@@ -117,9 +118,9 @@ int drmaa2_reset_db(char *name)
 }
 
 
-int drmaa2_db_query(char *db_name, char *stmt, sqlite3_callback callback, void *args)
+int drmaa2_db_query(char *stmt, sqlite3_callback callback, void *args)
 {
-    sqlite3 *db = open_db(db_name);
+    sqlite3 *db = open_db(DRMAA_DBFILE);
     char *zErrMsg = 0;
 
     DEBUG_PRINT("%s\n", stmt);
@@ -130,9 +131,9 @@ int drmaa2_db_query(char *db_name, char *stmt, sqlite3_callback callback, void *
     return rc;
 }
 
-int drmaa2_db_query_rowid(char *db_name, char *stmt)
+int drmaa2_db_query_rowid(char *stmt)
 {
-    sqlite3 *db = open_db(db_name);
+    sqlite3 *db = open_db(DRMAA_DBFILE);
     char *zErrMsg = 0;
 
     DEBUG_PRINT("%s\n", stmt);
@@ -148,22 +149,22 @@ int drmaa2_db_query_rowid(char *db_name, char *stmt)
 
 //start of external used functions
 
-int save_jsession(char *db_name, const char *contact, const char *session_name)
+int save_jsession(const char *contact, const char *session_name)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO job_sessions VALUES(%Q, %Q); COMMIT;", contact, session_name);
-    int rc = drmaa2_db_query(db_name, stmt, NULL, NULL);
+    int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
 }
 
-int delete_jsession(char *db_name, const char *session_name)
+int delete_jsession(const char *session_name)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
         DELETE FROM job_sessions WHERE name = %Q;\
         DELETE FROM job_templates WHERE session_name = %Q;\
         DELETE FROM jobs WHERE session_name = %Q;\
         COMMIT;", session_name, session_name, session_name);
-    int rc = drmaa2_db_query(db_name, stmt, NULL, NULL);
+    int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
 }
@@ -188,11 +189,11 @@ static int get_jsession_callback(void **ptr, int argc, char **argv, char **azCol
     return 0;
 }
 
-drmaa2_jsession get_jsession(char *db_name, const char *session_name)
+drmaa2_jsession get_jsession(const char *session_name)
 {
 	drmaa2_jsession js = NULL;
     char *stmt = sqlite3_mprintf("SELECT * FROM job_sessions WHERE name = %Q", session_name);
-    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_jsession_callback, &js);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_jsession_callback, &js);
     sqlite3_free(stmt);
     if (js == NULL) printf("no such jobsession\n");
     return js;
@@ -212,7 +213,7 @@ int drmaa2_session_is_valid(int session_type, const char *session_name)
     char *session_type_name = (session_type == 0) ? "job_sessions": "reservation_sessions";
     char *stmt = sqlite3_mprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE name = %Q LIMIT 1);", session_type_name, session_name);
     int exists = 0;
-    int rc = drmaa2_db_query(DRMAA_DBFILE, stmt, (sqlite3_callback)drmaa2_entry_exists_callback, &exists);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_entry_exists_callback, &exists);
     sqlite3_free(stmt);
     return exists;
 }
@@ -228,20 +229,20 @@ int drmaa2_rsession_is_valid(const char *session_name)
 }
 
 
-long long save_job(char *db_name, const char *session_name, long long template_id)
+long long save_job(const char *session_name, long long template_id)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO jobs \
         VALUES(%Q, %lld, %Q, %Q, %Q, datetime('now'), %Q, %Q); COMMIT;", session_name, template_id, NULL, NULL, NULL, NULL, NULL);
-    sqlite3_int64 row_id = drmaa2_db_query_rowid(db_name, stmt);
+    sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
 }
 
 
-long long save_jtemplate(char *db_name, drmaa2_jtemplate jt, const char *session_name)
+long long save_jtemplate(drmaa2_jtemplate jt, const char *session_name)
 {
     char *stmt = sqlite3_mprintf("INSERT INTO job_templates VALUES(%Q, %Q, %Q)", session_name, jt->remoteCommand, jt->args);
-    sqlite3_int64 row_id = drmaa2_db_query_rowid(db_name, stmt);
+    sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
 }
@@ -258,10 +259,10 @@ static int get_jsession_names_callback(void *session_names, int argc, char **arg
     return 0;
 }
 
-drmaa2_string_list get_jsession_names(char *db_name, drmaa2_string_list session_names)
+drmaa2_string_list get_jsession_names(drmaa2_string_list session_names)
 {
     char stmt[] = "SELECT name FROM job_sessions";
-    int rc = drmaa2_db_query(db_name, stmt, get_jsession_names_callback, session_names);
+    int rc = drmaa2_db_query(stmt, get_jsession_names_callback, session_names);
     if (rc != SQLITE_OK) return NULL;
     return session_names;
 }
@@ -285,10 +286,10 @@ static int get_sjobs_callback(void *ptr, int argc, char **argv, char **azColName
     return 0;
 }
 
-drmaa2_j_list get_session_jobs(char *db_name, drmaa2_j_list jobs, const char *session_name)
+drmaa2_j_list get_session_jobs(drmaa2_j_list jobs, const char *session_name)
 {
     char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM jobs WHERE session_name = %Q;", session_name);
-    int rc = drmaa2_db_query(db_name, stmt, get_sjobs_callback, jobs);
+    int rc = drmaa2_db_query(stmt, get_sjobs_callback, jobs);
     sqlite3_free(stmt);
     if (rc != SQLITE_OK) return NULL;
     return jobs;
@@ -314,7 +315,7 @@ static int get_jobs_callback(void *ptr, int argc, char **argv, char **azColName)
     return 0;
 }
 
-drmaa2_j_list get_jobs(char *db_name, drmaa2_j_list jobs, drmaa2_jinfo filter)
+drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jinfo filter)
 {
     //TODO: build full filter statement
     char *sqlfilter = NULL;
@@ -325,7 +326,7 @@ drmaa2_j_list get_jobs(char *db_name, drmaa2_j_list jobs, drmaa2_jinfo filter)
         }
     }
     char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM jobs %s", sqlfilter);
-    int rc = drmaa2_db_query(db_name, stmt, get_jobs_callback, jobs);
+    int rc = drmaa2_db_query(stmt, get_jobs_callback, jobs);
     sqlite3_free(stmt);
     free(sqlfilter);
     if (rc != SQLITE_OK) return NULL;
@@ -334,19 +335,19 @@ drmaa2_j_list get_jobs(char *db_name, drmaa2_j_list jobs, drmaa2_jinfo filter)
 
 
 
-int save_rsession(char *db_name, const char *contact, const char *session_name)
+int save_rsession(const char *contact, const char *session_name)
 {
     char *stmt = sqlite3_mprintf("INSERT INTO reservation_sessions VALUES(%Q, %Q)", contact, session_name);
-    int rc = drmaa2_db_query(db_name, stmt, NULL, 0);
+    int rc = drmaa2_db_query(stmt, NULL, 0);
     sqlite3_free(stmt);
     return rc;
 }
 
 
-int delete_rsession(char *db_name, const char *session_name)
+int delete_rsession(const char *session_name)
 {
     char *stmt = sqlite3_mprintf("DELETE FROM reservation_sessions WHERE name = %Q", session_name);
-    int rc = drmaa2_db_query(db_name, stmt, NULL, 0);
+    int rc = drmaa2_db_query(stmt, NULL, 0);
     sqlite3_free(stmt);
     return rc;
 }
@@ -370,30 +371,30 @@ static int get_rsession_callback(void **ptr, int argc, char **argv, char **azCol
     return 0;
 }
 
-drmaa2_rsession get_rsession(char *db_name, const char *session_name)
+drmaa2_rsession get_rsession(const char *session_name)
 {
     drmaa2_rsession rs = NULL;
     char *stmt = sqlite3_mprintf("SELECT * FROM reservation_sessions WHERE name = %Q", session_name);
-    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_rsession_callback, &rs);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_rsession_callback, &rs);
     sqlite3_free(stmt);
     if (rs == NULL) printf("no such reservation session\n");
     return rs;
 }
 
 
-long long save_reservation(char *db_name, const char *session_name, long long template_id)
+long long save_reservation(const char *session_name, long long template_id)
 {
     char *stmt = sqlite3_mprintf("INSERT INTO reservations VALUES(%Q, %lld, %Q, %Q, %Q, %Q, %Q)", session_name, template_id, NULL, NULL, NULL, NULL, NULL);
-    sqlite3_int64 rowid = drmaa2_db_query_rowid(db_name, stmt);
+    sqlite3_int64 rowid = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return rowid;
 }
 
 
-long long save_rtemplate(char *db_name, drmaa2_rtemplate rt)
+long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("INSERT INTO reservation_templates VALUES(%Q)", rt->candidateMachines);
-    sqlite3_int64 row_id = drmaa2_db_query_rowid(db_name, stmt);
+    char *stmt = sqlite3_mprintf("INSERT INTO reservation_templates VALUES(%Q, %Q)", session_name, rt->candidateMachines);
+    sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
 }
@@ -410,10 +411,10 @@ static int get_rsession_names_callback(void *session_names, int argc, char **arg
     return 0;
 }
 
-drmaa2_string_list get_rsession_names(char *db_name, drmaa2_string_list session_names)
+drmaa2_string_list get_rsession_names(drmaa2_string_list session_names)
 {
     char stmt[] = "SELECT name FROM reservation_sessions";
-    int rc = drmaa2_db_query(db_name, stmt, get_rsession_names_callback, session_names);
+    int rc = drmaa2_db_query(stmt, get_rsession_names_callback, session_names);
     if (rc != SQLITE_OK) return NULL;
     return session_names;
 }
@@ -437,10 +438,10 @@ static int get_reservations_callback(void *ptr, int argc, char **argv, char **az
     return 0;
 }
 
-drmaa2_r_list get_reservations(char *db_name, drmaa2_r_list reservations)
+drmaa2_r_list get_reservations(drmaa2_r_list reservations)
 {
     char *stmt = "SELECT session_name, rowid FROM reservations";
-    int rc = drmaa2_db_query(db_name, stmt, get_reservations_callback, reservations);
+    int rc = drmaa2_db_query(stmt, get_reservations_callback, reservations);
     if (rc != SQLITE_OK) return NULL;
     return reservations;
 }
@@ -458,12 +459,12 @@ static int get_status_callback(int *ptr, int argc, char **argv, char **azColName
     return 0;
 }
 
-int drmaa2_get_job_status(char *db_name, drmaa2_j j)
+int drmaa2_get_job_status(drmaa2_j j)
 {
     int status = -1;
     long long rowid = atoll(j->id);
     char *stmt = sqlite3_mprintf("SELECT exit_status FROM jobs WHERE rowid = %lld", rowid);
-    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_status_callback, &status);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_status_callback, &status);
     sqlite3_free(stmt);
     return status;
 }
@@ -506,12 +507,12 @@ static int get_jobinfo_callback(drmaa2_jinfo ji, int argc, char **argv, char **a
     return 0;
 }
 
-drmaa2_jinfo get_job_info(char *db_name, drmaa2_jinfo ji)
+drmaa2_jinfo get_job_info(drmaa2_jinfo ji)
 {
     long long rowid = atoll(ji->jobId);
     char *stmt = sqlite3_mprintf("SELECT exit_status, terminating_signal, submission_time, dispatch_time, finish_time\
         FROM jobs WHERE rowid = %lld", rowid);
-    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)get_jobinfo_callback, ji);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_jobinfo_callback, ji);
     sqlite3_free(stmt);
     if (rc != SQLITE_OK) return NULL;
     return ji;
@@ -531,35 +532,35 @@ static int cmd_callback(char **ptr, int argc, char **argv, char **azColName)
     return 0;
 }
 
-char *get_command(char *db_name, long long row_id)
+char *get_command(long long row_id)
 {
     char *stmt = sqlite3_mprintf("SELECT remoteCommand FROM jobs, job_templates \
         WHERE jobs.rowid = %lld AND job_templates.rowid = jobs.template_id", row_id);
     char *command = NULL;
-    int rc = drmaa2_db_query(db_name, stmt, (sqlite3_callback)cmd_callback, &command);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)cmd_callback, &command);
     sqlite3_free(stmt);
     return command;
 }
 
 
-int drmaa2_save_pid(char *db_name, long long row_id, pid_t pid)
+int drmaa2_save_pid(long long row_id, pid_t pid)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs\
         SET pid = %d, dispatch_time = datetime('now') WHERE rowid = %lld; COMMIT;", pid, row_id);
-    int rc = drmaa2_db_query(db_name, stmt, NULL, NULL);
+    int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
 }
 
 
-int drmaa2_save_exit_status(char *db_name, long long row_id, int status)
+int drmaa2_save_exit_status(long long row_id, int status)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs \
         SET exit_status = %d, finish_time = datetime('now') WHERE rowid = %lld; COMMIT;", status, row_id);
     int rc = -1;
     while (rc != SQLITE_OK) //must ensure that status is really written as drmaa2-mock wait relies on it
     {
-        rc = drmaa2_db_query(db_name, stmt, NULL, NULL);
+        rc = drmaa2_db_query(stmt, NULL, NULL);
         if (rc == SQLITE_OK)
             break;
         sleep(1);
