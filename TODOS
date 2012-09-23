@@ -33,8 +33,11 @@
 
 questions:
 
+- naming of implementation specific functions
+
+- which job categories?
+
 - j/rsession destroy semantic
 
-- queue implementation
-
 - free slotinfo (unnecessary?)
+

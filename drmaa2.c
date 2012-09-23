@@ -223,6 +223,17 @@ void drmaa2_rtemplate_free(drmaa2_rtemplate * rtRef)
 }
 
 
+void drmaa2_queueinfo_free(drmaa2_queueinfo * qiRef)
+{
+    drmaa2_queueinfo qi = *qiRef;
+    if (qi != NULL) {
+        drmaa2_string_free(&(qi->name));          
+        free(qi);
+        *qiRef = NULL;
+    }
+}
+
+
 void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef)
 {
     if (*miRef != NULL) {
@@ -558,8 +569,24 @@ drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa
 
 drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names)
 {
-    //TODO: implement
-    return DRMAA2_UNSET_LIST;
+    drmaa2_queueinfo_list ql = drmaa2_list_create(DRMAA2_QUEUEINFOLIST, (drmaa2_list_entryfree)drmaa2_queueinfo_free);
+    if (names == DRMAA2_UNSET_LIST) {
+        // return all queue info instances
+        drmaa2_queueinfo qi = (drmaa2_queueinfo)malloc(sizeof(drmaa2_queueinfo_s));
+        qi->name = strdup("default");
+        drmaa2_list_add(ql, qi);
+    }
+    else {
+        int i;
+        for (i = 0; i < drmaa2_list_size(names); i++) {
+            if (!strcmp(drmaa2_list_get(names, i), "default")) {
+                drmaa2_queueinfo qi = (drmaa2_queueinfo)malloc(sizeof(drmaa2_queueinfo_s));
+                qi->name = strdup("default");
+                drmaa2_list_add(ql, qi);
+            }
+        }
+    }
+    return ql;
 }
 
 

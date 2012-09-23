@@ -124,5 +124,19 @@ void test_job_lists()
 }
 
 
+void test_get_queues()
+{
+    drmaa2_msession ms = drmaa2_open_msession("my_msession");
+    drmaa2_queueinfo_list ql = drmaa2_msession_get_all_queues(ms, NULL);
+    CU_ASSERT_PTR_NOT_NULL(ql);
+
+    //drmaa2 mock specific
+    CU_ASSERT_EQUAL(drmaa2_list_size(ql), 1);
+    CU_ASSERT_STRING_EQUAL(((drmaa2_queueinfo)drmaa2_list_get(ql, 0))->name, "default");
+
+    drmaa2_list_free(&ql);
+    drmaa2_close_msession(ms);
+    drmaa2_msession_free(&ms);
+}
 
 

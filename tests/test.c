@@ -214,6 +214,10 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
+    if (NULL == CU_add_test(pSuite, "Queue Lists", test_get_queues)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
 
 
     // 7th Suite
