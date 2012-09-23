@@ -346,7 +346,11 @@ int save_rsession(const char *contact, const char *session_name)
 
 int delete_rsession(const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("DELETE FROM reservation_sessions WHERE name = %Q", session_name);
+    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
+    DELETE FROM reservation_sessions WHERE name = %Q;\
+    DELETE FROM reservation_templates WHERE session_name = %Q;\
+    DELETE FROM reservations WHERE session_name = %Q;\
+    COMMIT;", session_name, session_name, session_name);
     int rc = drmaa2_db_query(stmt, NULL, 0);
     sqlite3_free(stmt);
     return rc;
@@ -397,6 +401,32 @@ long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name)
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
+}
+
+
+static int drmaa2_get_reservation_callback(drmaa2_string *session_name, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    assert(!strcmp(azColName[0], "session_name"));
+    *session_name = strdup(argv[0]);
+    return 0;
+}
+
+drmaa2_r drmaa2_get_reservation(const drmaa2_string reservationId)
+{
+    long long rowid = atoll(reservationId);
+    char *stmt = sqlite3_mprintf("SELECT session_name FROM reservations WHERE rowid = %lld", rowid);
+    drmaa2_string session_name = NULL;
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_get_reservation_callback, &session_name);
+    sqlite3_free(stmt);
+    if (rc != SQLITE_OK || !session_name) return NULL;
+    else
+    {
+        drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
+        r->session_name = strdup(session_name);
+        r->id = strdup(reservationId);
+        return r;
+    }
 }
 
 

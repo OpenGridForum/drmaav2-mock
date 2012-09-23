@@ -325,8 +325,13 @@ drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_
         return NULL;
     }
 
-    //TODO: implement
-    return NULL;    
+    drmaa2_r r = drmaa2_get_reservation(reservationId);
+    if (r == NULL)
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "Reservation ID is invalid.";
+    }
+    return r;    
 }
 
 
@@ -369,8 +374,21 @@ drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs)
 drmaa2_string drmaa2_r_get_id(const drmaa2_r r)
 {
     //returns copy since application should call drmaa2_string_free()
-    return (r->id != NULL) ? strdup(r->id) : DRMAA2_UNSET_STRING;
+    return strdup(r->id);
 }
+
+
+drmaa2_string drmaa2_r_get_session_name(const drmaa2_r r)
+{
+    return strdup(r->session_name);
+}
+
+
+//TODO: implement
+//drmaa2_rtemplate  drmaa2_r_get_reservation_template (const drmaa2_r r);
+//drmaa2_rinfo      drmaa2_r_get_info                 (const drmaa2_r r);
+//drmaa2_error      drmaa2_r_terminate                (drmaa2_r r);
+
 
 
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)

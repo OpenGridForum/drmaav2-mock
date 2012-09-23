@@ -53,7 +53,7 @@ int main()
 
     rt->maxSlots = 4;                                                    // perform advance reservation
     if (DRMAA2_TRUE == drmaa2_supports(DRMAA2_RT_MACHINEOS)) 
-        rt->machineOS=DRMAA2_LINUX;
+        rt->machineOS = DRMAA2_LINUX;
     rt->candidateMachines = cl;
     r = drmaa2_rsession_request_reservation(rs, rt);
 
