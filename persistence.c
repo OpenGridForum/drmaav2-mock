@@ -450,6 +450,34 @@ drmaa2_string_list get_rsession_names(drmaa2_string_list session_names)
 }
 
 
+static int drmaa2_get_sreservations_callback(void *ptr, int argc, char **argv, char **azColName)
+{
+    assert(argc == 2);
+    drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
+    int i;
+    for(i=0; i<argc; i++)
+    {
+        DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+        if (!strcmp(azColName[i], "session_name"))
+            r->session_name = strdup(argv[i]);
+        else
+            r->id = strdup(argv[i]);
+    }
+    DEBUG_PRINT("\n");
+    drmaa2_list_add((drmaa2_r_list)ptr, r);
+    return 0;
+}
+
+drmaa2_r_list drmaa2_get_session_reservations(drmaa2_r_list reservations, const char *session_name)
+{
+    char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM reservations WHERE session_name = %Q;", session_name);
+    int rc = drmaa2_db_query(stmt, drmaa2_get_sreservations_callback, reservations);
+    sqlite3_free(stmt);
+    if (rc != SQLITE_OK) return NULL;
+    return reservations;
+}
+
+
 static int get_reservations_callback(void *ptr, int argc, char **argv, char **azColName)
 {
     assert(argc == 2);

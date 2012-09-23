@@ -235,6 +235,10 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
+    if (NULL == CU_add_test(pSuite, "Get reservations", test_rsession_get_reservations)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
 
 
 

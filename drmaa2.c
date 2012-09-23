@@ -366,8 +366,11 @@ drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs)
         return NULL;
     }
 
-    //TODO: implement
-    return NULL; 
+
+    drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, (drmaa2_list_entryfree)drmaa2_r_free);
+    reservations = drmaa2_get_session_reservations(reservations, rs->name);
+
+    return reservations;
 }
 
 
@@ -446,7 +449,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
         return NULL;
     }
 
-    drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
+    drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
     jobs = get_session_jobs(jobs, js->name);
 
     return jobs;
@@ -539,7 +542,7 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 
 drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
 {
-    drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, DRMAA2_UNSET_CALLBACK);
+    drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, (drmaa2_list_entryfree)drmaa2_r_free);
     reservations = get_reservations(reservations);
     return reservations;
 }
@@ -547,7 +550,7 @@ drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
 
 drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter)
 {
-    drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, DRMAA2_UNSET_CALLBACK);
+    drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
     jobs = get_jobs(jobs, filter);
     return jobs;
 }

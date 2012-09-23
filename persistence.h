@@ -36,6 +36,7 @@ long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name);
 drmaa2_r drmaa2_get_reservation(const drmaa2_string reservationId);
 
 drmaa2_string_list get_rsession_names(drmaa2_string_list session_names);
+drmaa2_r_list drmaa2_get_session_reservations(drmaa2_r_list reservations, const char *session_name);
 
 drmaa2_r_list get_reservations(drmaa2_r_list reservations);
 
