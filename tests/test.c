@@ -32,6 +32,7 @@
 #include "test_msession.h"
 #include "test_jsession.h"
 #include "test_rsession.h"
+#include "test_reservation.h"
 
 
 
@@ -240,6 +241,19 @@ int main(int argc, char* argv[])
       return CU_get_error();
     }
     if (NULL == CU_add_test(pSuite, "Get reservations", test_rsession_get_reservations)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+
+    // 8th Suite
+    pSuite = CU_add_suite("Reservation", NULL, NULL);
+    if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    /* add the tests to the suite */
+    if (NULL == CU_add_test(pSuite, "Get reservation info", test_r_get_info)) {
       CU_cleanup_registry();
       return CU_get_error();
     }

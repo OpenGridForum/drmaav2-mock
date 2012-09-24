@@ -99,6 +99,8 @@ void test_rsession_get_reservations()
     CU_ASSERT_EQUAL(drmaa2_list_size(reservations), 2);
     drmaa2_list_free(&reservations);
 
+    drmaa2_destroy_rsession("mysession");
+    drmaa2_rsession_free(&rs);
 
 
 

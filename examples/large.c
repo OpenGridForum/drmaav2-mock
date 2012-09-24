@@ -57,6 +57,10 @@ int main()
     rt->candidateMachines = cl;
     r = drmaa2_rsession_request_reservation(rs, rt);
 
+    drmaa2_rinfo ri = drmaa2_r_get_info(r);
+    printf("Got reservation\n id: %s\n name: %s\n", ri->reservationId, ri->reservationName);
+    drmaa2_rinfo_free(&ri);
+
     jt->remoteCommand = strdup("/bin/date");                                     // submit job 
     jt->reservationId = drmaa2_r_get_id(r);
     drmaa2_dict_set(env, "FOO", "BAR");
@@ -78,6 +82,7 @@ int main()
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);
     drmaa2_destroy_jsession("myjsession");
+    drmaa2_destroy_rsession("myrsession");
 
 
     drmaa2_msession_free(&ms);

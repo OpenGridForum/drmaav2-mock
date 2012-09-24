@@ -41,3 +41,7 @@ questions:
 
 - free slotinfo (unnecessary?)
 
+
+
+- reservation request (only name and id are set)
+

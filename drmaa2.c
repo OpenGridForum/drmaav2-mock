@@ -355,12 +355,13 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
         return NULL;
     }
 
+    char *reservation_name = rt->reservationName ? rt->reservationName : "reservation"; 
     long long template_id = save_rtemplate(rt, rs->name);
-    long long id = save_reservation(rs->name, template_id); 
+    long long id = save_reservation(rs->name, template_id, reservation_name); 
 
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
     char *cid;
-    asprintf(&cid, "%lld\n", id);
+    asprintf(&cid, "%lld", id);
     r->id = cid; //already allocated
     r->session_name = strdup(rs->name);
 
@@ -399,8 +400,23 @@ drmaa2_string drmaa2_r_get_session_name(const drmaa2_r r)
 
 
 //TODO: implement
-//drmaa2_rtemplate  drmaa2_r_get_reservation_template (const drmaa2_r r);
-//drmaa2_rinfo      drmaa2_r_get_info                 (const drmaa2_r r);
+drmaa2_rtemplate  drmaa2_r_get_reservation_template(const drmaa2_r r)
+{
+    drmaa2_rtemplate rt = drmaa2_rtemplate_create();
+    rt = drmaa2_get_rtemplate(rt, r->id);
+    return rt;
+}
+
+
+drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r)
+{
+    drmaa2_rinfo ri = drmaa2_rinfo_create();
+    ri->reservationId = strdup(r->id);
+    ri = drmaa2_get_rinfo(ri);
+    return ri; 
+}
+
+
 //drmaa2_error      drmaa2_r_terminate                (drmaa2_r r);
 
 

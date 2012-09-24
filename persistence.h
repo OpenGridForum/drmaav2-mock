@@ -30,7 +30,7 @@ int save_rsession(const char *contact, const char *session);
 int delete_rsession(const char *session_name);
 drmaa2_rsession get_rsession(const char *session_name);
 
-long long save_reservation(const char *session_name, long long template_id);
+long long save_reservation(const char *session_name, long long template_id, const char *name);
 long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name);
 
 drmaa2_r drmaa2_get_reservation(const drmaa2_string reservationId);
@@ -39,6 +39,10 @@ drmaa2_string_list get_rsession_names(drmaa2_string_list session_names);
 drmaa2_r_list drmaa2_get_session_reservations(drmaa2_r_list reservations, const char *session_name);
 
 drmaa2_r_list get_reservations(drmaa2_r_list reservations);
+
+
+drmaa2_rtemplate drmaa2_get_rtemplate(drmaa2_rtemplate rt, const char *reservationId);
+drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri);
 
 
 int drmaa2_get_job_status(drmaa2_j j);
