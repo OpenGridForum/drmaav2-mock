@@ -9,9 +9,7 @@
 
 
 
-- rsession interface
-
-- reservation interface
+- reservation interface: terminate reservation
 
 - complete jobinfo filter
 

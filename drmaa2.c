@@ -399,7 +399,6 @@ drmaa2_string drmaa2_r_get_session_name(const drmaa2_r r)
 }
 
 
-//TODO: implement
 drmaa2_rtemplate  drmaa2_r_get_reservation_template(const drmaa2_r r)
 {
     drmaa2_rtemplate rt = drmaa2_rtemplate_create();
@@ -417,8 +416,8 @@ drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r)
 }
 
 
+//TODO: implement
 //drmaa2_error      drmaa2_r_terminate                (drmaa2_r r);
-
 
 
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
@@ -538,6 +537,54 @@ drmaa2_string drmaa2_j_get_id(const drmaa2_j j)
 {
     // returns copy since application should call drmaa2_string_free()
     return strdup(j->id);
+}
+
+
+drmaa2_string drmaa2_j_get_session_name(const drmaa2_j j)
+{
+    return strdup(j->session_name);
+}
+
+
+drmaa2_jtemplate drmaa2_j_get_jt(const drmaa2_j j)
+{
+    return NULL;
+}
+
+
+drmaa2_error drmaa2_j_suspend(drmaa2_j j)
+{
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_error drmaa2_j_resume(drmaa2_j j)
+{
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_error drmaa2_j_hold(drmaa2_j j)
+{
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_error drmaa2_j_release(drmaa2_j j)
+{
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_error drmaa2_j_terminate(drmaa2_j j)
+{
+    return DRMAA2_SUCCESS;
+}
+
+
+drmaa2_jstate drmaa2_j_get_state(const drmaa2_j j, drmaa2_string * substate)
+{
+    //TODO: implement
 }
 
 
