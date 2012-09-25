@@ -55,7 +55,18 @@ args TEXT\
 \
 CREATE TABLE reservation_templates(\
 session_name TEXT,\
-candidate_machines TEXT\
+reservation_name TEXT,\
+start_time NUMERIC,\
+end_time NUMERIC,\
+duration NUMERIC,\
+min_slots INTEGER,\
+max_slots INTEGER,\
+job_category TEXT,\
+users_ACL TEXT,\
+candidate_machines TEXT,\
+min_phys_memory INTEGER,\
+machine_os INTEGER,\
+machine_arch INTEGER\
 );\
 ";
 
@@ -403,7 +414,10 @@ long long save_reservation(const char *session_name, long long template_id, cons
 
 long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("INSERT INTO reservation_templates VALUES(%Q, %Q)", session_name, rt->candidateMachines);
+    //TODO: save string lists
+    char *stmt = sqlite3_mprintf("INSERT INTO reservation_templates VALUES(%Q, %Q, %d, %d, %d, %lld, %lld, %Q, %Q, %Q, %lld, %d, %d)", 
+                    session_name, rt->reservationName, rt->startTime, rt->endTime, rt->duration, rt->minSlots, rt->maxSlots,
+                    rt->jobCategory, NULL, NULL, rt->minPhysMemory, rt->machineOS, rt->machineArch);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
@@ -511,9 +525,70 @@ drmaa2_r_list get_reservations(drmaa2_r_list reservations)
 }
 
 
+static int drmaa2_get_rtemplate_callback(drmaa2_rtemplate rt, int argc, char **argv, char **azColName)
+{
+    //TODO: save string lists
+    assert(argc == 12);
+    int i;
+    for(i=0; i<argc; i++)
+    {
+        DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+        if (!strcmp(azColName[i], "reservation_name") && argv[i] != NULL)
+            rt->reservationName = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "min_slots") && argv[i] != NULL)
+            rt->minSlots = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "max_slots") && argv[i] != NULL)
+            rt->maxSlots = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "job_category") && argv[i] != NULL)
+            rt->jobCategory = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "users_ACL") && argv[i] != NULL)
+            rt->usersACL = DRMAA2_UNSET_LIST;
+        else if (!strcmp(azColName[i], "candidate_machines") && argv[i] != NULL)
+            rt->candidateMachines = DRMAA2_UNSET_LIST;
+        else if (!strcmp(azColName[i], "min_phys_memory") && argv[i] != NULL)
+            rt->minPhysMemory = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "machine_os") && argv[i] != NULL)
+            rt->machineOS = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "machine_arch") && argv[i] != NULL)
+            rt->machineArch = atoi(argv[i]);
+        else if ((argv[i] != NULL) && 
+    (!strcmp(azColName[i], "start_time") || !strcmp(azColName[i], "end_time") || !strcmp(azColName[i], "duration")) )
+        {
+            struct tm tm;
+            time_t epoch;
+            // convert time string to unix time stamp
+            if (atoi(argv[i]) == DRMAA2_UNSET_TIME) {
+                epoch = DRMAA2_UNSET_TIME;
+            }
+            else if ( strptime(argv[i], "%Y-%m-%d %H:%M:%S", &tm) != 0 ) {
+                epoch = mktime(&tm);
+            }
+            else {
+                printf("time conversion error\n");
+                exit(1);
+            }
+
+            if (!strcmp(azColName[i], "start_time"))
+                rt->startTime = epoch;
+            if (!strcmp(azColName[i], "reserved_end_time"))
+                rt->endTime = epoch;
+            if (!strcmp(azColName[i], "duration"))
+                rt->duration = epoch;
+        }
+    }
+    DEBUG_PRINT("\n");
+    return 0;
+}
 
 drmaa2_rtemplate drmaa2_get_rtemplate(drmaa2_rtemplate rt, const char *reservationId)
 {
+    long long row_id = atoll(reservationId);
+    char *stmt = sqlite3_mprintf("SELECT reservation_name, start_time, end_time, duration, min_slots, max_slots,\
+                job_category, users_ACL, candidate_machines, min_phys_memory, machine_os, machine_arch\
+        FROM reservation_templates WHERE rowid = %lld", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_get_rtemplate_callback, rt);
+    sqlite3_free(stmt);
+    if (rc != SQLITE_OK) return NULL;
     return rt;
 }
 
@@ -636,7 +711,6 @@ drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri)
     sqlite3_free(stmt);
     if (rc != SQLITE_OK) return NULL;
     return ri;
-
 }
 
 
