@@ -33,6 +33,7 @@
 #include "test_jsession.h"
 #include "test_rsession.h"
 #include "test_reservation.h"
+#include "test_job.h"
 
 
 
@@ -258,6 +259,27 @@ int main(int argc, char* argv[])
       return CU_get_error();
     }
     if (NULL == CU_add_test(pSuite, "Get reservation template", test_r_get_template)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+
+    // 8th Suite
+    pSuite = CU_add_suite("Job", NULL, NULL);
+    if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    /* add the tests to the suite */
+  if (NULL == CU_add_test(pSuite, "Get job id/name", test_j_get_id_name)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Get job info", test_j_get_info)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Get job template", test_j_get_template)) {
       CU_cleanup_registry();
       return CU_get_error();
     }
