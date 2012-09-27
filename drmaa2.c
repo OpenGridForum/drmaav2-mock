@@ -548,7 +548,9 @@ drmaa2_string drmaa2_j_get_session_name(const drmaa2_j j)
 
 drmaa2_jtemplate drmaa2_j_get_jt(const drmaa2_j j)
 {
-    return NULL;
+    drmaa2_jtemplate jt = drmaa2_jtemplate_create();
+    jt = drmaa2_get_job_template(jt, j->id);
+    return jt;
 }
 
 

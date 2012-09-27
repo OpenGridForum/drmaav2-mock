@@ -49,8 +49,36 @@ reserved_machines TEXT\
 \
 CREATE TABLE job_templates(\
 session_name TEXT,\
-remoteCommand TEXT,\
-args TEXT\
+remote_command TEXT,\
+args TEXT,\
+submit_as_hold INTEGER,\
+rerunnable INTEGER,\
+job_environment TEXT,\
+working_directory TEXT,\
+job_category TEXT,\
+email TEXT,\
+email_on_started TEXT,\
+email_on_terminated TEXT,\
+job_name TEXT,\
+input_path TEXT,\
+output_path TEXT,\
+error_path TEXT,\
+join_files INTEGER,\
+reservation_id TEXT,\
+queue_name TEXT,\
+min_slots INTEGER,\
+max_slots INTEGER,\
+priority INTEGER,\
+candidate_machines TEXT,\
+min_phys_memory INTEGER,\
+machine_os INTEGER,\
+machine_arch INTEGER,\
+start_time NUMERIC,\
+deadline_time NUMERIC,\
+stage_in_files TEXT,\
+stage_out_files TEXT,\
+resource_limits TEXT,\
+accounting_id TEXT\
 );\
 \
 CREATE TABLE reservation_templates(\
@@ -253,7 +281,13 @@ long long save_job(const char *session_name, long long template_id)
 
 long long save_jtemplate(drmaa2_jtemplate jt, const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("INSERT INTO job_templates VALUES(%Q, %Q, %Q)", session_name, jt->remoteCommand, jt->args);
+    char *stmt = sqlite3_mprintf("INSERT INTO job_templates VALUES(%Q, %Q, %Q, %d, %d, %Q, %Q, %Q, %Q, %d, %d, %Q, %Q, %Q,\
+                                %Q, %d, %Q, %Q, %lld, %lld, %lld, %Q, %lld, %d, %d, %d, %d, %Q, %Q, %Q, %Q)",
+                    session_name, jt->remoteCommand, jt->args, jt->submitAsHold, jt->rerunnable, NULL, jt->workingDirectory,
+                    jt->jobCategory, NULL, jt->emailOnStarted, jt->emailOnTerminated, jt->jobName, jt->inputPath,
+                    jt->outputPath, jt->errorPath, jt->joinFiles, jt->reservationId, jt->queueName, jt->minSlots,
+                    jt->maxSlots, jt->priority, NULL, jt->minPhysMemory, jt->machineOS, jt->machineArch, jt->startTime,
+                    jt->deadlineTime, NULL, NULL, NULL, jt->accountingId);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
@@ -593,6 +627,55 @@ drmaa2_rtemplate drmaa2_get_rtemplate(drmaa2_rtemplate rt, const char *reservati
 }
 
 
+static int drmaa2_get_rinfo_callback(drmaa2_rinfo ri, int argc, char **argv, char **azColName)
+{
+    assert(argc == 6);
+    int i;
+    for(i=0; i<argc; i++)
+    {
+        DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+        if (!strcmp(azColName[i], "reservation_name") && argv[i] != NULL)
+            ri->reservationName = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "users_ACL") && argv[i] != NULL)
+            ri->usersACL = DRMAA2_UNSET_LIST;
+        else if (!strcmp(azColName[i], "reserved_slots") && argv[i] != NULL)
+            ri->reservedSlots = atoi(argv[i]);
+        else if ((argv[i] != NULL) && 
+    (!strcmp(azColName[i], "reserved_start_time") || !strcmp(azColName[i], "reserved_end_time") ) )
+        {
+            struct tm tm;
+            time_t epoch;
+            // convert time string to unix time stamp
+            if ( strptime(argv[i], "%Y-%m-%d %H:%M:%S", &tm) != 0 )
+                epoch = mktime(&tm);
+            else
+            {
+                printf("time conversion error\n");
+                exit(1);
+            }
+
+            if (!strcmp(azColName[i], "reserved_start_time"))
+                ri->reservedStartTime = epoch;
+            if (!strcmp(azColName[i], "reserved_end_time"))
+                ri->reservedEndTime = epoch;
+        }
+    }
+    DEBUG_PRINT("\n");
+    return 0;
+}
+
+drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri)
+{
+    long long row_id = atoll(ri->reservationId);
+    char *stmt = sqlite3_mprintf("SELECT reservation_name, reserved_start_time, reserved_end_time, users_ACL, reserved_slots, reserved_machines\
+        FROM reservations WHERE rowid = %lld", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_get_rinfo_callback, ri);
+    sqlite3_free(stmt);
+    if (rc != SQLITE_OK) return NULL;
+    return ri;
+}
+
+
 
 static int get_status_callback(int *ptr, int argc, char **argv, char **azColName)
 {
@@ -613,6 +696,112 @@ int drmaa2_get_job_status(drmaa2_j j)
     int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_status_callback, &status);
     sqlite3_free(stmt);
     return status;
+}
+
+
+static int drmaa2_get_job_template_callback(drmaa2_jtemplate jt, int argc, char **argv, char **azColName)
+{
+    //TODO: save string lists
+    assert(argc == 30);
+    int i;
+    for(i=0; i<argc; i++)
+    {
+        DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+        if (!strcmp(azColName[i], "remote_command") && argv[i] != NULL)
+            jt->remoteCommand = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "submit_as_hold") && argv[i] != NULL)
+            jt->submitAsHold = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "rerunnable") && argv[i] != NULL)
+            jt->rerunnable = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "job_environment") && argv[i] != NULL)
+            jt->jobEnvironment = DRMAA2_UNSET_DICT;
+        else if (!strcmp(azColName[i], "working_directory") && argv[i] != NULL)
+            jt->workingDirectory = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "job_category") && argv[i] != NULL)
+            jt->jobCategory = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "email") && argv[i] != NULL)
+            jt->email = DRMAA2_UNSET_LIST;
+        else if (!strcmp(azColName[i], "email_on_started") && argv[i] != NULL)
+            jt->emailOnStarted = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "email_on_terminated") && argv[i] != NULL)
+            jt->emailOnTerminated = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "job_name") && argv[i] != NULL)
+            jt->jobName = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "input_path") && argv[i] != NULL)
+            jt->inputPath = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "output_path") && argv[i] != NULL)
+            jt->outputPath = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "error_path") && argv[i] != NULL)
+            jt->errorPath = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "join_files") && argv[i] != NULL)
+            jt->joinFiles = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "reservation_id") && argv[i] != NULL)
+            jt->reservationId = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "queue_name") && argv[i] != NULL)
+            jt->queueName = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "min_slots") && argv[i] != NULL)
+            jt->minSlots = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "max_slots") && argv[i] != NULL)
+            jt->maxSlots = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "priority") && argv[i] != NULL)
+            jt->priority = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "candidate_machines") && argv[i] != NULL)
+            jt->candidateMachines = DRMAA2_UNSET_LIST;
+        else if (!strcmp(azColName[i], "min_phys_memory") && argv[i] != NULL)
+            jt->minPhysMemory = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "machine_os") && argv[i] != NULL)
+            jt->machineOS = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "machine_arch") && argv[i] != NULL)
+            jt->machineArch = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "stage_in_files") && argv[i] != NULL)
+            jt->jobEnvironment = DRMAA2_UNSET_DICT;
+        else if (!strcmp(azColName[i], "stage_out_files") && argv[i] != NULL)
+            jt->jobEnvironment = DRMAA2_UNSET_DICT;
+        else if (!strcmp(azColName[i], "resource_limits") && argv[i] != NULL)
+            jt->resourceLimits = DRMAA2_UNSET_DICT;
+        else if (!strcmp(azColName[i], "accounting_id") && argv[i] != NULL)
+            jt->accountingId = strdup(argv[i]);
+
+        else if ((argv[i] != NULL) && 
+    (!strcmp(azColName[i], "start_time") || !strcmp(azColName[i], "deadline_time") ) )
+        {
+            struct tm tm;
+            time_t epoch;
+            // convert time string to unix time stamp
+            if (atoi(argv[i]) == DRMAA2_UNSET_TIME) {
+                epoch = DRMAA2_UNSET_TIME;
+            }
+            else if ( strptime(argv[i], "%Y-%m-%d %H:%M:%S", &tm) != 0 ) {
+                epoch = mktime(&tm);
+            }
+            else {
+                printf("time conversion error\n");
+                exit(1);
+            }
+
+            if (!strcmp(azColName[i], "start_time"))
+                jt->startTime = epoch;
+            if (!strcmp(azColName[i], "deadline_time"))
+                jt->deadlineTime = epoch;
+        }
+    }
+    DEBUG_PRINT("\n");
+    return 0;
+}
+
+drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId)
+{
+    long long row_id = atoll(jobId);
+    char *stmt = sqlite3_mprintf("SELECT remote_command, args, submit_as_hold, rerunnable, job_environment, \
+        working_directory, job_category, email, email_on_started, email_on_terminated, job_name, input_path, \
+        output_path, error_path, join_files, reservation_id, queue_name, min_slots, max_slots, priority, \
+        candidate_machines, min_phys_memory, machine_os, machine_arch, start_time, deadline_time, \
+        stage_in_files, stage_out_files, resource_limits, accounting_id \
+        FROM job_templates WHERE rowid = %lld", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_get_job_template_callback, jt);
+    sqlite3_free(stmt);
+    if (rc != SQLITE_OK) return NULL;
+    return jt; 
 }
 
 
@@ -665,55 +854,6 @@ drmaa2_jinfo get_job_info(drmaa2_jinfo ji)
 }
 
 
-static int drmaa2_get_rinfo_callback(drmaa2_rinfo ri, int argc, char **argv, char **azColName)
-{
-    assert(argc == 6);
-    int i;
-    for(i=0; i<argc; i++)
-    {
-        DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-        if (!strcmp(azColName[i], "reservation_name") && argv[i] != NULL)
-            ri->reservationName = strdup(argv[i]);
-        else if (!strcmp(azColName[i], "users_ACL") && argv[i] != NULL)
-            ri->usersACL = DRMAA2_UNSET_LIST;
-        else if (!strcmp(azColName[i], "reserved_slots") && argv[i] != NULL)
-            ri->reservedSlots = atoi(argv[i]);
-        else if ((argv[i] != NULL) && 
-    (!strcmp(azColName[i], "reserved_start_time") || !strcmp(azColName[i], "reserved_end_time") ) )
-        {
-            struct tm tm;
-            time_t epoch;
-            // convert time string to unix time stamp
-            if ( strptime(argv[i], "%Y-%m-%d %H:%M:%S", &tm) != 0 )
-                epoch = mktime(&tm);
-            else
-            {
-                printf("time conversion error\n");
-                exit(1);
-            }
-
-            if (!strcmp(azColName[i], "reserved_start_time"))
-                ri->reservedStartTime = epoch;
-            if (!strcmp(azColName[i], "reserved_end_time"))
-                ri->reservedEndTime = epoch;
-        }
-    }
-    DEBUG_PRINT("\n");
-    return 0;
-}
-
-drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri)
-{
-    long long row_id = atoll(ri->reservationId);
-    char *stmt = sqlite3_mprintf("SELECT reservation_name, reserved_start_time, reserved_end_time, users_ACL, reserved_slots, reserved_machines\
-        FROM reservations WHERE rowid = %lld", row_id);
-    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_get_rinfo_callback, ri);
-    sqlite3_free(stmt);
-    if (rc != SQLITE_OK) return NULL;
-    return ri;
-}
-
-
 
 
 //queries for wrapper
@@ -728,7 +868,7 @@ static int cmd_callback(char **ptr, int argc, char **argv, char **azColName)
 
 char *get_command(long long row_id)
 {
-    char *stmt = sqlite3_mprintf("SELECT remoteCommand FROM jobs, job_templates \
+    char *stmt = sqlite3_mprintf("SELECT remote_command FROM jobs, job_templates \
         WHERE jobs.rowid = %lld AND job_templates.rowid = jobs.template_id", row_id);
     char *command = NULL;
     int rc = drmaa2_db_query(stmt, (sqlite3_callback)cmd_callback, &command);

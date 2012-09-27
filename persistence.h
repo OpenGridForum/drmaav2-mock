@@ -47,6 +47,8 @@ drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri);
 
 int drmaa2_get_job_status(drmaa2_j j);
 
+drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId);
+
 drmaa2_jinfo get_job_info(drmaa2_jinfo ji);
 
 int drmaa2_setup_db(char *name);
