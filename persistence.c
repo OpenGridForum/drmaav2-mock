@@ -200,11 +200,12 @@ int save_jsession(const char *contact, const char *session_name)
 
 int delete_jsession(const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
-        DELETE FROM job_sessions WHERE name = %Q;\
-        DELETE FROM job_templates WHERE session_name = %Q;\
-        DELETE FROM jobs WHERE session_name = %Q;\
-        COMMIT;", session_name, session_name, session_name);
+    char *stmt = sqlite3_mprintf("DELETE FROM job_sessions WHERE name = %Q", session_name);
+//    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
+//        DELETE FROM job_sessions WHERE name = %Q;\
+//        DELETE FROM job_templates WHERE session_name = %Q;\
+//        DELETE FROM jobs WHERE session_name = %Q;\
+//        COMMIT;", session_name, session_name, session_name);
     int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
@@ -393,11 +394,12 @@ int save_rsession(const char *contact, const char *session_name)
 
 int delete_rsession(const char *session_name)
 {
-    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
-    DELETE FROM reservation_sessions WHERE name = %Q;\
-    DELETE FROM reservation_templates WHERE session_name = %Q;\
-    DELETE FROM reservations WHERE session_name = %Q;\
-    COMMIT;", session_name, session_name, session_name);
+    char *stmt = sqlite3_mprintf("DELETE FROM reservation_sessions WHERE name = %Q", session_name);
+//    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE;\
+//    DELETE FROM reservation_sessions WHERE name = %Q;\
+//    DELETE FROM reservation_templates WHERE session_name = %Q;\
+//    DELETE FROM reservations WHERE session_name = %Q;\
+//    COMMIT;", session_name, session_name, session_name);
     int rc = drmaa2_db_query(stmt, NULL, 0);
     sqlite3_free(stmt);
     return rc;
