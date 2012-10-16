@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <sqlite3.h>
 
@@ -884,6 +885,28 @@ int drmaa2_save_pid(long long row_id, pid_t pid)
     int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
+}
+
+
+static int get_pid_callback(pid_t *pid, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    if (argv[0] == NULL)
+    {
+        printf("PID is not yet set.\n");
+    }
+    *pid = atoi(argv[0]);
+    return 0;
+}
+
+pid_t get_job_pid(drmaa2_j j)
+{
+    pid_t pid;
+    long long row_id = atoll(j->id);
+    char *stmt = sqlite3_mprintf("SELECT pid FROM jobs WHERE rowid = %lld", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_pid_callback, &pid);
+    sqlite3_free(stmt);
+    return pid;
 }
 
 

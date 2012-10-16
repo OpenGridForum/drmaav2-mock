@@ -67,6 +67,7 @@ int main()
     jt->jobEnvironment = env;
     j = drmaa2_jsession_run_job(js, jt);
 
+    drmaa2_j_terminate(j);
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);                  // Wait for termination and print exit status
     ji = drmaa2_j_get_info(j);
     printf("Job terminated with exit status %u\n",ji->exitStatus);
@@ -81,7 +82,7 @@ int main()
 
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);
-    //drmaa2_destroy_jsession("myjsession");
+    drmaa2_destroy_jsession("myjsession");
     drmaa2_destroy_rsession("myrsession");
 
 

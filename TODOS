@@ -29,11 +29,14 @@
 
 
 
+
+
 questions:
 
-- naming of implementation specific functions
+(- naming of implementation specific functions)
 
 - which job categories?
+	openmp
 
 - j/rsession destroy semantic
 

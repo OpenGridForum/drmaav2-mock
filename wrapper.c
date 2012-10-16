@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     if (childpid == 0)
     {
     	//child
+    	setsid();	// create new process group so that jobs containing multiple processes can be killed
     	char *args[] = {cmd, NULL};
     	execv(args[0], args);
     	return 0;			// dead code, just to avoid GCC warning

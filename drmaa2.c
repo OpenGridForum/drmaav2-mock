@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <assert.h>
+#include <signal.h>
+#include <errno.h>
 
 #include "drmaa2-mock.h"
 #include "persistence.h"
@@ -528,6 +530,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             asprintf(&cid, "%lld\n", id);
             j->id = cid; //already allocated
             j->session_name = strdup(js->name);
+            sleep(1); //TODO: ensure that job is started
             return j;
         }
 }
@@ -580,14 +583,22 @@ drmaa2_error drmaa2_j_release(drmaa2_j j)
 
 drmaa2_error drmaa2_j_terminate(drmaa2_j j)
 {
+    pid_t jpid = get_job_pid(j);
+    pid_t job_gpid =  getpgid(jpid);
+    DRMAA2_DEBUG_PRINT("Kill process group %d.\n", jpid);
+    if (killpg(job_gpid, SIGTERM)) {
+        DRMAA2_DEBUG_PRINT("ERROR: %s\n", strerror(errno));
+    }
+
     return DRMAA2_SUCCESS;
 }
 
-
+/*
 drmaa2_jstate drmaa2_j_get_state(const drmaa2_j j, drmaa2_string * substate)
 {
     //TODO: implement
 }
+*/
 
 
 drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)

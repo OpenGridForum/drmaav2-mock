@@ -66,4 +66,9 @@ int drmaa2_save_pid(long long row_id, pid_t pid);
 int drmaa2_save_exit_status(long long row_id, int status);
 
 
+//queries for mock
+
+pid_t get_job_pid(drmaa2_j j);
+
+
 #endif 
