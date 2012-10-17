@@ -559,25 +559,69 @@ drmaa2_jtemplate drmaa2_j_get_jt(const drmaa2_j j)
 
 drmaa2_error drmaa2_j_suspend(drmaa2_j j)
 {
-    return DRMAA2_SUCCESS;
+    drmaa2_jstate old_state = get_state(j);
+    if (old_state == DRMAA2_RUNNING) {
+        save_state(j, DRMAA2_SUSPENDED);
+        return DRMAA2_SUCCESS;
+    }
+    else {
+        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        char *drmaa2_lasterror_text_v   = "Current job state does not allow to suspend the job.";
+        return DRMAA2_INVALID_ARGUMENT;
+    }
 }
 
 
 drmaa2_error drmaa2_j_resume(drmaa2_j j)
 {
-    return DRMAA2_SUCCESS;
+    drmaa2_jstate old_state = get_state(j);
+    if (old_state == DRMAA2_SUSPENDED) {
+        save_state(j, DRMAA2_RUNNING);
+        return DRMAA2_SUCCESS;
+    }
+    else {
+        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        char *drmaa2_lasterror_text_v   = "Current job state does not allow to resume the job.";
+        return DRMAA2_INVALID_ARGUMENT;
+    }
 }
 
 
 drmaa2_error drmaa2_j_hold(drmaa2_j j)
 {
-    return DRMAA2_SUCCESS;
+    drmaa2_jstate old_state = get_state(j);
+    if (old_state == DRMAA2_QUEUED) {
+        save_state(j, DRMAA2_QUEUED_HELD);
+        return DRMAA2_SUCCESS;
+    }
+    else if (old_state == DRMAA2_REQUEUED) {
+        save_state(j, DRMAA2_REQUEUED_HELD);
+        return DRMAA2_SUCCESS;
+    }
+    else {
+        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        char *drmaa2_lasterror_text_v   = "Current job state does not allow to hold the job.";
+        return DRMAA2_INVALID_ARGUMENT;
+    }
 }
 
 
 drmaa2_error drmaa2_j_release(drmaa2_j j)
 {
-    return DRMAA2_SUCCESS;
+    drmaa2_jstate old_state = get_state(j);
+    if (old_state == DRMAA2_QUEUED_HELD) {
+        save_state(j, DRMAA2_QUEUED);
+        return DRMAA2_SUCCESS;
+    }
+    else if (old_state == DRMAA2_REQUEUED_HELD) {
+        save_state(j, DRMAA2_REQUEUED);
+        return DRMAA2_SUCCESS;
+    }
+    else {
+        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        char *drmaa2_lasterror_text_v   = "Current job state does not allow to release the job.";
+        return DRMAA2_INVALID_ARGUMENT;
+    }
 }
 
 
@@ -593,12 +637,13 @@ drmaa2_error drmaa2_j_terminate(drmaa2_j j)
     return DRMAA2_SUCCESS;
 }
 
-/*
+
 drmaa2_jstate drmaa2_j_get_state(const drmaa2_j j, drmaa2_string * substate)
 {
-    //TODO: implement
+    *substate = NULL;
+    return get_state(j);
 }
-*/
+
 
 
 drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)

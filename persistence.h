@@ -56,6 +56,15 @@ int drmaa2_setup_db(char *name);
 int drmaa2_reset_db(char *name);
 
 
+pid_t get_job_pid(drmaa2_j j);
+
+int get_state(drmaa2_j j);
+
+int save_state(drmaa2_j j, drmaa2_jstate state);
+int save_state_id(long long row_id, drmaa2_jstate state);
+
+
+
 
 //queries for wrapper
 
@@ -65,10 +74,6 @@ int drmaa2_save_pid(long long row_id, pid_t pid);
 
 int drmaa2_save_exit_status(long long row_id, int status);
 
-
-//queries for mock
-
-pid_t get_job_pid(drmaa2_j j);
 
 
 #endif 

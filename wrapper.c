@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     {
     	//child
     	setsid();	// create new process group so that jobs containing multiple processes can be killed
+    	save_state_id(row_id, DRMAA2_RUNNING);
     	char *args[] = {cmd, NULL};
     	execv(args[0], args);
     	return 0;			// dead code, just to avoid GCC warning
@@ -70,11 +71,13 @@ int main(int argc, char *argv[])
 
 		if (WIFEXITED(status))
 	    {
+	    	save_state_id(row_id, DRMAA2_DONE);
 	        DRMAA2_DEBUG_PRINT("Process terminated normally by a call to _exit(2) or exit(3).\n");
 	        DRMAA2_DEBUG_PRINT("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
 	    }
 	    if (WIFSIGNALED(status))
 	    {
+	    	save_state_id(row_id, DRMAA2_FAILED);
 	        DRMAA2_DEBUG_PRINT("Process terminated due to receipt of a signal.\n");
 	        DRMAA2_DEBUG_PRINT("%d  - evaluates to the number of the signal that caused the termination of the process.\n", WTERMSIG(status));
 	        DRMAA2_DEBUG_PRINT("%d  - evaluates as true if the termination of the process was accompanied by the creation of a core \

@@ -33,7 +33,8 @@ exit_status INTEGER,\
 terminating_signal INTEGER,\
 submission_time INTEGER,\
 dispatch_time INTEGER,\
-finish_time INTEGER\
+finish_time INTEGER,\
+state INTEGER\
 );\
 \
 CREATE TABLE reservations(\
@@ -274,7 +275,7 @@ int drmaa2_rsession_is_valid(const char *session_name)
 long long save_job(const char *session_name, long long template_id)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO jobs \
-        VALUES(%Q, %lld, %Q, %Q, %Q, datetime('now'), %Q, %Q); COMMIT;", session_name, template_id, NULL, NULL, NULL, NULL, NULL);
+        VALUES(%Q, %lld, %Q, %Q, %Q, datetime('now'), %Q, %Q, 1); COMMIT;", session_name, template_id, NULL, NULL, NULL, NULL, NULL);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
@@ -857,6 +858,66 @@ drmaa2_jinfo get_job_info(drmaa2_jinfo ji)
 }
 
 
+static int get_pid_callback(pid_t *pid, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    if (argv[0] == NULL)
+    {
+        printf("PID is not yet set.\n");
+    }
+    *pid = atoi(argv[0]);
+    return 0;
+}
+
+pid_t get_job_pid(drmaa2_j j)
+{
+    pid_t pid;
+    long long row_id = atoll(j->id);
+    char *stmt = sqlite3_mprintf("SELECT pid FROM jobs WHERE rowid = %lld", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_pid_callback, &pid);
+    sqlite3_free(stmt);
+    return pid;
+}
+
+
+static int get_state_callback(int *state, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    *state = atoi(argv[0]);
+    return 0;
+}
+
+int get_state(drmaa2_j j)
+{
+    int state;
+    long long row_id = atoll(j->id);
+    char *stmt = sqlite3_mprintf("SELECT state FROM jobs WHERE rowid = %lld", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_pid_callback, &state);
+    sqlite3_free(stmt);
+    return state;
+}
+
+
+int save_state(drmaa2_j j, drmaa2_jstate state)
+{
+    long long row_id = atoll(j->id);
+    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs\
+        SET state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
+    int rc = drmaa2_db_query(stmt, NULL, NULL);
+    sqlite3_free(stmt);
+    return rc;
+}
+
+
+int save_state_id(long long row_id, drmaa2_jstate state)
+{
+    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs\
+        SET state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
+    int rc = drmaa2_db_query(stmt, NULL, NULL);
+    sqlite3_free(stmt);
+    return rc;
+}
+
 
 
 //queries for wrapper
@@ -887,28 +948,6 @@ int drmaa2_save_pid(long long row_id, pid_t pid)
     int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
-}
-
-
-static int get_pid_callback(pid_t *pid, int argc, char **argv, char **azColName)
-{
-    assert(argc == 1);
-    if (argv[0] == NULL)
-    {
-        printf("PID is not yet set.\n");
-    }
-    *pid = atoi(argv[0]);
-    return 0;
-}
-
-pid_t get_job_pid(drmaa2_j j)
-{
-    pid_t pid;
-    long long row_id = atoll(j->id);
-    char *stmt = sqlite3_mprintf("SELECT pid FROM jobs WHERE rowid = %lld", row_id);
-    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_pid_callback, &pid);
-    sqlite3_free(stmt);
-    return pid;
 }
 
 

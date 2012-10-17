@@ -69,6 +69,12 @@ int main()
 
     drmaa2_j_terminate(j);
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);                  // Wait for termination and print exit status
+
+    drmaa2_string substate = NULL;
+    drmaa2_jstate state = drmaa2_j_get_state(j, &substate);
+    printf("State of job: %d\n", state);
+    drmaa2_string_free(&substate);
+
     ji = drmaa2_j_get_info(j);
     printf("Job terminated with exit status %u\n",ji->exitStatus);
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
