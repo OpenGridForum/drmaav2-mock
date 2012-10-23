@@ -27,12 +27,16 @@ typedef struct drmaa2_j_s
     drmaa2_string session_name;
 } drmaa2_j_s;
 
+typedef struct drmaa2_jarray_s
+{
+    drmaa2_string id;
+    drmaa2_string session_name;
+} drmaa2_jarray_s;
+
 typedef struct drmaa2_r_s
 {
     drmaa2_string id;
     drmaa2_string session_name;
-    //drmaa2_rtemplate template;
-    //drmaa2_rinfo info;
 } drmaa2_r_s;
 
 

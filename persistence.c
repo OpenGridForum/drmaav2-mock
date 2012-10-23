@@ -49,6 +49,13 @@ reserved_slots INTEGER,\
 reserved_machines TEXT\
 );\
 \
+CREATE TABLE job_arrays(\
+session_name TEXT,\
+template_id INTEGER,\
+\
+jobs TEXT\
+);\
+\
 CREATE TABLE job_templates(\
 session_name TEXT,\
 remote_command TEXT,\
@@ -105,6 +112,7 @@ DELETE FROM job_sessions;\
 DELETE FROM reservation_sessions;\
 DELETE FROM jobs;\
 DELETE FROM reservations;\
+DELETE FROM job_arrays;\
 DELETE FROM job_templates;\
 DELETE FROM reservation_templates;\
 ";
@@ -918,6 +926,15 @@ int save_state_id(long long row_id, drmaa2_jstate state)
     return rc;
 }
 
+
+long long save_jarray(drmaa2_string session_name, long long template_id, drmaa2_string_list sl)
+{
+    char *stmt = sqlite3_mprintf("INSERT INTO job_arrays VALUES (%Q, %lld, %Q)",
+        session_name, template_id, NULL);
+    int rc = drmaa2_db_query(stmt, NULL, NULL);
+    sqlite3_free(stmt);
+    return rc;
+}
 
 
 //queries for wrapper

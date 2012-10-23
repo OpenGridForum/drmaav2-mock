@@ -288,7 +288,12 @@ void drmaa2_j_free(drmaa2_j * jRef)
 
 void drmaa2_jarray_free(drmaa2_jarray * jaRef)
 {
-
+    if (*jaRef != NULL) {
+        drmaa2_string_free(&((*jaRef)->id));
+        drmaa2_string_free(&((*jaRef)->session_name));
+        free(*jaRef);
+        *jaRef=NULL;
+    }
 }
 
 void drmaa2_r_free(drmaa2_r * rRef)
@@ -418,8 +423,10 @@ drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r)
 }
 
 
-//TODO: implement
-//drmaa2_error      drmaa2_r_terminate                (drmaa2_r r);
+drmaa2_error drmaa2_r_terminate (drmaa2_r r) {
+    //TODO: think about semantik
+    return DRMAA2_SUCCESS;
+}
 
 
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
@@ -484,6 +491,13 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 }
 
 
+drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drmaa2_string jobarrayId)
+{
+    //TODO
+    return NULL;
+}
+
+
 drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
 {
     if (!drmaa2_jsession_is_valid(js->name))
@@ -536,6 +550,64 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 }
 
 
+drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drmaa2_jtemplate jt, 
+    unsigned long begin_index, unsigned long end_index, unsigned long step, unsigned long max_parallel)
+{
+    if (end_index < begin_index) {
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "The beginIndex value must be less than or equal to endIndex.";
+        return NULL;
+    } else if (begin_index < 1) {
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "Only positive index numbers are allowed for the beginIndex.";
+        return NULL;
+    }
+    unsigned long index = begin_index;
+    drmaa2_j j;
+
+    drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
+
+    while (index <= end_index) {
+        printf("index: %lu\n", index);
+        //TODO: replace index in template parameters
+        j = drmaa2_jsession_run_job(js, jt);
+        drmaa2_list_add(sl, strdup(j->id));
+        drmaa2_j_free(&j);
+        index += step;
+    }
+
+    long long template_id = save_jtemplate(jt, js->name);
+
+    long long id = save_jarray(js->name, template_id, sl);
+    drmaa2_list_free(&sl);
+    drmaa2_jarray ja = (drmaa2_jarray)malloc(sizeof(drmaa2_jarray_s));
+    char *cid;
+    asprintf(&cid, "%lld\n", id);
+    ja->id = cid; //already allocated
+    ja->session_name = strdup(js->name);
+
+
+    return ja;
+}
+
+
+drmaa2_j drmaa2_jsession_wait_any_started (const drmaa2_jsession js, const drmaa2_j_list l, 
+    const time_t timeout)
+{
+    
+    return NULL;
+}
+
+
+drmaa2_j drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js, 
+    const drmaa2_j_list l, const time_t timeout)
+{
+    //TODO
+    return NULL;
+}
+
+
+
 drmaa2_string drmaa2_j_get_id(const drmaa2_j j)
 {
     // returns copy since application should call drmaa2_string_free()
@@ -565,8 +637,8 @@ drmaa2_error drmaa2_j_suspend(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
-        char *drmaa2_lasterror_text_v   = "Current job state does not allow to suspend the job.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v   = "Current job state does not allow to suspend the job.";
         return DRMAA2_INVALID_ARGUMENT;
     }
 }
@@ -580,8 +652,8 @@ drmaa2_error drmaa2_j_resume(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
-        char *drmaa2_lasterror_text_v   = "Current job state does not allow to resume the job.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v   = "Current job state does not allow to resume the job.";
         return DRMAA2_INVALID_ARGUMENT;
     }
 }
@@ -599,8 +671,8 @@ drmaa2_error drmaa2_j_hold(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
-        char *drmaa2_lasterror_text_v   = "Current job state does not allow to hold the job.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v   = "Current job state does not allow to hold the job.";
         return DRMAA2_INVALID_ARGUMENT;
     }
 }
@@ -618,8 +690,8 @@ drmaa2_error drmaa2_j_release(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        int drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
-        char *drmaa2_lasterror_text_v   = "Current job state does not allow to release the job.";
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v   = "Current job state does not allow to release the job.";
         return DRMAA2_INVALID_ARGUMENT;
     }
 }
@@ -655,6 +727,19 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
     
     //TODO set: jobSubState, allocatedMachines, i->submissionMachine, jobOwner, queueName 
     return ji;
+}
+
+
+drmaa2_error drmaa2_j_wait_started (const drmaa2_j j, const time_t timeout)
+{
+    drmaa2_jstate state;
+    while (1) {
+        state = get_state(j);
+        if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD)
+            break;
+        sleep(1);
+    }
+    return DRMAA2_SUCCESS;
 }
 
 
@@ -770,6 +855,7 @@ void drmaa2_version_free(drmaa2_version * vRef)
 
 drmaa2_bool drmaa2_supports(const drmaa2_capability c)
 {
+    //TODO late ;)
     return DRMAA2_FALSE;
 }
 
@@ -942,5 +1028,12 @@ drmaa2_string_list drmaa2_get_rsession_names(void)
     drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
     session_names = get_rsession_names(session_names);
     return session_names;
+}
+
+
+drmaa2_error drmaa2_register_event_notification(const drmaa2_callback callback)
+{
+    //TODO implement
+    return DRMAA2_SUCCESS;
 }
 

@@ -67,6 +67,7 @@ int main()
     jt->jobEnvironment = env;
     j = drmaa2_jsession_run_job(js, jt);
 
+    drmaa2_j_wait_started(j, DRMAA2_INFINITE_TIME);
     drmaa2_j_terminate(j);
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);                  // Wait for termination and print exit status
 
@@ -80,11 +81,18 @@ int main()
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup
-    drmaa2_jtemplate_free(&jt);  // includes free of env
+    //drmaa2_jtemplate_free(&jt);  // includes free of env
     drmaa2_rtemplate_free(&rt);  // includes free of cl
     drmaa2_jinfo_free(&ji);
     drmaa2_j_free(&j);
     drmaa2_r_free(&r);
+
+    printf("Here comes a job array\n");
+    drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);
+
+
+    drmaa2_jarray_free(&ja);
+    drmaa2_jtemplate_free(&jt);  // includes free of env
 
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);

@@ -9,8 +9,6 @@
 
 
 
-- reservation interface: terminate reservation
-
 - complete jobinfo filter
 
 - notifications
@@ -38,11 +36,6 @@ questions:
 - which job categories?
 	openmp
 
-- j/rsession destroy semantic
-
 - free slotinfo (unnecessary?)
 
-
-
-- reservation request (only name and id are set)
 
