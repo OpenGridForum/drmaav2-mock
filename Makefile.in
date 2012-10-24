@@ -1,30 +1,33 @@
 all: drmaa examples
-examples: large
+examples: example-large
 ifeq (@SQLITE3_EXISTS@,1)
-drmaa: drmaa2.so setup wrapper
+drmaa: drmaa2.so setup_persistency wrapper
 else
-drmaa: drmaa2.so setup wrapper sqlite3.o
+drmaa: drmaa2.so setup_persistency wrapper sqlite3.o
 endif
 tests: force_look
 	cd tests; $(MAKE) $(MFLAGS) 
 
-drmaa2.so: persistence.o drmaa2.o drmaa2-list.o drmaa2-dict.o
+drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o
 	@CC@ -o $@ -shared @LIBS@ $^
 
-setup: setup_db.o drmaa2.so 
+setup_persistency: setup_db.o drmaa2.so 
 	@CC@ -o $@ @LIBS@ $^
 
 wrapper: wrapper.o drmaa2.so
 	@CC@ -o $@ @LIBS@ $^
 
-persistence.o: persistence.c drmaa2-list.c 
+drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c 
 	@CC@ @CFLAGS@ -c $^
 
-large: large.o drmaa2.so
+drmaa2-specific.o: drmaa2-specific.c
+	@CC@ @CFLAGS@ -c $^
+
+example-large: example-large.o drmaa2.so
 	@CC@ -o $@ @LIBS@ $^
 
-large.o: examples/large.c
-	@CC@ -c $^
+example-large.o: examples/large.c
+	@CC@ -o $@ -c $^
 
 force_look:
 	true
@@ -40,4 +43,4 @@ clean:
 	rm -f *.o
 	rm -f *.so
 	rm -f tests/*.o tests/test
-	rm -f app large test_app
+	rm -f app example-large test_app

@@ -7,8 +7,8 @@
 
 #include <sqlite3.h>
 
-#include "persistence.h"
-#include "drmaa2-mock.h"
+#include "drmaa2-persistence.h"
+#include "drmaa2-specific.h"
 #include "drmaa2-debug.h"
 
 

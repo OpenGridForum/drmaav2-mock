@@ -10,8 +10,8 @@
 #include <signal.h>
 #include <errno.h>
 
-#include "drmaa2-mock.h"
-#include "persistence.h"
+#include "drmaa2-specific.h"
+#include "drmaa2-persistence.h"
 #include "drmaa2-debug.h"
 
 

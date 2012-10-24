@@ -4,7 +4,7 @@
 #include <CUnit/CUnit.h>
 #include "../drmaa2.h"
 #include "test_msession.h"
-#include "../persistence.h"
+#include "../drmaa2-persistence.h"
 
 
 

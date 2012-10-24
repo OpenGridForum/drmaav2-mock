@@ -8,7 +8,7 @@
 #include <sqlite3.h>
 
 #include "drmaa2-debug.h"
-#include "persistence.h"
+#include "drmaa2-persistence.h"
 
 
 void usage()

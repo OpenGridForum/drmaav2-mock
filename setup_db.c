@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "config.h"
-#include "persistence.h"
+#include "drmaa2-persistence.h"
 
 
 
