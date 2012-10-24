@@ -19,6 +19,8 @@
 int drmaa2_lasterror_v          = DRMAA2_SUCCESS;
 char *drmaa2_lasterror_text_v   = NULL;
 
+drmaa2_callback current_drmaa2_callback = NULL;
+
 // supported jobcategories
 // TODO: Programmatic
 #define JOBCATEGORIES_LENGTH  3
@@ -752,7 +754,10 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
         status = drmaa2_get_job_status(j);
         sleep(1);
     }
-    
+    drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
+    n->jobId = j->id;
+    if (current_drmaa2_callback)
+        current_drmaa2_callback(&n);
     return DRMAA2_SUCCESS;
 }
 
@@ -1033,6 +1038,7 @@ drmaa2_string_list drmaa2_get_rsession_names(void)
 
 drmaa2_error drmaa2_register_event_notification(const drmaa2_callback callback)
 {
+    current_drmaa2_callback = callback;
     //TODO implement
     return DRMAA2_SUCCESS;
 }

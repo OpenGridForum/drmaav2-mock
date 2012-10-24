@@ -15,6 +15,14 @@ void callback_free(void * entry)
 }
 
 
+
+void my_drmaa2_callback(drmaa2_notification * notification)
+{
+    printf("my callback is called\n");
+    printf("%s\n", (*notification)->jobId);
+}
+
+
 int main()
 {
     drmaa2_jinfo            ji = NULL;
@@ -22,6 +30,7 @@ int main()
     drmaa2_r                 r = NULL;
     drmaa2_machineinfo_list ml = NULL;
     drmaa2_machineinfo       m = NULL;
+    drmaa2_register_event_notification(&my_drmaa2_callback);
 
     drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
     drmaa2_rtemplate        rt = drmaa2_rtemplate_create();
@@ -88,7 +97,8 @@ int main()
     drmaa2_r_free(&r);
 
     printf("Here comes a job array\n");
-    drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);
+    //drmaa2_register_event_notification(&my_drmaa2_callback);
+    drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 2, 1, DRMAA2_UNSET_NUM);
 
 
     drmaa2_jarray_free(&ja);
