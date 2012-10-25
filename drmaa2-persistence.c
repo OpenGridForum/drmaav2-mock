@@ -176,7 +176,9 @@ int drmaa2_db_query(char *stmt, sqlite3_callback callback, void *args)
     DEBUG_PRINT("%s\n", stmt);
     int rc = sqlite3_exec(db, stmt, callback, args, &zErrMsg);
 
-    evaluate_result_code(rc, zErrMsg);   
+    evaluate_result_code(rc, zErrMsg);
+    if (rc != SQLITE_OK)
+        printf("%s\n", stmt);   
     sqlite3_close(db);
     return rc;
 }
@@ -927,14 +929,36 @@ int save_state_id(long long row_id, drmaa2_jstate state)
 }
 
 
-long long save_jarray(drmaa2_string session_name, long long template_id, drmaa2_string_list sl)
+long long save_jarray(const char *session_name, long long template_id, drmaa2_string_list sl)
 {
-    char *stmt = sqlite3_mprintf("INSERT INTO job_arrays VALUES (%Q, %lld, %Q)",
+    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO job_arrays VALUES (%Q, %lld, %Q); COMMIT;",
         session_name, template_id, NULL);
     int rc = drmaa2_db_query(stmt, NULL, NULL);
+    sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
-    return rc;
+    return row_id;
 }
+
+
+static int jarray_exists_callback(int *exists, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    DEBUG_PRINT("%s = %s\n", azColName[0], argv[0] ? argv[0] : "NULL");
+    *exists = atoi(argv[0]);
+    return 0;
+}
+
+int jarray_exists(const char *session_name, const char *jobarrayId)
+{
+    long long row_id = atoll(jobarrayId);
+    char *stmt = sqlite3_mprintf("SELECT EXISTS(SELECT 1 FROM job_arrays \
+        WHERE session_name = %Q AND rowid = %lld LIMIT 1);", session_name, row_id);
+    int exists = 0;
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)jarray_exists_callback, &exists);
+    sqlite3_free(stmt);
+    return exists;
+}
+
 
 
 //queries for wrapper

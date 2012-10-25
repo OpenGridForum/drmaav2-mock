@@ -100,6 +100,13 @@ int main()
     //drmaa2_register_event_notification(&my_drmaa2_callback);
     drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 2, 1, DRMAA2_UNSET_NUM);
 
+    drmaa2_jtemplate ja_jt = drmaa2_jarray_get_job_template(ja);
+    drmaa2_string ja_id = drmaa2_jarray_get_id(ja);
+    printf("The jobarray %s was submitted with following command:  %s\n",
+        ja_id, ja_jt->remoteCommand);
+    drmaa2_string_free(&ja_id);
+    drmaa2_jtemplate_free(&ja_jt);
+
 
     drmaa2_jarray_free(&ja);
     drmaa2_jtemplate_free(&jt);  // includes free of env

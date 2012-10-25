@@ -431,6 +431,41 @@ drmaa2_error drmaa2_r_terminate (drmaa2_r r) {
 }
 
 
+drmaa2_string drmaa2_jarray_get_id(const drmaa2_jarray ja)
+{
+    return strdup(ja->id);
+}
+
+
+drmaa2_j_list drmaa2_jarray_get_jobs(const drmaa2_jarray ja)
+{
+    //TODO
+    return NULL;
+}
+
+
+drmaa2_string drmaa2_jarray_get_session_name(const drmaa2_jarray ja)
+{
+    return strdup(ja->session_name);
+}
+
+
+drmaa2_jtemplate drmaa2_jarray_get_job_template(const drmaa2_jarray ja)
+{
+    drmaa2_jtemplate jt = drmaa2_jtemplate_create();
+    printf("%s\n", ja->id);
+    jt = drmaa2_get_job_template(jt, ja->id);
+    return jt;
+}
+
+
+drmaa2_error     drmaa2_jarray_suspend           (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_resume            (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_hold              (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_release           (drmaa2_jarray ja); 
+drmaa2_error     drmaa2_jarray_terminate         (drmaa2_jarray ja);
+
+
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
 {
     if (!drmaa2_jsession_is_valid(js->name))
@@ -495,8 +530,26 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 
 drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drmaa2_string jobarrayId)
 {
-    //TODO
-    return NULL;
+    if (!drmaa2_jsession_is_valid(js->name))
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
+        drmaa2_lasterror_text_v = "Job session is invalid.";
+        return NULL;
+    }
+
+    drmaa2_jarray ja = NULL;
+    if (jarray_exists(js->name, jobarrayId))
+    {
+        ja = (drmaa2_jarray)malloc(sizeof(drmaa2_jarray));
+        ja->id = strdup(jobarrayId);
+        ja->session_name = strdup(js->name);
+    }
+    else
+    {
+        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_text_v = "Session does not / no longer contain the according job array.";
+    }
+    return ja;
 }
 
 
@@ -571,7 +624,9 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
 
     while (index <= end_index) {
         printf("index: %lu\n", index);
-        //TODO: replace index in template parameters
+
+        //TODO: index placeholders
+
         j = drmaa2_jsession_run_job(js, jt);
         drmaa2_list_add(sl, strdup(j->id));
         drmaa2_j_free(&j);
@@ -587,8 +642,6 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
     asprintf(&cid, "%lld\n", id);
     ja->id = cid; //already allocated
     ja->session_name = strdup(js->name);
-
-
     return ja;
 }
 
