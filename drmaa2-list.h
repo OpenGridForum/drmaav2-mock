@@ -29,5 +29,8 @@ typedef void *(*drmaa2_copy_data_callback)(const void *data);
 
 drmaa2_list drmaa2_list_create_copy(drmaa2_list l, const drmaa2_list_entryfree callback, const drmaa2_copy_data_callback copy);
 
+drmaa2_string_list string_split(const char *string, char separator);
+drmaa2_string string_join(drmaa2_string_list sl, char separator);
+
 
 #endif 

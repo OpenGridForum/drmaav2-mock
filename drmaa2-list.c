@@ -199,3 +199,65 @@ drmaa2_list drmaa2_list_create_copy(drmaa2_list l, const drmaa2_list_entryfree c
     return list;
 }
 
+drmaa2_string_list string_split(const char *string, char separator)
+{
+    if (string == NULL)
+        return DRMAA2_UNSET_LIST;
+
+    drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
+    char *rest = (char *)string;
+    char *to_insert;
+    char *separator_pos;
+    while((separator_pos = strchr(rest, separator)) != NULL)
+    {
+        to_insert = (char *)malloc(sizeof(char) * (separator_pos-rest+1));
+        strncpy(to_insert, rest, separator_pos-rest);
+        to_insert[separator_pos-rest] = '\0';
+        drmaa2_list_add(sl, to_insert);
+        rest = separator_pos + 1;
+    }
+    to_insert = (char *)malloc(sizeof(char) * (strlen(rest)+1));
+    strncpy(to_insert, rest, strlen(rest));
+    to_insert[strlen(rest)] = '\0';
+    drmaa2_list_add(sl, to_insert);
+
+    return sl;
+}
+
+drmaa2_string string_join(drmaa2_string_list sl, char separator)
+{
+    if (sl == NULL || drmaa2_list_size(sl) == 0)
+        return NULL;
+    size_t character_count = 0;
+    //we calculate space for items, separators and terminating '\0'
+    size_t i;
+    for (i = 0; i < drmaa2_list_size(sl); i++)
+    {
+        character_count += strlen(drmaa2_list_get(sl, i)) + 1;
+    }
+    
+    drmaa2_string string = (char *)malloc(sizeof(char) * character_count);
+    char *next_cpy_pos = string;
+    char *to_insert = NULL;
+    for (i = 0; i < drmaa2_list_size(sl); i++)
+    {
+        to_insert = (char *)drmaa2_list_get(sl, i);
+        size_t item_len = strlen(to_insert);
+        strncpy(next_cpy_pos, to_insert, item_len);
+        next_cpy_pos[item_len] = separator;
+        next_cpy_pos += item_len + 1;
+    }
+    string[character_count-1] = '\0';
+    return string;
+}
+
+
+
+
+
+
+
+
+
+
+

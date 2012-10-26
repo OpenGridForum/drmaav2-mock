@@ -137,6 +137,14 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
+    if (NULL == CU_add_test(pSuite, "String split method", testStringSplit)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "String join method", testStringJoin)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
 
 
     // 3rd Suite

@@ -439,8 +439,8 @@ drmaa2_string drmaa2_jarray_get_id(const drmaa2_jarray ja)
 
 drmaa2_j_list drmaa2_jarray_get_jobs(const drmaa2_jarray ja)
 {
-    //TODO
-    return NULL;
+    drmaa2_j_list jl = get_jobs_of_jarray(ja);
+    return jl;
 }
 
 
@@ -453,17 +453,47 @@ drmaa2_string drmaa2_jarray_get_session_name(const drmaa2_jarray ja)
 drmaa2_jtemplate drmaa2_jarray_get_job_template(const drmaa2_jarray ja)
 {
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
-    printf("%s\n", ja->id);
-    jt = drmaa2_get_job_template(jt, ja->id);
-    return jt;
+    return drmaa2_get_jobarray_template(jt, ja->id);
 }
 
 
-drmaa2_error     drmaa2_jarray_suspend           (drmaa2_jarray ja); 
-drmaa2_error     drmaa2_jarray_resume            (drmaa2_jarray ja); 
-drmaa2_error     drmaa2_jarray_hold              (drmaa2_jarray ja); 
-drmaa2_error     drmaa2_jarray_release           (drmaa2_jarray ja); 
-drmaa2_error     drmaa2_jarray_terminate         (drmaa2_jarray ja);
+// helper method to avoid code duplication
+drmaa2_error drmaa2_jarray_change_state(drmaa2_jarray ja, drmaa2_error (*chage_state_method)(drmaa2_j))
+{
+    drmaa2_j_list jl = drmaa2_jarray_get_jobs(ja);
+    size_t i;
+    for (i = 0; i < drmaa2_list_size(jl); i++)
+    {
+        chage_state_method((drmaa2_j)drmaa2_list_get(jl, i));
+    }
+    drmaa2_list_free(&jl);
+    return DRMAA2_SUCCESS;
+}
+
+drmaa2_error drmaa2_jarray_suspend (drmaa2_jarray ja)
+{
+    return drmaa2_jarray_change_state(ja, drmaa2_j_suspend);
+}
+
+drmaa2_error drmaa2_jarray_resume (drmaa2_jarray ja)
+{
+    return drmaa2_jarray_change_state(ja, drmaa2_j_resume);
+}
+
+drmaa2_error drmaa2_jarray_hold (drmaa2_jarray ja)
+{
+    return drmaa2_jarray_change_state(ja, drmaa2_j_hold);
+}
+
+drmaa2_error drmaa2_jarray_release (drmaa2_jarray ja)
+{
+    return drmaa2_jarray_change_state(ja, drmaa2_j_release);
+}
+
+drmaa2_error drmaa2_jarray_terminate (drmaa2_jarray ja)
+{
+    return drmaa2_jarray_change_state(ja, drmaa2_j_terminate);    
+}
 
 
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
@@ -692,9 +722,9 @@ drmaa2_error drmaa2_j_suspend(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_v = DRMAA2_INVALID_STATE;
         drmaa2_lasterror_text_v   = "Current job state does not allow to suspend the job.";
-        return DRMAA2_INVALID_ARGUMENT;
+        return DRMAA2_INVALID_STATE;
     }
 }
 
@@ -707,9 +737,9 @@ drmaa2_error drmaa2_j_resume(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_v = DRMAA2_INVALID_STATE;
         drmaa2_lasterror_text_v   = "Current job state does not allow to resume the job.";
-        return DRMAA2_INVALID_ARGUMENT;
+        return DRMAA2_INVALID_STATE;
     }
 }
 
@@ -726,9 +756,9 @@ drmaa2_error drmaa2_j_hold(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_v = DRMAA2_INVALID_STATE;
         drmaa2_lasterror_text_v   = "Current job state does not allow to hold the job.";
-        return DRMAA2_INVALID_ARGUMENT;
+        return DRMAA2_INVALID_STATE;
     }
 }
 
@@ -745,9 +775,9 @@ drmaa2_error drmaa2_j_release(drmaa2_j j)
         return DRMAA2_SUCCESS;
     }
     else {
-        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+        drmaa2_lasterror_v = DRMAA2_INVALID_STATE;
         drmaa2_lasterror_text_v   = "Current job state does not allow to release the job.";
-        return DRMAA2_INVALID_ARGUMENT;
+        return DRMAA2_INVALID_STATE;
     }
 }
 

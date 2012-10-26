@@ -67,6 +67,9 @@ int save_state_id(long long row_id, drmaa2_jstate state);
 long long save_jarray(const char *session_name, long long template_id, drmaa2_string_list sl);
 int jarray_exists(const char *session_name, const char *jobarrayId);
 
+drmaa2_j_list get_jobs_of_jarray(drmaa2_jarray ja);
+
+drmaa2_jtemplate drmaa2_get_jobarray_template(drmaa2_jtemplate jt, const char *jobarrayId);
 
 
 

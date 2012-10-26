@@ -30,7 +30,7 @@ int main()
     drmaa2_r                 r = NULL;
     drmaa2_machineinfo_list ml = NULL;
     drmaa2_machineinfo       m = NULL;
-    drmaa2_register_event_notification(&my_drmaa2_callback);
+    drmaa2_register_event_notification(my_drmaa2_callback);
 
     drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
     drmaa2_rtemplate        rt = drmaa2_rtemplate_create();
@@ -97,8 +97,7 @@ int main()
     drmaa2_r_free(&r);
 
     printf("Here comes a job array\n");
-    //drmaa2_register_event_notification(&my_drmaa2_callback);
-    drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 2, 1, DRMAA2_UNSET_NUM);
+    drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);
 
     drmaa2_jtemplate ja_jt = drmaa2_jarray_get_job_template(ja);
     drmaa2_string ja_id = drmaa2_jarray_get_id(ja);
@@ -106,6 +105,9 @@ int main()
         ja_id, ja_jt->remoteCommand);
     drmaa2_string_free(&ja_id);
     drmaa2_jtemplate_free(&ja_jt);
+
+    drmaa2_jarray_terminate(ja);
+
 
 
     drmaa2_jarray_free(&ja);

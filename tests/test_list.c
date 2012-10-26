@@ -87,10 +87,45 @@ void testCreateCopy()
     CU_ASSERT_STRING_EQUAL(drmaa2_list_get(copy, 2), "ich");
     drmaa2_list_free(&copy);
 
-    CU_PASS("test finished")
-
-
+    CU_PASS("test finished");
 }
+
+
+void testStringSplit()
+{
+    char string[] = "1|9|17|25";
+
+    drmaa2_string_list sl = string_split(string, '|');
+    CU_ASSERT_EQUAL(drmaa2_list_size(sl), 4);
+    CU_ASSERT_STRING_EQUAL(drmaa2_list_get(sl, 0), "1");
+    CU_ASSERT_STRING_EQUAL(drmaa2_list_get(sl, 1), "9");
+    CU_ASSERT_STRING_EQUAL(drmaa2_list_get(sl, 3), "25");
+
+    drmaa2_list_free(&sl);
+
+    CU_PASS("test finished")
+}
+
+
+void testStringJoin()
+{
+    drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
+    // add items
+    drmaa2_list_add(sl, "1");
+    drmaa2_list_add(sl, "10");
+    drmaa2_list_add(sl, "100");
+    drmaa2_list_add(sl, "1001");
+
+    drmaa2_string string = string_join(sl, '|');
+    CU_ASSERT_EQUAL(strlen(string), 13);
+    CU_ASSERT_STRING_EQUAL(string, "1|10|100|1001");
+
+    drmaa2_list_free(&sl);
+    drmaa2_string_free(&string);
+    CU_PASS("test finished")
+}
+
+
 
 
 

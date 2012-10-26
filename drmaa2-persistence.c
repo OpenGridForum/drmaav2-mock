@@ -10,6 +10,7 @@
 #include "drmaa2-persistence.h"
 #include "drmaa2-specific.h"
 #include "drmaa2-debug.h"
+#include "drmaa2-list.h"
 
 
 
@@ -806,6 +807,7 @@ static int drmaa2_get_job_template_callback(drmaa2_jtemplate jt, int argc, char 
 drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId)
 {
     long long row_id = atoll(jobId);
+    printf("id: %lld\n", row_id);
     char *stmt = sqlite3_mprintf("SELECT remote_command, args, submit_as_hold, rerunnable, job_environment, \
         working_directory, job_category, email, email_on_started, email_on_terminated, job_name, input_path, \
         output_path, error_path, join_files, reservation_id, queue_name, min_slots, max_slots, priority, \
@@ -931,11 +933,12 @@ int save_state_id(long long row_id, drmaa2_jstate state)
 
 long long save_jarray(const char *session_name, long long template_id, drmaa2_string_list sl)
 {
+    drmaa2_string string = string_join(sl, '|');
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO job_arrays VALUES (%Q, %lld, %Q); COMMIT;",
-        session_name, template_id, NULL);
-    int rc = drmaa2_db_query(stmt, NULL, NULL);
+        session_name, template_id, string);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
+    drmaa2_string_free(&string);
     return row_id;
 }
 
@@ -957,6 +960,53 @@ int jarray_exists(const char *session_name, const char *jobarrayId)
     int rc = drmaa2_db_query(stmt, (sqlite3_callback)jarray_exists_callback, &exists);
     sqlite3_free(stmt);
     return exists;
+}
+
+static int get_jobs_of_jarray_callback(char **jobs, int argc, char **argv, char **azColName)
+{
+    assert(argc == 1);
+    DEBUG_PRINT("%s = %s\n", azColName[0], argv[0] ? argv[0] : "NULL");
+    *jobs = strdup(argv[0]);
+    return 0;
+}
+
+drmaa2_j_list get_jobs_of_jarray(drmaa2_jarray ja)
+{
+    long long row_id = atoll(ja->id);
+    char *stmt = sqlite3_mprintf("SELECT jobs FROM job_arrays \
+        WHERE rowid = %lld;", row_id);
+    char *jobs = NULL;
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_jobs_of_jarray_callback, &jobs);
+    sqlite3_free(stmt);
+    drmaa2_string_list sl = string_split(jobs, '|');
+    drmaa2_j_list jl = (drmaa2_j_list)drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
+    drmaa2_j j;
+    size_t i;
+    for (i = 0; i < drmaa2_list_size(sl); i++)
+    {
+        j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
+        j->id = strdup(drmaa2_list_get(sl, i));
+        j->session_name = strdup(ja->session_name);
+        drmaa2_list_add(jl, j);
+    }
+    return jl;
+}
+
+drmaa2_jtemplate drmaa2_get_jobarray_template(drmaa2_jtemplate jt, const char *jobarrayId)
+{
+    long long row_id = atoll(jobarrayId);
+    printf("id: %lld\n", row_id);
+    char *stmt = sqlite3_mprintf("SELECT remote_command, args, submit_as_hold, rerunnable, job_environment, \
+        working_directory, job_category, email, email_on_started, email_on_terminated, job_name, input_path, \
+        output_path, error_path, join_files, reservation_id, queue_name, min_slots, max_slots, priority, \
+        candidate_machines, min_phys_memory, machine_os, machine_arch, start_time, deadline_time, \
+        stage_in_files, stage_out_files, resource_limits, accounting_id \
+        FROM job_templates, job_arrays WHERE job_arrays.rowid = %lld AND job_templates.rowid = job_arrays.template_id", row_id);
+    int rc = drmaa2_db_query(stmt, (sqlite3_callback)drmaa2_get_job_template_callback, jt);
+    sqlite3_free(stmt);
+    if (rc != SQLITE_OK)
+        return NULL;
+    return jt; 
 }
 
 
