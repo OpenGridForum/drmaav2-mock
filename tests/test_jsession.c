@@ -88,3 +88,41 @@ void test_job_categories()
 
 }
 
+
+void test_wait_any_terminated()
+{
+    drmaa2_jsession js = drmaa2_create_jsession("mysession1234", NULL);
+
+    drmaa2_jtemplate jt = drmaa2_jtemplate_create();
+    jt->remoteCommand = strdup("./a.out");
+    drmaa2_j j1 = drmaa2_jsession_run_job(js, jt);
+    printf("jobID %s\n", drmaa2_j_get_id(j1));
+    drmaa2_string_free(&jt->remoteCommand);
+    jt->remoteCommand = strdup("/bin/date");
+    sleep(5);
+    drmaa2_j j2 = drmaa2_jsession_run_job(js, jt);
+    drmaa2_j j3 = drmaa2_jsession_run_job(js, jt);
+
+    drmaa2_j_list jl = drmaa2_jsession_get_jobs(js, NULL);
+
+    drmaa2_j terminated_j = drmaa2_jsession_wait_any_terminated(js, jl, DRMAA2_INFINITE_TIME);
+    CU_ASSERT_PTR_NOT_NULL(j3);
+    printf("jobID %s\n", drmaa2_j_get_id(terminated_j));
+
+    drmaa2_j_free(&terminated_j);
+    drmaa2_j_free(&j1);
+    drmaa2_j_free(&j2);
+    drmaa2_j_free(&j3);
+
+    drmaa2_list_free(&jl);
+    drmaa2_jtemplate_free(&jt);
+    //drmaa2_destroy_jsession("mysession");
+    drmaa2_jsession_free(&js);
+
+
+}
+
+
+
+
+

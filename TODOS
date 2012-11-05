@@ -11,31 +11,10 @@
 
 - complete jobinfo filter
 
-- notifications
-
-- introspection
-
-- jobarray support
-
 - job categories
 
 - machine info
 
-
-
-- slot info
-
-
-
-
-
-questions:
-
-(- naming of implementation specific functions)
-
-- which job categories?
-	openmp
-
-- free slotinfo (unnecessary?)
+- BUG: new jobsession with same name as previously destroyed session 
 
 

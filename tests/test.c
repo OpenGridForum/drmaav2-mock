@@ -207,6 +207,10 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
+    if (NULL == CU_add_test(pSuite, "Wait any terminated", test_wait_any_terminated)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
 
 
     // 6th Suite

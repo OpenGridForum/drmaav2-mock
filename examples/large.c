@@ -9,17 +9,19 @@ void error_handler()
 {
 }
 
-void callback_free(void * entry)
+void callback_free(void *entry)
 {
     free(entry);
 }
 
 
 
-void my_drmaa2_callback(drmaa2_notification * notification)
+void my_drmaa2_callback(drmaa2_notification *notification)
 {
     printf("my callback is called\n");
-    printf("%s\n", (*notification)->jobId);
+    printf("Job %s Status %d \n", (*notification)->jobId, (*notification)->jobState);
+
+    drmaa2_notification_free(notification);
 }
 
 
@@ -70,14 +72,13 @@ int main()
     printf("Got reservation\n id: %s\n name: %s\n", ri->reservationId, ri->reservationName);
     drmaa2_rinfo_free(&ri);
 
-    jt->remoteCommand = strdup("/bin/date");                                     // submit job 
+    jt->remoteCommand = strdup("./a.out");                                     // submit job 
     jt->reservationId = drmaa2_r_get_id(r);
     drmaa2_dict_set(env, "FOO", "BAR");
     jt->jobEnvironment = env;
     j = drmaa2_jsession_run_job(js, jt);
-
     drmaa2_j_wait_started(j, DRMAA2_INFINITE_TIME);
-    drmaa2_j_terminate(j);
+    //drmaa2_j_terminate(j);
     drmaa2_j_wait_terminated(j, DRMAA2_INFINITE_TIME);                  // Wait for termination and print exit status
 
     drmaa2_string substate = NULL;
@@ -86,7 +87,7 @@ int main()
     drmaa2_string_free(&substate);
 
     ji = drmaa2_j_get_info(j);
-    printf("Job terminated with exit status %u\n",ji->exitStatus);
+    printf("Job terminated with exit status %i\n",ji->exitStatus);
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup

@@ -692,14 +692,14 @@ drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri)
 
 
 
-static int get_status_callback(int *ptr, int argc, char **argv, char **azColName)
+static int get_status_callback(int *status, int argc, char **argv, char **azColName)
 {
     assert(argc == 1);
     if (argv[0] != NULL)
     {
-        *ptr = atoi(argv[0]);
+        *status = atoi(argv[0]);
     }
-    // else: status value stays -1
+    // status stays -1
     return 0;
 }
 
@@ -807,7 +807,6 @@ static int drmaa2_get_job_template_callback(drmaa2_jtemplate jt, int argc, char 
 drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId)
 {
     long long row_id = atoll(jobId);
-    printf("id: %lld\n", row_id);
     char *stmt = sqlite3_mprintf("SELECT remote_command, args, submit_as_hold, rerunnable, job_environment, \
         working_directory, job_category, email, email_on_started, email_on_terminated, job_name, input_path, \
         output_path, error_path, join_files, reservation_id, queue_name, min_slots, max_slots, priority, \

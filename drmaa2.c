@@ -2,9 +2,6 @@
 #include "drmaa2-list.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
 #include <string.h>
 #include <assert.h>
 #include <signal.h>
@@ -19,7 +16,19 @@
 int drmaa2_lasterror_v          = DRMAA2_SUCCESS;
 char *drmaa2_lasterror_text_v   = NULL;
 
+
 drmaa2_callback current_drmaa2_callback = NULL;
+
+
+void call_state_chage_notification(drmaa2_j j, drmaa2_jstate state) {
+    drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
+    n->event = DRMAA2_NEW_STATE;
+    n->jobId = strdup(j->id);
+    n->sessionName = strdup(j->session_name);
+    n->jobState = state;
+    current_drmaa2_callback(&n);
+}
+
 
 // supported jobcategories
 // TODO: Programmatic
@@ -35,7 +44,6 @@ int string_array_contains(char *array[], int len, char *string)
         if (strcmp(array[i], string) == 0) return 1;
     return 0;
 }
-
 
 
 
@@ -97,6 +105,17 @@ void drmaa2_jinfo_free(drmaa2_jinfo * jiRef)
         drmaa2_string_free(&(ji->queueName));
         free(ji);
         *jiRef = NULL;
+    }
+}
+
+
+void drmaa2_slotinfo_free(drmaa2_slotinfo * siRef)
+{
+    drmaa2_slotinfo si = *siRef;
+    if (si != NULL) {
+        drmaa2_string_free(&(si->machineName));
+        free(si);
+        *siRef = NULL;
     }
 }
 
@@ -223,6 +242,18 @@ void drmaa2_rtemplate_free(drmaa2_rtemplate * rtRef)
         drmaa2_list_free(&(rt->candidateMachines));
         free(rt);
         *rtRef = NULL;
+    }
+}
+
+
+void drmaa2_notification_free(drmaa2_notification *nRef)
+{
+    drmaa2_notification n = *nRef;
+    if (n != NULL) {
+        drmaa2_string_free(&(n->jobId));
+        drmaa2_string_free(&(n->sessionName));
+        free(n);
+        *nRef = NULL;
     }
 }
 
@@ -426,7 +457,6 @@ drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r)
 
 
 drmaa2_error drmaa2_r_terminate (drmaa2_r r) {
-    //TODO: think about semantik
     return DRMAA2_SUCCESS;
 }
 
@@ -602,36 +632,8 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     }
 
     long long template_id = save_jtemplate(jt, js->name);
-
-    long long id = save_job(js->name, template_id); 
-
-    pid_t childpid;
-
-    if ((childpid = fork()) == -1)
-    {
-        perror("fork failed\n");
-        exit(1);
-    }
-    else if (childpid == 0)
-        {
-            // child
-            char *id_c;
-            asprintf(&id_c, "%lld", id);
-            char *args[] = {"./wrapper", id_c, NULL};
-            execv(args[0], args);
-            return NULL;        // dead code, just to avoid a GCC warning about control end reach
-        }
-    else
-        {
-            // parent
-            drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
-            char *cid;
-            asprintf(&cid, "%lld\n", id);
-            j->id = cid; //already allocated
-            j->session_name = strdup(js->name);
-            sleep(1); //TODO: ensure that job is started
-            return j;
-        }
+    long long job_id = save_job(js->name, template_id); 
+    return submit_job_to_DRMS(js, job_id, jt);
 }
 
 
@@ -679,23 +681,68 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
 drmaa2_j drmaa2_jsession_wait_any_started (const drmaa2_jsession js, const drmaa2_j_list l, 
     const time_t timeout)
 {
-    
-    return NULL;
+    drmaa2_j started_j = NULL;
+    drmaa2_j current_j = NULL;
+    drmaa2_jstate state;
+    size_t i;
+    while (started_j == NULL) {
+        for (i = 0; i < drmaa2_list_size(l); i++) {
+            current_j = (drmaa2_j)drmaa2_list_get(l, i);
+            state = get_state(current_j);
+            if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD) {
+                started_j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
+                started_j->session_name = strdup(js->name);
+                started_j->id = strdup(current_j->id);
+                break;
+            }
+        }
+        if (started_j != NULL) {
+            break;
+        } else if (timeout == DRMAA2_ZERO_TIME || timeout <= time(NULL)) {
+            drmaa2_lasterror_v = DRMAA2_TIMEOUT;
+            drmaa2_lasterror_text_v = "A timeout occured while waiting for job termination.";
+            break;
+        }
+        sleep(1);
+    }
+    return started_j;
 }
 
 
 drmaa2_j drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js, 
     const drmaa2_j_list l, const time_t timeout)
 {
-    //TODO
-    return NULL;
+    drmaa2_j terminated_j = NULL;
+    drmaa2_j current_j = NULL;
+    drmaa2_jstate state;
+    size_t i;
+    while (terminated_j == NULL) {
+        for (i = 0; i < drmaa2_list_size(l); i++) {
+            current_j = (drmaa2_j)drmaa2_list_get(l, i);
+            state = get_state(current_j);
+            if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD) {
+                terminated_j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
+                terminated_j->session_name = strdup(js->name);
+                terminated_j->id = strdup(current_j->id);
+                break;
+            }
+        }
+        if (terminated_j != NULL) {
+            break;
+        } else if (timeout == DRMAA2_ZERO_TIME || timeout <= time(NULL)) {
+            drmaa2_lasterror_v = DRMAA2_TIMEOUT;
+            drmaa2_lasterror_text_v = "A timeout occured while waiting for job termination.";
+            break;
+        }
+        sleep(1);
+    }
+    return terminated_j;
 }
 
 
 
 drmaa2_string drmaa2_j_get_id(const drmaa2_j j)
 {
-    // returns copy since application should call drmaa2_string_free()
     return strdup(j->id);
 }
 
@@ -719,6 +766,8 @@ drmaa2_error drmaa2_j_suspend(drmaa2_j j)
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_RUNNING) {
         save_state(j, DRMAA2_SUSPENDED);
+        if (current_drmaa2_callback != NULL)
+            call_state_chage_notification(j, DRMAA2_SUSPENDED);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -734,6 +783,8 @@ drmaa2_error drmaa2_j_resume(drmaa2_j j)
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_SUSPENDED) {
         save_state(j, DRMAA2_RUNNING);
+        if (current_drmaa2_callback != NULL)
+            call_state_chage_notification(j, DRMAA2_RUNNING);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -749,10 +800,14 @@ drmaa2_error drmaa2_j_hold(drmaa2_j j)
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_QUEUED) {
         save_state(j, DRMAA2_QUEUED_HELD);
+        if (current_drmaa2_callback != NULL)
+            call_state_chage_notification(j, DRMAA2_QUEUED_HELD);
         return DRMAA2_SUCCESS;
     }
     else if (old_state == DRMAA2_REQUEUED) {
         save_state(j, DRMAA2_REQUEUED_HELD);
+        if (current_drmaa2_callback != NULL)
+            call_state_chage_notification(j, DRMAA2_REQUEUED);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -768,10 +823,14 @@ drmaa2_error drmaa2_j_release(drmaa2_j j)
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_QUEUED_HELD) {
         save_state(j, DRMAA2_QUEUED);
+        if (current_drmaa2_callback != NULL)
+            call_state_chage_notification(j, DRMAA2_QUEUED);
         return DRMAA2_SUCCESS;
     }
     else if (old_state == DRMAA2_REQUEUED_HELD) {
         save_state(j, DRMAA2_REQUEUED);
+        if (current_drmaa2_callback != NULL)
+            call_state_chage_notification(j, DRMAA2_REQUEUED);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -818,29 +877,39 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 drmaa2_error drmaa2_j_wait_started (const drmaa2_j j, const time_t timeout)
 {
     drmaa2_jstate state;
+    drmaa2_error return_status = DRMAA2_SUCCESS;
     while (1) {
         state = get_state(j);
-        if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD)
+        if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD) {
             break;
+        }else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
+            drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
+            drmaa2_lasterror_text_v = "A timeout occured while waiting for a job start.";
+            break;
+        }
         sleep(1);
     }
-    return DRMAA2_SUCCESS;
+    return return_status;
 }
 
 
 drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 {
+
     DRMAA2_DEBUG_PRINT("wait for job with id: %s\n", j->id);
-    int status = -1;
-    while (status == -1)
+    drmaa2_error return_status = DRMAA2_SUCCESS;
+    while (1)
     {
-        status = drmaa2_get_job_status(j);
+        if (drmaa2_get_job_status(j) != -1) {
+            break;
+        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
+            DRMAA2_DEBUG_PRINT("TIMEOUT\n");
+            drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
+            drmaa2_lasterror_text_v = "A timeout occured while waiting for job termination.";
+            break;
+        }
         sleep(1);
     }
-    drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
-    n->jobId = j->id;
-    if (current_drmaa2_callback)
-        current_drmaa2_callback(&n);
     return DRMAA2_SUCCESS;
 }
 
@@ -919,7 +988,6 @@ drmaa2_version drmaa2_get_drms_version(void)
 
 drmaa2_string drmaa2_get_drmaa_name(void)
 {
-    // returns copy since application should call drmaa2_string_free()
     return strdup("drmaa2-mock");
 }
 
@@ -1122,7 +1190,6 @@ drmaa2_string_list drmaa2_get_rsession_names(void)
 drmaa2_error drmaa2_register_event_notification(const drmaa2_callback callback)
 {
     current_drmaa2_callback = callback;
-    //TODO implement
     return DRMAA2_SUCCESS;
 }
 

@@ -39,7 +39,7 @@ sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ @CFLAGS@ -c $<
 
 clean:
-	rm -f setup wrapper
+	rm -f setup_persistency wrapper
 	rm -f *.o
 	rm -f *.so
 	rm -f tests/*.o tests/test
