@@ -42,8 +42,7 @@ typedef struct drmaa2_r_s
 } drmaa2_r_s;
 
 
-void call_state_chage_notification(drmaa2_j j, drmaa2_jstate state);
-
+drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl);
 
 drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtemplate jt);
 

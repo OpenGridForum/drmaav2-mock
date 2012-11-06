@@ -30,21 +30,6 @@ void call_state_chage_notification(drmaa2_j j, drmaa2_jstate state) {
 }
 
 
-// supported jobcategories
-// TODO: Programmatic
-#define JOBCATEGORIES_LENGTH  3
-char *jobcategories[] = {"OpenMP", "Java", "Python"};
-
-
-int string_array_contains(char *array[], int len, char *string)
-// false: 0     true: != 0
-{
-    int i;
-    for (i=0; i<len; i++)
-        if (strcmp(array[i], string) == 0) return 1;
-    return 0;
-}
-
 
 
 void drmaa2_string_free(drmaa2_string * sRef)
@@ -563,12 +548,7 @@ drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
     }
 
     drmaa2_string_list jc = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
-    int i;
-    for (i=0; i<JOBCATEGORIES_LENGTH; i++)
-    {
-        drmaa2_list_add(jc, strdup(jobcategories[i]));
-    }
-    return jc;
+    return add_supported_job_categories(jc);
 }
 
 
@@ -623,12 +603,21 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     }
 
     //TODO: complete template evaluation
-    if ((jt->jobCategory != DRMAA2_UNSET_STRING) && 
-        !string_array_contains(jobcategories, JOBCATEGORIES_LENGTH, jt->jobCategory))
-    {
-        drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
-        drmaa2_lasterror_text_v = "Given job category is not supported.";
-        return NULL;
+    if (jt->jobCategory != DRMAA2_UNSET_STRING) {
+        drmaa2_string_list sl = drmaa2_jsession_get_job_categories(js);
+        size_t i;
+        drmaa2_bool found = DRMAA2_FALSE;
+        for (i = 0; i < drmaa2_list_size(sl); i++) {
+            if (strcmp(jt->jobCategory, drmaa2_list_get(sl, i)) == 0) {
+                found = DRMAA2_TRUE;
+                break;
+            }
+        }
+        if (found == DRMAA2_FALSE) {
+            drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
+            drmaa2_lasterror_text_v = "Given job category is not supported.";
+            return NULL;
+        }
     }
 
     long long template_id = save_jtemplate(jt, js->name);
@@ -959,17 +948,22 @@ drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession m
 
     // TODO: get real machine info
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
-    mi->name                = strdup("my machine");  
-    mi->available           = 1;    
-    mi->sockets             = 1;      
+
+    char *hostname = (char *)malloc(sizeof(char) * 256);
+    int error_code = gethostname(hostname, 256);
+    mi->name = (error_code == 0) ? strdup(hostname) : DRMAA2_UNSET_STRING;
+    free(hostname);
+ 
+    mi->available           = DRMAA2_TRUE;
+    mi->sockets             = sysconf(_SC_NPROCESSORS_ONLN);
     mi->coresPerSocket      = 1;
-    mi->threadsPerCore      = 1;  
-    mi->load                = 0;  
-    mi->physMemory          = 4194304;
-    mi->virtMemory          = 4194304;    
-    mi->machineOS           = DRMAA2_MACOS;  
+    mi->threadsPerCore      = 1;
+    mi->load                = DRMAA2_UNSET_NUM;  
+    mi->physMemory          = 4194304;  //TODO
+    mi->virtMemory          = 4194304; //TODO: doesnt work: sysconf(_SC_PHYS_PAGES)/1000.0 * sysconf(_SC_PAGE_SIZE);   
+    mi->machineOS           = DRMAA2_MACOS;  //TODO 
     mi->machineOSVersion    = NULL;
-    mi->machineArch         = DRMAA2_X86;
+    mi->machineArch         = DRMAA2_X86;  //TODO
 
     drmaa2_list_add(ml, mi);
     return ml;

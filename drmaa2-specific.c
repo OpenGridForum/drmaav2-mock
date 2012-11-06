@@ -66,6 +66,16 @@ drmaa2_error drmaa2_set_instance_value(void * instance, const char * name, const
 }
 
 
+drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl) {
+#ifdef __GNUC__
+    if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 2) {
+        drmaa2_list_add(jl, strdup("OpenMP")); // GCC 4.2 implements OpenMP 2.5
+    }
+#endif
+    return jl;
+}
+
+
 void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt) {
     pid_t job_pid;
 

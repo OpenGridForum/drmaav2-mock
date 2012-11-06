@@ -73,12 +73,11 @@ void test_job_categories()
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
 
     drmaa2_string_list jc = drmaa2_jsession_get_job_categories(js);
-    CU_ASSERT_TRUE(stringlist_contains(jc, "Python"));
     drmaa2_list_free(&jc);
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
     jt->remoteCommand = strdup("/bin/date");
-    jt->jobCategory = strdup("Shell");
+    jt->jobCategory = strdup("non-existing jobCategory");
     drmaa2_j j3 = drmaa2_jsession_run_job(js, jt);
     CU_ASSERT_PTR_NULL(j3);
     CU_ASSERT_EQUAL(drmaa2_lasterror(), DRMAA2_INVALID_ARGUMENT);
