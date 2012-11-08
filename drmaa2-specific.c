@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <semaphore.h>
 
 #include "drmaa2-debug.h"
 
@@ -139,7 +140,7 @@ drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl) {
 }
 
 
-void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt) {
+void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
     pid_t job_pid;
 
     if ((job_pid = fork()) == -1) {
@@ -162,6 +163,7 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt) {
     else {
         // parent - monitors the running job
         drmaa2_save_pid(row_id, job_pid);
+        sem_post(lock); // pid is written now (notify lib)
 
         pid_t child;
         int status;
@@ -198,6 +200,16 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt) {
 drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtemplate jt) {
     pid_t childpid;
 
+    char *lock_name;
+    asprintf(&lock_name, "drmaa2%lld", job_id);
+    sem_t *lock  = sem_open(lock_name, O_CREAT | O_EXCL, S_IRWXU, 0);
+    if (lock == SEM_FAILED) {
+        perror("sem_open  failed\n");
+        printf("%s\n", lock_name);
+        exit(1);
+    }
+
+
     if ((childpid = fork()) == -1) {
         perror("fork failed\n");
         exit(1);
@@ -213,14 +225,15 @@ drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtempla
         
         if (childpid == 0) {
             // child
-            start_and_monitor_job(j, jt); 
-            //char *args[] = {"./wrapper", job_id_c, NULL};      //old version - will be removed with later commit
-            //execv(args[0], args);                              //old version - will be removed with later commit
+            start_and_monitor_job(j, jt, lock); 
             return NULL;        // dead code, just to avoid a GCC warning about control end reach
         }
         else {
             // parent
-            sleep(1); //TODO: ensure that job is started
+            sem_wait(lock); // ensure that pid is written before drmaa lib return
+            sem_close(lock);
+            sem_unlink(lock_name);
+            free(lock_name);
             return j;
         }
     }

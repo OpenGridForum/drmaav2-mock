@@ -125,4 +125,5 @@ int main()
     drmaa2_jsession_free(&js);
  
     drmaa2_list_free(&ml);
+    sleep(2); // wait that jobs are terminated
 }
