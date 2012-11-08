@@ -208,6 +208,8 @@ drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtempla
         drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
         j->id = job_id_c; //already allocated
         j->session_name = strdup(js->name);
+        save_state_id(job_id, DRMAA2_QUEUED);
+
         
         if (childpid == 0) {
             // child

@@ -665,7 +665,7 @@ drmaa2_j drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js,
         for (i = 0; i < drmaa2_list_size(l); i++) {
             current_j = (drmaa2_j)drmaa2_list_get(l, i);
             state = get_state(current_j);
-            if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD) {
+            if (state == DRMAA2_DONE || state == DRMAA2_FAILED) {
                 terminated_j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
                 terminated_j->session_name = strdup(js->name);
                 terminated_j->id = strdup(current_j->id);
@@ -827,7 +827,7 @@ drmaa2_error drmaa2_j_wait_started (const drmaa2_j j, const time_t timeout)
         state = get_state(j);
         if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD) {
             break;
-        }else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
+        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
             drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
             drmaa2_lasterror_text_v = "A timeout occured while waiting for a job start.";
             break;
@@ -842,7 +842,22 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 {
 
     DRMAA2_DEBUG_PRINT("wait for job with id: %s\n", j->id);
+    drmaa2_jstate state;
     drmaa2_error return_status = DRMAA2_SUCCESS;
+    while (1) {
+        state = get_state(j);
+        if (state == DRMAA2_DONE || state == DRMAA2_FAILED) {
+            break;
+        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
+            drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
+            drmaa2_lasterror_text_v = "A timeout occured while waiting for a job start.";
+            break;
+        }
+        sleep(1);
+    }
+
+    return return_status;
+/*
     while (1)
     {
         if (drmaa2_get_job_status(j) != -1) {
@@ -856,6 +871,7 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
         sleep(1);
     }
     return DRMAA2_SUCCESS;
+*/
 }
 
 
