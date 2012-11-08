@@ -254,6 +254,17 @@ void drmaa2_queueinfo_free(drmaa2_queueinfo * qiRef)
 }
 
 
+void drmaa2_version_free(drmaa2_version * vRef)
+{
+    if (*vRef != NULL) {
+        drmaa2_string_free(&((*vRef)->major));
+        drmaa2_string_free(&((*vRef)->minor));
+        free(*vRef);
+        *vRef=NULL;
+    }
+}
+
+
 void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef)
 {
     if (*miRef != NULL) {
@@ -265,64 +276,10 @@ void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef)
 }
 
 
-void drmaa2_jsession_free(drmaa2_jsession * jsRef)
-{
-    if (*jsRef != NULL) {
-        drmaa2_string_free(&((*jsRef)->contact));
-        drmaa2_string_free(&((*jsRef)->name));
-        free(*jsRef);
-        *jsRef = NULL;
-    }
-}
+// drmaa2 reflective interface is implemented by drmaa2-specific.c
 
-void drmaa2_rsession_free(drmaa2_rsession * rsRef)
-{
-    if (*rsRef != NULL) {
-        drmaa2_string_free(&((*rsRef)->contact));
-        drmaa2_string_free(&((*rsRef)->name));
-        free(*rsRef);
-        *rsRef = NULL;
-    }
-}
 
-void drmaa2_msession_free(drmaa2_msession * msRef)
-{
-    if (*msRef != NULL) {
-        drmaa2_string_free(&((*msRef)->name));
-        free(*msRef);
-        *msRef = NULL;
-    }
-}
-
-void drmaa2_j_free(drmaa2_j * jRef)
-{
-    if (*jRef != NULL) {
-        drmaa2_string_free(&((*jRef)->id));
-        drmaa2_string_free(&((*jRef)->session_name));
-        free(*jRef);
-        *jRef=NULL;
-    }
-}
-
-void drmaa2_jarray_free(drmaa2_jarray * jaRef)
-{
-    if (*jaRef != NULL) {
-        drmaa2_string_free(&((*jaRef)->id));
-        drmaa2_string_free(&((*jaRef)->session_name));
-        free(*jaRef);
-        *jaRef=NULL;
-    }
-}
-
-void drmaa2_r_free(drmaa2_r * rRef)
-{
-    if (*rRef != NULL) {
-        drmaa2_string_free(&((*rRef)->id));
-        drmaa2_string_free(&((*rRef)->session_name));
-        free(*rRef);
-        *rRef=NULL;
-    }
-}
+// drmaa2 interface types and corresponding free functions are implemented by drmaa2-specific
 
 
 drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs)
@@ -413,7 +370,6 @@ drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs)
 
 drmaa2_string drmaa2_r_get_id(const drmaa2_r r)
 {
-    //returns copy since application should call drmaa2_string_free()
     return strdup(r->id);
 }
 
@@ -605,15 +561,15 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     //TODO: complete template evaluation
     if (jt->jobCategory != DRMAA2_UNSET_STRING) {
         drmaa2_string_list sl = drmaa2_jsession_get_job_categories(js);
+        drmaa2_bool supported = DRMAA2_FALSE;
         size_t i;
-        drmaa2_bool found = DRMAA2_FALSE;
         for (i = 0; i < drmaa2_list_size(sl); i++) {
             if (strcmp(jt->jobCategory, drmaa2_list_get(sl, i)) == 0) {
-                found = DRMAA2_TRUE;
+                supported = DRMAA2_TRUE;
                 break;
             }
         }
-        if (found == DRMAA2_FALSE) {
+        if (supported == DRMAA2_FALSE) {
             drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
             drmaa2_lasterror_text_v = "Given job category is not supported.";
             return NULL;
@@ -967,46 +923,6 @@ drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession m
 
     drmaa2_list_add(ml, mi);
     return ml;
-}
-
-
-drmaa2_string drmaa2_get_drms_name(void)
-{
-    return NULL;
-}
-
-drmaa2_version drmaa2_get_drms_version(void)
-{
-    return NULL;
-}
-
-drmaa2_string drmaa2_get_drmaa_name(void)
-{
-    return strdup("drmaa2-mock");
-}
-
-drmaa2_version drmaa2_get_drmaa_version(void)
-{
-    drmaa2_version version = (drmaa2_version)malloc(sizeof(drmaa2_version_s));
-    version->major = strdup("0");
-    version->minor = strdup("1");
-    return version;
-}
-
-void drmaa2_version_free(drmaa2_version * vRef)
-{
-    if (*vRef != NULL) {
-        drmaa2_string_free(&((*vRef)->major));
-        drmaa2_string_free(&((*vRef)->minor));
-        free(*vRef);
-        *vRef=NULL;
-    }
-};
-
-drmaa2_bool drmaa2_supports(const drmaa2_capability c)
-{
-    //TODO late ;)
-    return DRMAA2_FALSE;
 }
 
 

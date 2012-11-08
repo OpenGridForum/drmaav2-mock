@@ -4,6 +4,8 @@
 #include "drmaa2.h"
 
 
+// implementation-specific drmaa inface types
+
 typedef struct drmaa2_jsession_s
 {
     drmaa2_string contact;

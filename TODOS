@@ -11,10 +11,13 @@
 
 - complete jobinfo filter
 
-- job categories
-
 - machine info
 
 - BUG: new jobsession with same name as previously destroyed session 
+
+
+- dict list
+
+- placeholders
 
 
