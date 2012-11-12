@@ -17,6 +17,7 @@ int drmaa2_lasterror_v          = DRMAA2_SUCCESS;
 char *drmaa2_lasterror_text_v   = NULL;
 
 
+// callback is global
 drmaa2_callback current_drmaa2_callback = NULL;
 
 
@@ -558,7 +559,6 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
         return NULL;
     }
 
-    //TODO: complete template evaluation
     if (jt->jobCategory != DRMAA2_UNSET_STRING) {
         drmaa2_string_list sl = drmaa2_jsession_get_job_categories(js);
         drmaa2_bool supported = DRMAA2_FALSE;
@@ -575,6 +575,40 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
             return NULL;
         }
     }
+
+    if (!drmaa2_supports(DRMAA2_JT_EMAIL) && (jt->email != DRMAA2_UNSET_LIST
+            || jt->emailOnStarted != DRMAA2_UNSET_BOOL || jt->emailOnTerminated != DRMAA2_UNSET_BOOL)) {
+        drmaa2_lasterror_v = DRMAA2_UNSUPPORTED_ATTRIBUTE;
+        drmaa2_lasterror_text_v = "Email is not supported.";
+        return NULL;
+    }
+
+    if (!drmaa2_supports(DRMAA2_JT_MAXSLOTS) && jt->maxSlots != DRMAA2_UNSET_NUM) {
+        drmaa2_lasterror_v = DRMAA2_UNSUPPORTED_ATTRIBUTE;
+        drmaa2_lasterror_text_v = "MaxSlot is not supported.";
+        return NULL;
+    }
+
+    if (!drmaa2_supports(DRMAA2_JT_DEADLINE) && jt->deadlineTime != DRMAA2_UNSET_TIME) {
+        drmaa2_lasterror_v = DRMAA2_UNSUPPORTED_ATTRIBUTE;
+        drmaa2_lasterror_text_v = "DeadLineTime is not supported.";
+        return NULL;
+    }
+
+    if (!drmaa2_supports(DRMAA2_JT_STAGING) && (jt->stageInFiles != DRMAA2_UNSET_DICT ||
+            jt->stageOutFiles != DRMAA2_UNSET_DICT)) {
+        drmaa2_lasterror_v = DRMAA2_UNSUPPORTED_ATTRIBUTE;
+        drmaa2_lasterror_text_v = "Staging is not supported.";
+        return NULL;
+    }
+
+    if (!drmaa2_supports(DRMAA2_JT_ACCOUNTINGID) && jt->accountingId != DRMAA2_UNSET_STRING) {
+        drmaa2_lasterror_v = DRMAA2_UNSUPPORTED_ATTRIBUTE;
+        drmaa2_lasterror_text_v = "AccountingID is not supported.";
+        return NULL;
+    }
+
+    // further evaluation can be done here
 
     long long template_id = save_jtemplate(jt, js->name);
     long long job_id = save_job(js->name, template_id); 
@@ -857,21 +891,6 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
     }
 
     return return_status;
-/*
-    while (1)
-    {
-        if (drmaa2_get_job_status(j) != -1) {
-            break;
-        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
-            DRMAA2_DEBUG_PRINT("TIMEOUT\n");
-            drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
-            drmaa2_lasterror_text_v = "A timeout occured while waiting for job termination.";
-            break;
-        }
-        sleep(1);
-    }
-    return DRMAA2_SUCCESS;
-*/
 }
 
 
@@ -888,74 +907,6 @@ drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
     jobs = get_jobs(jobs, filter);
     return jobs;
-}
-
-
-drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names)
-{
-    drmaa2_queueinfo_list ql = drmaa2_list_create(DRMAA2_QUEUEINFOLIST, (drmaa2_list_entryfree)drmaa2_queueinfo_free);
-    if (names == DRMAA2_UNSET_LIST) {
-        // return all queue info instances
-        drmaa2_queueinfo qi = (drmaa2_queueinfo)malloc(sizeof(drmaa2_queueinfo_s));
-        qi->name = strdup("default");
-        drmaa2_list_add(ql, qi);
-    }
-    else {
-        int i;
-        for (i = 0; i < drmaa2_list_size(names); i++) {
-            if (!strcmp(drmaa2_list_get(names, i), "default")) {
-                drmaa2_queueinfo qi = (drmaa2_queueinfo)malloc(sizeof(drmaa2_queueinfo_s));
-                qi->name = strdup("default");
-                drmaa2_list_add(ql, qi);
-            }
-        }
-    }
-    return ql;
-}
-
-
-drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
-{
-    drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, (drmaa2_list_entryfree)drmaa2_machineinfo_free);
-
-    // TODO: get real machine info
-    drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
-
-    char *hostname = (char *)malloc(sizeof(char) * 256);
-    int error_code = gethostname(hostname, 256);
-    mi->name = (error_code == 0) ? strdup(hostname) : DRMAA2_UNSET_STRING;
-    free(hostname);
- 
-    mi->available           = DRMAA2_TRUE;
-    mi->sockets             = sysconf(_SC_NPROCESSORS_ONLN);
-    mi->coresPerSocket      = 1;
-    mi->threadsPerCore      = 1;
-    mi->load                = DRMAA2_UNSET_NUM;  
-    mi->physMemory          = 4194304;  //TODO
-    mi->virtMemory          = 4194304; //TODO: doesnt work: sysconf(_SC_PHYS_PAGES)/1000.0 * sysconf(_SC_PAGE_SIZE);   
-    mi->machineOS           = DRMAA2_MACOS;  //TODO 
-    mi->machineOSVersion    = NULL;
-    mi->machineArch         = DRMAA2_X86;  //TODO
-
-    drmaa2_list_add(ml, mi);
-    return ml;
-}
-
-
-char *drmaa2_generate_unique_name(char* prefix)
-{
-    //TODO: use uuid
-    srand(time(NULL));
-    int r = rand();
-    char *name;
-    if (asprintf(&name, "%s%i", prefix, r) == -1)
-    {
-        printf("BAD ALLOCATION\n");
-        drmaa2_lasterror_v = DRMAA2_OUT_OF_RESOURCE;
-        drmaa2_lasterror_text_v = "Could not allocate enough memory.";
-        return NULL;
-    };
-    return name;
 }
 
 

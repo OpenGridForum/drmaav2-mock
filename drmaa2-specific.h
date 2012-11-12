@@ -48,8 +48,7 @@ drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl);
 
 drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtemplate jt);
 
-
-
+drmaa2_string drmaa2_generate_unique_name(char* prefix);
 
 
 #endif 

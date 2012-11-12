@@ -140,6 +140,69 @@ drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl) {
 }
 
 
+drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names)
+{
+    drmaa2_queueinfo_list ql = drmaa2_list_create(DRMAA2_QUEUEINFOLIST, (drmaa2_list_entryfree)drmaa2_queueinfo_free);
+    if (names == DRMAA2_UNSET_LIST) {
+        // return all queue info instances
+        drmaa2_queueinfo qi = (drmaa2_queueinfo)malloc(sizeof(drmaa2_queueinfo_s));
+        qi->name = strdup("default");
+        drmaa2_list_add(ql, qi);
+    }
+    else {
+        int i;
+        for (i = 0; i < drmaa2_list_size(names); i++) {
+            if (!strcmp(drmaa2_list_get(names, i), "default")) {
+                drmaa2_queueinfo qi = (drmaa2_queueinfo)malloc(sizeof(drmaa2_queueinfo_s));
+                qi->name = strdup("default");
+                drmaa2_list_add(ql, qi);
+            }
+        }
+    }
+    return ql;
+}
+
+
+drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
+{
+    drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, (drmaa2_list_entryfree)drmaa2_machineinfo_free);
+
+    // TODO: get real machine info
+    drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
+
+    char *hostname = (char *)malloc(sizeof(char) * 256);
+    int error_code = gethostname(hostname, 256);
+    mi->name = (error_code == 0) ? strdup(hostname) : DRMAA2_UNSET_STRING;
+    free(hostname);
+ 
+    mi->available           = DRMAA2_TRUE;
+    mi->sockets             = sysconf(_SC_NPROCESSORS_ONLN);
+    mi->coresPerSocket      = 1;
+    mi->threadsPerCore      = 1;
+    mi->load                = DRMAA2_UNSET_NUM;  
+    mi->physMemory          = 4194304;
+    mi->virtMemory          = 4194304;
+#ifdef __APPLE__
+    mi->machineOS           = DRMAA2_MACOS;
+#endif
+#ifdef __MACH__
+    mi->machineOS           = DRMAA2_MACOS;
+#endif
+#ifdef __linux__
+    mi->machineOS           = DRMAA2_LINUX;
+#endif
+#ifdef __FreeBSD__
+    mi->machineOS           = DRMAA2_BSD;
+#endif
+    mi->machineOSVersion    = NULL;
+    mi->machineArch         = DRMAA2_X86;
+
+    drmaa2_list_add(ml, mi);
+    return ml;
+}
+
+
+
 void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
     pid_t job_pid;
 
@@ -269,7 +332,7 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c) {
         case DRMAA2_BULK_JOBS_MAXPARALLEL:  return DRMAA2_FALSE;
         case DRMAA2_JT_EMAIL:               return DRMAA2_FALSE;
         case DRMAA2_JT_STAGING:             return DRMAA2_TRUE;
-        case DRMAA2_JT_DEADLINE:            return DRMAA2_TRUE;
+        case DRMAA2_JT_DEADLINE:            return DRMAA2_FALSE;
         case DRMAA2_JT_MAXSLOTS:            return DRMAA2_FALSE;
         case DRMAA2_JT_ACCOUNTINGID:        return DRMAA2_FALSE;
         case DRMAA2_RT_STARTNOW:            return DRMAA2_TRUE;
@@ -278,6 +341,22 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c) {
         case DRMAA2_RT_MACHINEARCH:         return DRMAA2_FALSE;
         default:                            return DRMAA2_FALSE; 
     }
+}
+
+
+drmaa2_string drmaa2_generate_unique_name(char* prefix)
+{
+    srand(time(NULL));
+    int r = rand();
+    char *name;
+    if (asprintf(&name, "%s%i", prefix, r) == -1)
+    {
+        printf("BAD ALLOCATION\n");
+        drmaa2_lasterror_v = DRMAA2_OUT_OF_RESOURCE;
+        drmaa2_lasterror_text_v = "Could not allocate enough memory.";
+        return NULL;
+    };
+    return name;
 }
 
 

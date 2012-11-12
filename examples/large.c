@@ -97,6 +97,9 @@ int main()
     drmaa2_j_free(&j);
     drmaa2_r_free(&r);
 
+    drmaa2_string_free(&jt->remoteCommand);
+    jt->remoteCommand = strdup("./a.out");
+
     printf("Here comes a job array\n");
     drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);
 
