@@ -1,15 +1,17 @@
 Welcome !
 =========
 
-This is the reference implementation of the DRMAAv2 C language binding.
-It is maintained by members of the Open Grid Forum (OGF) standardization
-group working on the 'Distributed Resource Management Application API (DRMAA)'. 
-
+This is the reference implementation of the DRMAAv2 C language binding. 
 If you don't know what DRMAA is, please consult http://www.drmaa.org.
 
-The intention of this code base is to have a starting point for true product implementations
-of the DRMAAv2 C language binding. The source code licence is 'newBSD', which allows the unrestricted usage
-in both closed source and open source projects.
+The code base is maintained by members of the Open Grid Forum (OGF) DRMAA group. 
+The intention is to have a common starting point for true product implementations of the DRMAAv2 C language binding. 
+The source code licence is 'newBSD', which should allow you the unrestricted usage in both closed source and open source projects.
+
+This implementation is only a mock, since it maps the job submission and monitoring
+facilities of DRMAA to forked local processes only. DRM system vendors can re-use generic
+parts (such as list or persistence handling) and add only their product-specific job
+handling extensions.
 
 We would be happy if you give us a hint if this code was helpful for you.
 Additions to the test suite and forks are also more than welcome.
