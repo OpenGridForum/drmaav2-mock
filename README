@@ -1,15 +1,19 @@
-This is a mock implementation of the DRMAAv2 C language binding.
+Welcome !
+=========
+
+This is the reference implementation of the DRMAAv2 C language binding.
+It is maintained by members of the Open Grid Forum (OGF) standardization
+group working on the 'Distributed Resource Management Application API (DRMAA)'. 
+
 If you don't know what DRMAA is, please consult http://www.drmaa.org.
 
-The intention is to provide a reference for true product implementations
-of the C language binding. The source code licence is newBSD, which allows the unrestricted usage
+The intention of this code base is to have a starting point for true product implementations
+of the DRMAAv2 C language binding. The source code licence is 'newBSD', which allows the unrestricted usage
 in both closed source and open source projects.
 
 We would be happy if you give us a hint if this code was helpful for you.
-Additions to the test suite are also more than welcome.
+Additions to the test suite and forks are also more than welcome.
 
-====== WARNING ======
-Currently, this is NOT the final C binding for DRMAAv2. 
-If you are a DRM system vendor and intent to use the header file in this repository for some production code, 
-stop here and talk to us first.
-====== WARNING ====== 
+---
+The OGF DRMAA Working Group <drmaa-wg@ogf.org>
+
