@@ -90,7 +90,7 @@ void test_job_categories()
 
 void test_wait_any_terminated()
 {
-    drmaa2_jsession js = drmaa2_create_jsession("mysession1234", NULL);
+    drmaa2_jsession js = drmaa2_create_jsession("mysession_termination", NULL);
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
     jt->remoteCommand = strdup("./a.out");
@@ -103,11 +103,15 @@ void test_wait_any_terminated()
     drmaa2_j j3 = drmaa2_jsession_run_job(js, jt);
 
     drmaa2_j_list jl = drmaa2_jsession_get_jobs(js, NULL);
+    printf("JOB list size: %ld\n", drmaa2_list_size(jl));
+    CU_ASSERT_EQUAL(drmaa2_list_size(jl), 3);
 
     drmaa2_j terminated_j = drmaa2_jsession_wait_any_terminated(js, jl, DRMAA2_INFINITE_TIME);
-    CU_ASSERT_PTR_NOT_NULL(j3);
-    printf("jobID %s\n", drmaa2_j_get_id(terminated_j));
+    CU_ASSERT_PTR_NOT_NULL(terminated_j);
+    drmaa2_string j_id = drmaa2_j_get_id(terminated_j);
+    printf("jobID %s\n", j_id);
 
+    drmaa2_string_free(&j_id);
     drmaa2_j_free(&terminated_j);
     drmaa2_j_free(&j1);
     drmaa2_j_free(&j2);
@@ -115,7 +119,7 @@ void test_wait_any_terminated()
 
     drmaa2_list_free(&jl);
     drmaa2_jtemplate_free(&jt);
-    //drmaa2_destroy_jsession("mysession");
+    drmaa2_destroy_jsession("mysession_termination");
     drmaa2_jsession_free(&js);
 
 

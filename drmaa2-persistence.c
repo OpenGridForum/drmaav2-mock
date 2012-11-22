@@ -950,16 +950,6 @@ int save_state(drmaa2_j j, drmaa2_jstate state)
 }
 
 
-int save_state_id(long long row_id, drmaa2_jstate state)
-{
-    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs\
-        SET job_state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
-    int rc = drmaa2_db_query(stmt, NULL, NULL);
-    sqlite3_free(stmt);
-    return rc;
-}
-
-
 long long save_jarray(const char *session_name, long long template_id, drmaa2_string_list sl)
 {
     drmaa2_string string = string_join(sl, '|');

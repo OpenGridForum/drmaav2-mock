@@ -677,7 +677,7 @@ drmaa2_j drmaa2_jsession_wait_any_started (const drmaa2_jsession js, const drmaa
         }
         if (started_j != NULL) {
             break;
-        } else if (timeout == DRMAA2_ZERO_TIME || timeout <= time(NULL)) {
+        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
             drmaa2_lasterror_v = DRMAA2_TIMEOUT;
             drmaa2_lasterror_text_v = "A timeout occured while waiting for job termination.";
             break;
@@ -703,12 +703,13 @@ drmaa2_j drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js,
                 terminated_j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
                 terminated_j->session_name = strdup(js->name);
                 terminated_j->id = strdup(current_j->id);
+                printf("termi %s\n", terminated_j->id);
                 break;
             }
         }
         if (terminated_j != NULL) {
             break;
-        } else if (timeout == DRMAA2_ZERO_TIME || timeout <= time(NULL)) {
+        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
             drmaa2_lasterror_v = DRMAA2_TIMEOUT;
             drmaa2_lasterror_text_v = "A timeout occured while waiting for job termination.";
             break;

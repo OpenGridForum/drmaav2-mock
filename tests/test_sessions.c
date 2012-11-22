@@ -75,4 +75,7 @@ void test_multiple_sessions()
     drmaa2_jsession_free(&js3);
     drmaa2_jsession_free(&js4);
 
+    drmaa2_destroy_jsession("js1");
+    drmaa2_destroy_jsession("js3");
+
 }

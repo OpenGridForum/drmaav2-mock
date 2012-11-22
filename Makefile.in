@@ -1,9 +1,9 @@
 all: drmaa examples
 examples: example-large
 ifeq (@SQLITE3_EXISTS@,1)
-drmaa: drmaa2.so setup_persistency wrapper
+drmaa: drmaa2.so setup_persistency
 else
-drmaa: drmaa2.so setup_persistency wrapper sqlite3.o
+drmaa: drmaa2.so setup_persistency sqlite3.o
 endif
 tests: force_look
 	cd tests; $(MAKE) $(MFLAGS) 
@@ -12,9 +12,6 @@ drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-
 	@CC@ -o $@ -shared @LIBS@ $^
 
 setup_persistency: setup_db.o drmaa2.so 
-	@CC@ -o $@ @LIBS@ $^
-
-wrapper: wrapper.o drmaa2.so
 	@CC@ -o $@ @LIBS@ $^
 
 drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c 
@@ -39,7 +36,7 @@ sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ @CFLAGS@ -c $<
 
 clean:
-	rm -f setup_persistency wrapper
+	rm -f setup_persistency
 	rm -f *.o
 	rm -f *.so
 	rm -f tests/*.o tests/test

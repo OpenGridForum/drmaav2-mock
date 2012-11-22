@@ -216,7 +216,7 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
     if (job_pid == 0) {
         //child - represents the running job
         setsid();   // create new process group so that jobs containing multiple processes can be killed
-        save_state_id(row_id, DRMAA2_RUNNING);
+        save_state(j, DRMAA2_RUNNING);
         if (current_drmaa2_callback != NULL)
             call_state_chage_notification(j, DRMAA2_RUNNING);
         char *args[] = {jt->remoteCommand, NULL};
@@ -234,14 +234,14 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
         drmaa2_save_exit_status(row_id, WEXITSTATUS(status));
 
         if (WIFEXITED(status)) {
-            save_state_id(row_id, DRMAA2_DONE);
+            save_state(j, DRMAA2_DONE);
             if (current_drmaa2_callback != NULL)
                 call_state_chage_notification(j, DRMAA2_DONE);
             DRMAA2_DEBUG_PRINT("Process %d terminated normally by a call to _exit(2) or exit(3).\n", job_pid);
             DRMAA2_DEBUG_PRINT("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
         }
         if (WIFSIGNALED(status)) {
-            save_state_id(row_id, DRMAA2_FAILED);
+            save_state(j, DRMAA2_FAILED);
             if (current_drmaa2_callback != NULL)
                 call_state_chage_notification(j, DRMAA2_FAILED);
             DRMAA2_DEBUG_PRINT("Process %d terminated due to receipt of a signal.\n", job_pid);
@@ -272,18 +272,17 @@ drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtempla
         exit(1);
     }
 
-
-    if ((childpid = fork()) == -1) {
-        perror("fork failed\n");
-        exit(1);
-    }
-
     char *job_id_c;
     asprintf(&job_id_c, "%lld", job_id);
     drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
     j->id = job_id_c; //already allocated
     j->session_name = strdup(js->name);
-    save_state_id(job_id, DRMAA2_QUEUED);
+    save_state(j, DRMAA2_QUEUED);
+
+    if ((childpid = fork()) == -1) {
+        perror("fork failed\n");
+        exit(1);
+    }
 
     
     if (childpid == 0) {

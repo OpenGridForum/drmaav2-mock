@@ -61,7 +61,6 @@ pid_t get_job_pid(drmaa2_j j);
 int get_state(drmaa2_j j);
 
 int save_state(drmaa2_j j, drmaa2_jstate state);
-int save_state_id(long long row_id, drmaa2_jstate state);
 
 
 long long save_jarray(const char *session_name, long long template_id, drmaa2_string_list sl);
