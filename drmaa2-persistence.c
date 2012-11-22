@@ -32,10 +32,19 @@ pid INTEGER,\
 \
 exit_status INTEGER,\
 terminating_signal INTEGER,\
+annotation TEXT,\
+job_state INTEGER,\
+job_sub_state TEXT,\
+allocated_machines TEXT,\
+submission_machine TEXT,\
+job_owner TEXT,\
+slots INTEGER,\
+queue_name TEXT,\
+wallclock_time INTEGER,\
+time_amount INTEGER,\
 submission_time INTEGER,\
 dispatch_time INTEGER,\
-finish_time INTEGER,\
-state INTEGER\
+finish_time INTEGER\
 );\
 \
 CREATE TABLE reservations(\
@@ -286,7 +295,8 @@ int drmaa2_rsession_is_valid(const char *session_name)
 long long save_job(const char *session_name, long long template_id)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO jobs \
-        VALUES(%Q, %lld, %Q, %Q, %Q, datetime('now'), %Q, %Q, 1); COMMIT;", session_name, template_id, NULL, NULL, NULL, NULL, NULL);
+        VALUES(%Q, %lld, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, datetime('now'), %Q, %Q); COMMIT;",
+         session_name, template_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
@@ -831,6 +841,26 @@ static int get_jobinfo_callback(drmaa2_jinfo ji, int argc, char **argv, char **a
             ji->exitStatus = atoi(argv[i]);
         else if (!strcmp(azColName[i], "terminating_signal") && argv[i] != NULL)
             ji->terminatingSignal = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "annotation") && argv[i] != NULL)
+            ji->annotation = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "job_state") && argv[i] != NULL)
+            ji->jobState = atoi(argv[i]);
+        else if (!strcmp(azColName[i], "job_sub_state") && argv[i] != NULL)
+            ji->jobSubState = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "allocated_machines") && argv[i] != NULL)
+            ji->allocatedMachines = string_split(argv[i], '|');
+        else if (!strcmp(azColName[i], "submission_machine") && argv[i] != NULL)
+            ji->submissionMachine = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "job_owner") && argv[i] != NULL)
+            ji->jobOwner = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "slots") && argv[i] != NULL)
+            ji->slots = atoll(argv[i]);
+        else if (!strcmp(azColName[i], "queue_name") && argv[i] != NULL)
+            ji->queueName = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "wallclock_time") && argv[i] != NULL)
+            ji->wallclockTime = atoll(argv[i]);
+        else if (!strcmp(azColName[i], "cpu_time") && argv[i] != NULL)
+            ji->cpuTime = atoll(argv[i]);
         else if ((argv[i] != NULL) && 
     (!strcmp(azColName[i], "submission_time") || !strcmp(azColName[i], "dispatch_time") || !strcmp(azColName[i], "finish_time")) )
         {
@@ -902,7 +932,7 @@ int get_state(drmaa2_j j)
 {
     int state;
     long long row_id = atoll(j->id);
-    char *stmt = sqlite3_mprintf("SELECT state FROM jobs WHERE rowid = %lld", row_id);
+    char *stmt = sqlite3_mprintf("SELECT job_state FROM jobs WHERE rowid = %lld", row_id);
     int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_pid_callback, &state);
     sqlite3_free(stmt);
     return state;
@@ -913,7 +943,7 @@ int save_state(drmaa2_j j, drmaa2_jstate state)
 {
     long long row_id = atoll(j->id);
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs\
-        SET state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
+        SET job_state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
     int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
@@ -923,7 +953,7 @@ int save_state(drmaa2_j j, drmaa2_jstate state)
 int save_state_id(long long row_id, drmaa2_jstate state)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE jobs\
-        SET state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
+        SET job_state = %d WHERE rowid = %lld; COMMIT;", state, row_id);
     int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;

@@ -845,10 +845,7 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 {
     drmaa2_jinfo ji = drmaa2_jinfo_create();
     ji->jobId = strdup(j->id);
-    
-    ji = get_job_info(ji); // exitStatus, terminating signal and *_time are set
-    
-    //TODO set: jobSubState, allocatedMachines, i->submissionMachine, jobOwner, queueName 
+    ji = get_job_info(ji); 
     return ji;
 }
 

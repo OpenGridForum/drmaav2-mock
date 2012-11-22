@@ -237,21 +237,21 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
             save_state_id(row_id, DRMAA2_DONE);
             if (current_drmaa2_callback != NULL)
                 call_state_chage_notification(j, DRMAA2_DONE);
-            DRMAA2_DEBUG_PRINT("Process terminated normally by a call to _exit(2) or exit(3).\n");
+            DRMAA2_DEBUG_PRINT("Process %d terminated normally by a call to _exit(2) or exit(3).\n", job_pid);
             DRMAA2_DEBUG_PRINT("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
         }
         if (WIFSIGNALED(status)) {
             save_state_id(row_id, DRMAA2_FAILED);
             if (current_drmaa2_callback != NULL)
                 call_state_chage_notification(j, DRMAA2_FAILED);
-            DRMAA2_DEBUG_PRINT("Process terminated due to receipt of a signal.\n");
+            DRMAA2_DEBUG_PRINT("Process %d terminated due to receipt of a signal.\n", job_pid);
             DRMAA2_DEBUG_PRINT("%d  - evaluates to the number of the signal that caused the termination of the process.\n", WTERMSIG(status));
             DRMAA2_DEBUG_PRINT("%d  - evaluates as true if the termination of the process was accompanied by the creation of a core \
                  file containing an image of the process when the signal was received.\n", WCOREDUMP(status));
         }
         if (WIFSTOPPED(status)) {
-            DRMAA2_DEBUG_PRINT("Process has not terminated, but has stopped and can be restarted.  This macro can be true only if the wait call \
-                 specified the WUNTRACED option or if the child process is being traced (see ptrace(2)).\n");
+            DRMAA2_DEBUG_PRINT("Process %d has not terminated, but has stopped and can be restarted.  This macro can be true only if the wait call \
+                 specified the WUNTRACED option or if the child process is being traced (see ptrace(2)).\n", job_pid);
             DRMAA2_DEBUG_PRINT("%d  - evaluates to the number of the signal that caused the process to stop.\n", WSTOPSIG(status));
         }
         exit(0);
@@ -277,28 +277,27 @@ drmaa2_j submit_job_to_DRMS(drmaa2_jsession js, long long job_id, drmaa2_jtempla
         perror("fork failed\n");
         exit(1);
     }
-    else {
-        char *job_id_c;
-        asprintf(&job_id_c, "%lld", job_id);
-        drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
-        j->id = job_id_c; //already allocated
-        j->session_name = strdup(js->name);
-        save_state_id(job_id, DRMAA2_QUEUED);
 
-        
-        if (childpid == 0) {
-            // child
-            start_and_monitor_job(j, jt, lock); 
-            return NULL;        // dead code, just to avoid a GCC warning about control end reach
-        }
-        else {
-            // parent
-            sem_wait(lock); // ensure that pid is written before drmaa lib return
-            sem_close(lock);
-            sem_unlink(lock_name);
-            free(lock_name);
-            return j;
-        }
+    char *job_id_c;
+    asprintf(&job_id_c, "%lld", job_id);
+    drmaa2_j j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
+    j->id = job_id_c; //already allocated
+    j->session_name = strdup(js->name);
+    save_state_id(job_id, DRMAA2_QUEUED);
+
+    
+    if (childpid == 0) {
+        // child
+        start_and_monitor_job(j, jt, lock); 
+        return NULL;        // dead code, just to avoid a GCC warning about control end reach
+    }
+    else {
+        // parent
+        sem_wait(lock); // ensure that pid is written before drmaa lib return (important for kill (job termination))
+        sem_close(lock);
+        sem_unlink(lock_name);
+        free(lock_name);
+        return j;
     }
 }
 
