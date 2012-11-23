@@ -62,9 +62,27 @@ void test_job_list()
     drmaa2_j_free(&j1);
     drmaa2_j_free(&j2);
 
-    drmaa2_jtemplate_free(&jt);
     drmaa2_destroy_jsession("mysession");
     drmaa2_jsession_free(&js);
+
+    drmaa2_jsession js2 = drmaa2_create_jsession("mysession", NULL);
+
+    //it should be possible to reuse names of destroyed sessions
+    CU_ASSERT_PTR_NOT_NULL(js2);
+    drmaa2_j j1b = drmaa2_jsession_run_job(js2, jt);
+
+    jobs = drmaa2_jsession_get_jobs(js2, NULL);
+    //jobs of destroyed sessions with the same name should not count ;)
+    CU_ASSERT_EQUAL(drmaa2_list_size(jobs), 1);
+    drmaa2_list_free(&jobs);
+
+    drmaa2_j_wait_terminated(j1b, DRMAA2_INFINITE_TIME);
+    drmaa2_j_free(&j1b);
+
+    drmaa2_jtemplate_free(&jt);
+    drmaa2_destroy_jsession("mysession");
+    drmaa2_jsession_free(&js2);
+
 }
 
 

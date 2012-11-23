@@ -519,7 +519,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
     }
 
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
-    jobs = get_session_jobs(jobs, js->name);
+    jobs = get_session_jobs(jobs, js);
 
     return jobs;
 }
@@ -611,7 +611,7 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
     // further evaluation can be done here
 
     long long template_id = save_jtemplate(jt, js->name);
-    long long job_id = save_job(js->name, template_id); 
+    long long job_id = save_job(js, template_id); 
     return submit_job_to_DRMS(js, job_id, jt);
 }
 
@@ -703,7 +703,6 @@ drmaa2_j drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js,
                 terminated_j = (drmaa2_j)malloc(sizeof(drmaa2_j_s));
                 terminated_j->session_name = strdup(js->name);
                 terminated_j->id = strdup(current_j->id);
-                printf("termi %s\n", terminated_j->id);
                 break;
             }
         }
@@ -915,7 +914,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
 
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        char *name = drmaa2_generate_unique_name("jsession");
+        drmaa2_string name = drmaa2_generate_unique_name("jsession");
         if (name == NULL)
             return NULL;
         js->name = name;
@@ -926,7 +925,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     assert(session_name != DRMAA2_UNSET_STRING);
     js->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_jsession(contact, session_name) != 0)
+    if (save_jsession(&js) != 0)
     {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
@@ -943,7 +942,7 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
 
     if (session_name == DRMAA2_UNSET_STRING)
     {
-        char *name = drmaa2_generate_unique_name("rsession");
+        drmaa2_string name = drmaa2_generate_unique_name("rsession");
         if (name == NULL)
             return NULL;
         rs->name = name;

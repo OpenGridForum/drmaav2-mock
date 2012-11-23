@@ -344,8 +344,7 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c) {
 
 drmaa2_string drmaa2_generate_unique_name(char* prefix)
 {
-    srand(time(NULL));
-    int r = rand();
+    int r = drmaa2_random_int();
     char *name;
     if (asprintf(&name, "%s%i", prefix, r) == -1)
     {
@@ -355,6 +354,12 @@ drmaa2_string drmaa2_generate_unique_name(char* prefix)
         return NULL;
     };
     return name;
+}
+
+
+int drmaa2_random_int() {
+    srand(time(NULL));
+    return rand();
 }
 
 

@@ -16,6 +16,7 @@
 
 char setup[] = "\
 CREATE TABLE job_sessions(\
+id INTEGER,\
 contact TEXT,\
 name TEXT UNIQUE NOT NULL\
 );\
@@ -26,6 +27,7 @@ name TEXT UNIQUE NOT NULL\
 );\
 \
 CREATE TABLE jobs(\
+session_id INTEGER,\
 session_name TEXT,\
 template_id INTEGER,\
 pid INTEGER,\
@@ -211,9 +213,11 @@ int drmaa2_db_query_rowid(char *stmt)
 
 //start of external used functions
 
-int save_jsession(const char *contact, const char *session_name)
+int save_jsession(drmaa2_jsession *jsRef)
 {
-    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO job_sessions VALUES(%Q, %Q); COMMIT;", contact, session_name);
+    drmaa2_jsession js = *jsRef;
+    js->id = drmaa2_random_int(); 
+    char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO job_sessions VALUES(%lld, %Q, %Q); COMMIT;", js->id, js->contact, js->name);
     int rc = drmaa2_db_query(stmt, NULL, NULL);
     sqlite3_free(stmt);
     return rc;
@@ -236,7 +240,7 @@ int delete_jsession(const char *session_name)
 
 static int get_jsession_callback(void **ptr, int argc, char **argv, char **azColName)
 {
-	assert(argc == 2);
+	assert(argc == 3);
 	drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
     int i;
     for(i=0; i<argc; i++)
@@ -244,8 +248,10 @@ static int get_jsession_callback(void **ptr, int argc, char **argv, char **azCol
         DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         if (!strcmp(azColName[i], "name"))
         	js->name = strdup(argv[i]);
-        else
+        else if (!strcmp(azColName[i], "contact"))
         	js->contact = argv[i] ? strdup(argv[i]) : NULL;
+        else
+            js->id = atoi(argv[i]);
     }
     DEBUG_PRINT("\n");
     *ptr = js;
@@ -292,11 +298,11 @@ int drmaa2_rsession_is_valid(const char *session_name)
 }
 
 
-long long save_job(const char *session_name, long long template_id)
+long long save_job(drmaa2_jsession js, long long template_id)
 {
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO jobs \
-        VALUES(%Q, %lld, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, datetime('now'), %Q, %Q); COMMIT;",
-         session_name, template_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        VALUES(%lld, %Q, %lld, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, datetime('now'), %Q, %Q); COMMIT;",
+         js->id, js->name, template_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     sqlite3_int64 row_id = drmaa2_db_query_rowid(stmt);
     sqlite3_free(stmt);
     return row_id;
@@ -356,9 +362,10 @@ static int get_sjobs_callback(void *ptr, int argc, char **argv, char **azColName
     return 0;
 }
 
-drmaa2_j_list get_session_jobs(drmaa2_j_list jobs, const char *session_name)
+drmaa2_j_list get_session_jobs(drmaa2_j_list jobs, drmaa2_jsession js)
 {
-    char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM jobs WHERE session_name = %Q;", session_name);
+    char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM jobs WHERE session_name = %Q AND session_id = %lld;",
+            js->name, js->id);
     int rc = drmaa2_db_query(stmt, get_sjobs_callback, jobs);
     sqlite3_free(stmt);
     if (rc != SQLITE_OK) return NULL;
