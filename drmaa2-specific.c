@@ -358,7 +358,7 @@ drmaa2_string drmaa2_generate_unique_name(char* prefix)
 
 
 int drmaa2_random_int() {
-    srand(time(NULL));
+    srand(clock());
     return rand();
 }
 

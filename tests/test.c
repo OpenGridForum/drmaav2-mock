@@ -133,10 +133,6 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
-    if (NULL == CU_add_test(pSuite, "Copy list method", testCreateCopy)) {
-      CU_cleanup_registry();
-      return CU_get_error();
-    }
     if (NULL == CU_add_test(pSuite, "String split method", testStringSplit)) {
       CU_cleanup_registry();
       return CU_get_error();
@@ -198,7 +194,11 @@ int main(int argc, char* argv[])
     if (NULL == CU_add_test(pSuite, "Getter Methods", test_jsession_getter_methods)) {
       CU_cleanup_registry();
       return CU_get_error();
-    }   
+    }
+    if (NULL == CU_add_test(pSuite, "Getter Methods2", test_jsession_getter_methods2)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
     if (NULL == CU_add_test(pSuite, "Job Lists", test_job_list)) {
       CU_cleanup_registry();
       return CU_get_error();

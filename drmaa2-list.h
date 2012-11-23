@@ -19,16 +19,7 @@ typedef struct drmaa2_list_s {
 
 
 
-const char **stringlist_get_array(drmaa2_list l);
-void stringlist_free_array(char **array);
-
-int stringlist_contains(drmaa2_string_list sl, char *string);	// false: 0       true: !=0
-
-
-typedef void *(*drmaa2_copy_data_callback)(const void *data);
-
-drmaa2_list drmaa2_list_create_copy(drmaa2_list l, const drmaa2_list_entryfree callback, const drmaa2_copy_data_callback copy);
-
+// helper functions to store lists in a single database field and reconstruct them
 drmaa2_string_list string_split(const char *string, char separator);
 drmaa2_string string_join(drmaa2_string_list sl, char separator);
 

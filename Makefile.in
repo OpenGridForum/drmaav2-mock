@@ -1,5 +1,5 @@
 all: drmaa examples
-examples: example-large
+examples: example-large sleepFive
 ifeq (@SQLITE3_EXISTS@,1)
 drmaa: drmaa2.so setup_persistency
 else
@@ -19,6 +19,9 @@ drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c
 
 drmaa2-specific.o: drmaa2-specific.c
 	@CC@ @CFLAGS@ -c $^
+
+sleepFive: sleepFive.c
+	@CC@ -o $@ $^
 
 example-large: example-large.o drmaa2.so
 	@CC@ -o $@ @LIBS@ $^
@@ -40,4 +43,4 @@ clean:
 	rm -f *.o
 	rm -f *.so
 	rm -f tests/*.o tests/test
-	rm -f app example-large test_app
+	rm -f app example-large test_app sleepFive

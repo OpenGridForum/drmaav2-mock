@@ -1,5 +1,8 @@
-all: test
+all: test ../sleepFive
 
-test: *.c 
+../sleepFive: ../sleepFive.c
+	@CC@ -o $@ $^
+
+test: *.c
 	@CC@ -o $@ @CFLAGS@  @LIBS@ ../drmaa2.so $^
 

@@ -13,7 +13,7 @@
 
 - machine info
 
-- session_name for templates is not needed since templates are not deleted during session destruction
+(- session_name for templates is not needed since templates are not deleted during session destruction)
 
 
 - dict list

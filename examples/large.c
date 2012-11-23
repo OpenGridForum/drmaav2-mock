@@ -72,7 +72,7 @@ int main()
     printf("Got reservation\n id: %s\n name: %s\n", ri->reservationId, ri->reservationName);
     drmaa2_rinfo_free(&ri);
 
-    jt->remoteCommand = strdup("./a.out");                                     // submit job 
+    jt->remoteCommand = strdup("./sleepFive");                                     // submit job 
     jt->reservationId = drmaa2_r_get_id(r);
     drmaa2_dict_set(env, "FOO", "BAR");
     jt->jobEnvironment = env;
@@ -98,7 +98,7 @@ int main()
     drmaa2_r_free(&r);
 
     drmaa2_string_free(&jt->remoteCommand);
-    jt->remoteCommand = strdup("./a.out");
+    jt->remoteCommand = strdup("./sleepFive");
 
     printf("Here comes a job array\n");
     drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);

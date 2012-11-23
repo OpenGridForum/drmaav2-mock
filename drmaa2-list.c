@@ -4,38 +4,6 @@
 #include <string.h>
 #include <assert.h>
 
-const char **stringlist_get_array(drmaa2_list l)
-{
-    // no deep copy
-    assert(l->type == DRMAA2_STRINGLIST);
-    const char **array = (const char **)malloc(l->size * sizeof(char *));
-    drmaa2_list_item current_item = (drmaa2_list_item)l->head;
-    int i;
-    for (i = 0; i < l->size; i++)
-    {
-        array[i] = current_item->data;
-        current_item = current_item->next;
-    }
-    return array;
-}
-
-void stringlist_free_array(char **array)
-{
-    // no deep free
-    free(array);
-}
-
-int stringlist_contains(drmaa2_string_list sl, char *string)
-{
-    drmaa2_list_item current_item = sl->head;
-    while (current_item != NULL)
-    {
-        if (strcmp((char *)current_item->data, string) == 0) return 1;
-        current_item = current_item->next;
-    }
-    return 0;
-}
-
 
 void drmaa2_list_free (drmaa2_list * listref)
 {
@@ -172,33 +140,6 @@ drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entry
 }
 
 
-drmaa2_list drmaa2_list_create_copy(drmaa2_list l, const drmaa2_list_entryfree callback, const drmaa2_copy_data_callback copy)
-{
-    //the user is responsible for setting appropriate copy and free callbacks
-    if (l == NULL)
-        return DRMAA2_UNSET_LIST;
-
-    drmaa2_list list = drmaa2_list_create(l->type, callback);
-    
-    drmaa2_list_item current_item, new_item;
-    drmaa2_list_item *p_to_set;
-    current_item = l->head;
-    p_to_set = (drmaa2_list_item*)&(list->head);
-    while (current_item != NULL)
-    {
-        new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item));
-        *p_to_set = new_item;
-        //make flat copy in case that no copy callback is set
-        new_item->data = (copy != NULL) ? copy(current_item->data) : current_item->data;
-
-        current_item = current_item->next;
-        p_to_set = &(new_item->next);
-    }
-    new_item = NULL;
-    list->size = l->size;
-    return list;
-}
-
 drmaa2_string_list string_split(const char *string, char separator)
 {
     if (string == NULL)
@@ -250,13 +191,6 @@ drmaa2_string string_join(drmaa2_string_list sl, char separator)
     string[character_count-1] = '\0';
     return string;
 }
-
-
-
-
-
-
-
 
 
 

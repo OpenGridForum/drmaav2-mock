@@ -23,7 +23,7 @@ drmaa2_callback current_drmaa2_callback = NULL;
 
 void call_state_chage_notification(drmaa2_j j, drmaa2_jstate state) {
     drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
-    n->event = DRMAA2_NEW_STATE;
+    n->event = DRMAA2_NEW_STATE;    //only state change notifications are supported
     n->jobId = strdup(j->id);
     n->sessionName = strdup(j->session_name);
     n->jobState = state;
@@ -922,7 +922,7 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     else
         js->name = strdup(session_name);
 
-    assert(session_name != DRMAA2_UNSET_STRING);
+    assert(js->name != DRMAA2_UNSET_STRING);
     js->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
     if (save_jsession(&js) != 0)
@@ -950,7 +950,7 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
     else
         rs->name = strdup(session_name);
 
-    assert(session_name != DRMAA2_UNSET_STRING);
+    assert(rs->name != DRMAA2_UNSET_STRING);
     rs->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
     if (save_rsession(contact, session_name) != 0)
