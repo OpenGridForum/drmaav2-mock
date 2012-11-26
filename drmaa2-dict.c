@@ -17,9 +17,7 @@ void drmaa2_dict_free(drmaa2_dict * dRef)
 {
     drmaa2_dict d = *dRef;
     if (d == NULL)
-    {
         return;
-    }
 
     drmaa2_dict_item head = d->head;
     drmaa2_dict_item tmp;
@@ -38,8 +36,17 @@ void drmaa2_dict_free(drmaa2_dict * dRef)
 
 drmaa2_string_list drmaa2_dict_list(const drmaa2_dict d)
 {
-    // TODO implement
-    return NULL;
+    if (d == NULL)
+        return NULL;
+
+    drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
+    drmaa2_dict_item current_item = d->head;
+    while (current_item != NULL)
+    {
+        drmaa2_list_add(sl, strdup(current_item->key));
+        current_item = current_item->next;
+    }
+    return sl;
 }
 
 

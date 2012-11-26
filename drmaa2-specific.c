@@ -167,7 +167,6 @@ drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession m
 {
     drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, (drmaa2_list_entryfree)drmaa2_machineinfo_free);
 
-    // TODO: get real machine info
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
 
     char *hostname = (char *)malloc(sizeof(char) * 256);

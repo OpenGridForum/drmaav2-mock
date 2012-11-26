@@ -96,3 +96,31 @@ void testDict()
 
     drmaa2_dict_free(&d);
 }
+
+
+void testDictList()
+{
+    drmaa2_dict d = drmaa2_dict_create(NULL);
+    drmaa2_dict_set(d, "name", "drmaa2");
+    drmaa2_dict_set(d, "language", "c");
+    drmaa2_dict_set(d, "version", "2");
+
+    drmaa2_string_list sl = drmaa2_dict_list(d);
+
+    CU_ASSERT_EQUAL(drmaa2_list_size(sl), 3);
+
+    size_t i;
+    for (i = 0; i < drmaa2_list_size(sl); i++) {
+        CU_ASSERT_EQUAL(drmaa2_dict_has(d, drmaa2_list_get(sl, i)), DRMAA2_TRUE);
+    }
+
+    drmaa2_dict_free(&d);
+
+    CU_ASSERT_STRING_NOT_EQUAL(drmaa2_list_get(sl, 0), drmaa2_list_get(sl, 1));
+    CU_ASSERT_STRING_NOT_EQUAL(drmaa2_list_get(sl, 1), drmaa2_list_get(sl, 2));
+
+    drmaa2_list_free(&sl);
+}
+
+
+

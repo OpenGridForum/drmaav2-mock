@@ -1,20 +1,12 @@
-- split up implementation in multiple files
 
 - improve testsystem (execution of single tests)
 
 - prefix global variables
 
 - use test database (implementation should allow multiple databases)
+-------------------------------------------------------------------------
 
-
-
+for mock
 
 - complete jobinfo filter
-
-- machine info
-
-(- session_name for templates is not needed since templates are not deleted during session destruction)
-
-
-- dict list
 
