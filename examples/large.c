@@ -32,7 +32,7 @@ int main()
     drmaa2_r                 r = NULL;
     drmaa2_machineinfo_list ml = NULL;
     drmaa2_machineinfo       m = NULL;
-    drmaa2_register_event_notification(my_drmaa2_callback);
+    //drmaa2_register_event_notification(my_drmaa2_callback);
 
     drmaa2_jtemplate        jt = drmaa2_jtemplate_create();
     drmaa2_rtemplate        rt = drmaa2_rtemplate_create();
@@ -99,6 +99,9 @@ int main()
 
     drmaa2_string_free(&jt->remoteCommand);
     jt->remoteCommand = strdup("./sleepFive");
+    jt->workingDirectory = strdup("$DRMAA2_HOME_DIR$/hallo/$DRMAA2_INDEX$/test/$DRMAA2_INDEX$.tbl");
+    jt->errorPath = strdup("/$DRMAA2_INDEX$/test/$DRMAA2_INDEX$.tbl");
+    jt->inputPath = strdup("$DRMAA2_WORKING_DIR$/$DRMAA2_INDEX$/test/$DRMAA2_INDEX$.tbl");
 
     printf("Here comes a job array\n");
     drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);

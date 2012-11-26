@@ -616,6 +616,48 @@ drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplat
 }
 
 
+char *str_replace(char *orig, char *rep, char *with) {
+    char *result; // the return string
+    char *ins;    // the next insert point
+    char *tmp;    // varies
+    int len_rep;  // length of rep
+    int len_with; // length of with
+    int len_front; // distance between rep and end of last rep
+    int count;    // number of replacements
+
+    if (!orig)
+        return NULL;
+
+    len_with = strlen(with);
+    ins = orig;
+    len_rep = strlen(rep);
+
+    for (count = 0; (tmp = strstr(ins, rep)); ++count) {
+        ins = tmp + len_rep;
+    }
+
+    // first time through the loop, all the variable are set correctly
+    // from here on,
+    //    tmp points to the end of the result string
+    //    ins points to the next occurrence of rep in orig
+    //    orig points to the remainder of orig after "end of rep"
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+
+    if (!result)
+        return NULL;
+
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
+    }
+    strcpy(tmp, orig);
+    return result;
+}
+
+
 drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drmaa2_jtemplate jt, 
     unsigned long begin_index, unsigned long end_index, unsigned long step, unsigned long max_parallel)
 {
@@ -633,19 +675,77 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
 
     drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
 
+    char *workingDirectory = jt->workingDirectory;
+    char *inputPath = jt->inputPath;
+    char *outputPath = jt->outputPath;
+    char *errorPath = jt->errorPath;
     while (index <= end_index) {
-        printf("index: %lu\n", index);
 
-        //TODO: index placeholders
+    // Start replace placeholders
+        char *index_c;
+        char *tmp_working_dir;
+        char *tmp_input_path;
+        char *tmp_output_path;
+        char *tmp_error_path;
+        asprintf(&index_c, "%lu", index);
+
+        tmp_working_dir = str_replace(jt->workingDirectory, "$DRMAA2_INDEX$", index_c);
+        jt->workingDirectory = str_replace(tmp_working_dir, "$DRMAA2_HOME_DIR$", "~");
+        drmaa2_string_free(&tmp_working_dir);
+
+        tmp_input_path = str_replace(jt->inputPath, "$DRMAA2_INDEX$", index_c);
+        jt->inputPath = str_replace(tmp_input_path, "$DRMAA2_HOME_DIR$", "~");
+        drmaa2_string_free(&tmp_input_path);
+        tmp_input_path = jt->inputPath;
+        jt->inputPath = str_replace(tmp_input_path, "$DRMAA2_WORKING_DIR$", ".");
+        drmaa2_string_free(&tmp_input_path);
+
+        tmp_output_path = str_replace(jt->outputPath, "$DRMAA2_INDEX$", index_c);
+        jt->outputPath = str_replace(tmp_output_path, "$DRMAA2_HOME_DIR$", "~");
+        drmaa2_string_free(&tmp_output_path);
+        tmp_output_path = jt->outputPath;
+        jt->outputPath = str_replace(tmp_output_path, "$DRMAA2_WORKING_DIR$", ".");
+        drmaa2_string_free(&tmp_output_path);
+
+        tmp_error_path = str_replace(jt->errorPath, "$DRMAA2_INDEX$", index_c);
+        jt->errorPath = str_replace(tmp_error_path, "$DRMAA2_HOME_DIR$", "~");
+        drmaa2_string_free(&tmp_error_path);
+        tmp_error_path = jt->errorPath;
+        jt->errorPath = str_replace(tmp_error_path, "$DRMAA2_WORKING_DIR$", ".");
+        drmaa2_string_free(&tmp_error_path);
+    // End replace placeholders
+
 
         j = drmaa2_jsession_run_job(js, jt);
+
+
+    // Start clean up replacement variables
+        tmp_working_dir = jt->workingDirectory;
+        jt->workingDirectory = workingDirectory;
+        drmaa2_string_free(&tmp_working_dir);
+
+        tmp_input_path = jt->inputPath;
+        jt->inputPath = inputPath;
+        drmaa2_string_free(&tmp_input_path);
+
+        tmp_output_path = jt->outputPath;
+        jt->outputPath = outputPath;
+        drmaa2_string_free(&tmp_output_path);
+
+        tmp_error_path = jt->errorPath;
+        jt->errorPath = errorPath;
+        drmaa2_string_free(&tmp_error_path);
+
+        free(index_c);
+    // End clean up replacement variables
+
+
         drmaa2_list_add(sl, strdup(j->id));
         drmaa2_j_free(&j);
         index += step;
     }
 
     long long template_id = save_jtemplate(jt, js->name);
-
     long long id = save_jarray(js->name, template_id, sl);
     drmaa2_list_free(&sl);
     drmaa2_jarray ja = (drmaa2_jarray)malloc(sizeof(drmaa2_jarray_s));
