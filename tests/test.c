@@ -108,6 +108,10 @@ int main(int argc, char* argv[])
       CU_cleanup_registry();
       return CU_get_error();
     }
+    if (NULL == CU_add_test(pSuite, "Error handling", testDictErrorHandling)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
     if (NULL == CU_add_test(pSuite, "Basic dictionary methods", testBasicDict)) {
       CU_cleanup_registry();
       return CU_get_error();
@@ -126,6 +130,10 @@ int main(int argc, char* argv[])
     }
     /* add the tests to the suite */   
     if (NULL == CU_add_test(pSuite, "NullFree", testFreeNullList)) {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "Error handling", testListErrorHandling)) {
       CU_cleanup_registry();
       return CU_get_error();
     }

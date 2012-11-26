@@ -45,6 +45,9 @@ drmaa2_string_list drmaa2_dict_list(const drmaa2_dict d)
 
 drmaa2_bool drmaa2_dict_has(const drmaa2_dict d, const char * key)
 {
+    if (d == NULL)
+        return DRMAA2_FALSE;
+
     drmaa2_dict_item current_item = d->head;
     while (current_item != NULL)
     {
@@ -61,6 +64,9 @@ drmaa2_bool drmaa2_dict_has(const drmaa2_dict d, const char * key)
 
 const char * drmaa2_dict_get(const drmaa2_dict d, const char * key)
 {
+    if (d == NULL)
+        return NULL;
+
     drmaa2_dict_item current_item = d->head;
     while (current_item != NULL)
     {
@@ -77,6 +83,9 @@ const char * drmaa2_dict_get(const drmaa2_dict d, const char * key)
 
 drmaa2_error drmaa2_dict_del(drmaa2_dict d, const char * key)
 {
+    if (d == NULL)
+        return DRMAA2_INVALID_ARGUMENT;
+
     drmaa2_dict_item current_item = d->head;
     drmaa2_dict_item prev = NULL;
 
@@ -105,6 +114,9 @@ drmaa2_error drmaa2_dict_del(drmaa2_dict d, const char * key)
 
 drmaa2_error drmaa2_dict_set(drmaa2_dict d, const char * key, const char * val)
 {
+    if (d == NULL)
+        return DRMAA2_INVALID_ARGUMENT;
+
     if (d->head == NULL)
     {
         //empty dict

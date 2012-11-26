@@ -13,6 +13,37 @@ void testFreeNullDict()
 }
 
 
+void testDictErrorHandling()
+{
+    drmaa2_dict d = NULL;
+    drmaa2_error e = drmaa2_dict_set(d, "hallo", "1");
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    e = drmaa2_dict_del(d, "hallo");
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    drmaa2_bool b = drmaa2_dict_has(d, "halo");
+    CU_ASSERT_EQUAL(b, DRMAA2_FALSE);
+
+    const char *item = drmaa2_dict_get(d, "hallo");
+    CU_ASSERT_PTR_NULL(item);
+
+
+    d = drmaa2_dict_create(NULL);
+    drmaa2_dict_set(d, "hallo", "1");
+    drmaa2_dict_set(d, "hallo2", "1");
+    drmaa2_dict_set(d, "hallo3", "2");
+
+    e = drmaa2_dict_del(d, "halo");
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    item = drmaa2_dict_get(d, "halo");
+    CU_ASSERT_PTR_NULL(item);
+
+    drmaa2_dict_free(&d);
+}
+
+
 void testBasicDict()
 {
     drmaa2_dict d = drmaa2_dict_create(NULL);

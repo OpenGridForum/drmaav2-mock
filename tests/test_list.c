@@ -14,6 +14,40 @@ void testFreeNullList()
 }
 
 
+void testListErrorHandling()
+{
+    drmaa2_string_list sl = NULL;
+    drmaa2_error e = drmaa2_list_add(sl, "hallo");
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    e = drmaa2_list_del(sl, 3);
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    const char *item = drmaa2_list_get(sl, 3);
+    CU_ASSERT_PTR_NULL(item);
+
+
+    sl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
+    drmaa2_list_add(sl, "1");
+    drmaa2_list_add(sl, "1");
+    drmaa2_list_add(sl, "2");    
+
+    e = drmaa2_list_del(sl, 3);
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    e = drmaa2_list_del(sl, -1);
+    CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
+
+    item = drmaa2_list_get(sl, 3);
+    CU_ASSERT_PTR_NULL(item);
+
+    item = drmaa2_list_get(sl, -1);
+    CU_ASSERT_PTR_NULL(item);
+
+    drmaa2_list_free(&sl);
+}
+
+
 void testList()
 {
     drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);

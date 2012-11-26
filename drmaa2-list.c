@@ -9,9 +9,7 @@ void drmaa2_list_free (drmaa2_list * listref)
 {
     drmaa2_list l = *listref;
     if (l == NULL)
-    {
         return;
-    }
 
     drmaa2_list_item head = (drmaa2_list_item)l->head;
     drmaa2_list_item tmp;
@@ -29,6 +27,9 @@ void drmaa2_list_free (drmaa2_list * listref)
 
 const void *drmaa2_list_get (const drmaa2_list l, long pos)
 {
+    if (l == NULL)
+        return NULL;
+
     if (pos < 0 || pos >= l->size)
         return NULL;
 
@@ -41,7 +42,10 @@ const void *drmaa2_list_get (const drmaa2_list l, long pos)
 
 
 drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
-{   
+{
+    if (l == NULL)
+        return DRMAA2_INVALID_ARGUMENT;
+  
     drmaa2_list_item new_item;
     if ((new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item))) == NULL)
     {
@@ -69,6 +73,9 @@ drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
 
 drmaa2_error drmaa2_list_del (drmaa2_list l, long pos)
 {
+    if (l == NULL)
+        return DRMAA2_INVALID_ARGUMENT;
+
     if (pos < 0 || pos >= l->size)
         return DRMAA2_INVALID_ARGUMENT;
 
