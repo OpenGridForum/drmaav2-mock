@@ -120,6 +120,20 @@ int main()
     drmaa2_jarray_free(&ja);
     drmaa2_jtemplate_free(&jt);  // includes free of env
 
+    drmaa2_list jl = drmaa2_jsession_get_jobs(js, NULL);
+    printf("The job session has %ld jobs\n", drmaa2_list_size(jl));
+    drmaa2_list_free(&jl);
+
+    ji = drmaa2_jinfo_create();
+    ji->jobState = DRMAA2_FAILED;
+    jl = drmaa2_jsession_get_jobs(js, ji);
+    printf("The job session has %ld failed jobs\n", drmaa2_list_size(jl));
+    drmaa2_list_free(&jl);
+    drmaa2_jinfo_free(&ji);
+
+
+
+
     drmaa2_close_msession(ms);
     drmaa2_close_rsession(rs);
     drmaa2_destroy_jsession("myjsession");

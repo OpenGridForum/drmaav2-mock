@@ -362,12 +362,124 @@ static int get_sjobs_callback(void *ptr, int argc, char **argv, char **azColName
     return 0;
 }
 
-drmaa2_j_list get_session_jobs(drmaa2_j_list jobs, drmaa2_jsession js)
+
+int has_to_be_escaped(const char *key) {
+    if (strcmp(key, "session_name") == 0)
+        return 1;
+    else if (strcmp(key, "job_sub_state") == 0)
+        return 1;
+    else
+        return 0;
+}
+
+
+
+char *build_query_string(char* start, drmaa2_dict filter) {
+    if (filter == DRMAA2_UNSET_DICT)
+        return strdup(start);
+
+    size_t req_space = strlen(start) + 2; // 2 - 1 whitespace and terminating '\0'
+    drmaa2_string_list keys = drmaa2_dict_list(filter);
+
+    size_t i;
+    for (i = 0; i < drmaa2_list_size(keys); i++) {
+        const char *key = drmaa2_list_get(keys, i);
+        req_space += strlen(key) + strlen(drmaa2_dict_get(filter, key)) + 3; // 3 - 2 whitespace and '='
+        if (has_to_be_escaped(key)) {
+            req_space += 2;
+        }
+    }
+
+    if (drmaa2_list_size(keys) > 0)
+    {
+        req_space += 7; // " WHERE "
+        req_space += (drmaa2_list_size(keys) - 1) * 5;
+    }
+
+    char *query_string = (char *)malloc(sizeof(char *) * req_space);
+    
+    char *ins = query_string;
+    strcpy(ins, start);
+    ins[strlen(start)] = ' ';
+    ins += strlen(start) + 1;
+
+    char *cur_filter;
+
+    for (i = 0; i < drmaa2_list_size(keys); i++) {
+        if (i != 0) {
+            strcpy(ins, " AND ");
+            ins += 5;
+        } else {
+            strcpy(ins, " WHERE ");
+            ins += 7;
+        }
+
+        const char *key = drmaa2_list_get(keys, i);
+        const char *value = drmaa2_dict_get(filter, key);
+        if (has_to_be_escaped(key)) {
+            asprintf(&cur_filter, "%s = \"%s\"", key, value);
+        }
+        else {
+            asprintf(&cur_filter, "%s = %s", key, value);
+        }
+
+        strcpy(ins, cur_filter);
+        ins += strlen(cur_filter);
+    }
+    query_string[req_space - 1] = '\0';
+    drmaa2_list_free(&keys);
+
+    return query_string;
+}
+
+
+drmaa2_j_list get_session_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filter)
 {
-    char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM jobs WHERE session_name = %Q AND session_id = %lld;",
-            js->name, js->id);
-    int rc = drmaa2_db_query(stmt, get_sjobs_callback, jobs);
-    sqlite3_free(stmt);
+    drmaa2_dict sql_filter = drmaa2_dict_create(NULL);
+    char *session_id_c;
+    asprintf(&session_id_c, "%d", js->id);
+    char *exit_status_c         = NULL;
+    char *job_state_c           = NULL;
+    char *allocated_machines_c  = NULL;
+    char *slots_c               = NULL;
+    char *wallclock_time_c      = NULL;
+    char *cpu_time_c            = NULL;
+    char *submission_time_c     = NULL;
+    char *dispatch_time_c       = NULL;
+    char *finish_time_c         = NULL;
+
+    drmaa2_dict_set(sql_filter, "session_name", js->name);
+    drmaa2_dict_set(sql_filter, "session_id", session_id_c);
+    if (filter != NULL) {
+        if (filter->jobId != DRMAA2_UNSET_STRING)
+            drmaa2_dict_set(sql_filter, "rowid", filter->jobId);
+        if (filter->jobState != DRMAA2_UNSET_ENUM) {
+            asprintf(&job_state_c, "%d", filter->jobState);
+            drmaa2_dict_set(sql_filter, "job_state", job_state_c);
+        }
+        if (filter->allocatedMachines != DRMAA2_UNSET_LIST) {
+            allocated_machines_c = string_join(filter->allocatedMachines, '|');
+            drmaa2_dict_set(sql_filter, "allocated_machines", allocated_machines_c);
+        }
+        if (filter->slots != DRMAA2_UNSET_NUM) {
+            asprintf(&slots_c, "%lld", filter->slots);
+            drmaa2_dict_set(sql_filter, "slots", slots_c);
+        }
+    }
+        
+    drmaa2_string query = build_query_string("SELECT session_name, rowid FROM jobs", sql_filter);
+    int rc = drmaa2_db_query(query, get_sjobs_callback, jobs);
+    drmaa2_string_free(&query);
+    drmaa2_string_free(&session_id_c);
+    drmaa2_string_free(&job_state_c);
+    drmaa2_string_free(&allocated_machines_c);
+    drmaa2_string_free(&slots_c);
+    drmaa2_string_free(&wallclock_time_c);
+    drmaa2_string_free(&cpu_time_c);
+    drmaa2_string_free(&submission_time_c);
+    drmaa2_string_free(&dispatch_time_c);
+    drmaa2_string_free(&finish_time_c);
+
     if (rc != SQLITE_OK) return NULL;
     return jobs;
 }
@@ -394,18 +506,10 @@ static int get_jobs_callback(void *ptr, int argc, char **argv, char **azColName)
 
 drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jinfo filter)
 {
-    //TODO: build full filter statement
-    char *sqlfilter = NULL;
-    if (filter){
-        if (filter->exitStatus != -1)
-        {
-            asprintf(&sqlfilter, "WHERE exit_status = %d", filter->exitStatus);
-        }
-    }
-    char *stmt = sqlite3_mprintf("SELECT session_name, rowid FROM jobs %s", sqlfilter);
-    int rc = drmaa2_db_query(stmt, get_jobs_callback, jobs);
-    sqlite3_free(stmt);
-    free(sqlfilter);
+    char *query = build_query_string("SELECT session_name, rowid FROM jobs", NULL);
+    printf("query_string %s\n", query);
+    int rc = drmaa2_db_query(query, get_jobs_callback, jobs);
+    drmaa2_string_free(&query);
     if (rc != SQLITE_OK) return NULL;
     return jobs;
 }

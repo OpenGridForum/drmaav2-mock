@@ -519,7 +519,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
     }
 
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
-    jobs = get_session_jobs(jobs, js);
+    jobs = get_session_jobs(jobs, js, filter);
 
     return jobs;
 }
@@ -750,7 +750,7 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
     drmaa2_list_free(&sl);
     drmaa2_jarray ja = (drmaa2_jarray)malloc(sizeof(drmaa2_jarray_s));
     char *cid;
-    asprintf(&cid, "%lld\n", id);
+    asprintf(&cid, "%lld", id);
     ja->id = cid; //already allocated
     ja->session_name = strdup(js->name);
     return ja;
