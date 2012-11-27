@@ -519,7 +519,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
     }
 
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
-    jobs = get_session_jobs(jobs, js, filter);
+    jobs = get_jobs(jobs, js, filter);
 
     return jobs;
 }
@@ -1002,7 +1002,7 @@ drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
 drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter)
 {
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
-    jobs = get_jobs(jobs, filter);
+    jobs = get_jobs(jobs, NULL, filter);
     return jobs;
 }
 

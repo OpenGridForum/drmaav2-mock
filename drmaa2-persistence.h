@@ -20,9 +20,8 @@ long long save_job(drmaa2_jsession js, long long template_id);
 long long save_jtemplate(drmaa2_jtemplate jt, const char *session_name);
 
 drmaa2_string_list get_jsession_names(drmaa2_string_list session_names);
-drmaa2_j_list get_session_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filter);
 
-drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jinfo filter);
+drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filter);
 
 
 // reservation session methods
