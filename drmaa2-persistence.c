@@ -15,18 +15,18 @@
 
 
 char setup[] = "\
-CREATE TABLE job_sessions(\
+CREATE TABLE IF NOT EXISTS job_sessions(\
 id INTEGER,\
 contact TEXT,\
 name TEXT UNIQUE NOT NULL\
 );\
 \
-CREATE TABLE reservation_sessions(\
+CREATE TABLE IF NOT EXISTS reservation_sessions(\
 contact TEXT,\
 name TEXT UNIQUE NOT NULL\
 );\
 \
-CREATE TABLE jobs(\
+CREATE TABLE IF NOT EXISTS jobs(\
 session_id INTEGER,\
 session_name TEXT,\
 template_id INTEGER,\
@@ -49,7 +49,7 @@ dispatch_time INTEGER,\
 finish_time INTEGER\
 );\
 \
-CREATE TABLE reservations(\
+CREATE TABLE IF NOT EXISTS reservations(\
 session_name TEXT,\
 template_id INTEGER,\
 \
@@ -61,14 +61,14 @@ reserved_slots INTEGER,\
 reserved_machines TEXT\
 );\
 \
-CREATE TABLE job_arrays(\
+CREATE TABLE IF NOT EXISTS job_arrays(\
 session_name TEXT,\
 template_id INTEGER,\
 \
 jobs TEXT\
 );\
 \
-CREATE TABLE job_templates(\
+CREATE TABLE IF NOT EXISTS job_templates(\
 session_name TEXT,\
 remote_command TEXT,\
 args TEXT,\
@@ -102,7 +102,7 @@ resource_limits TEXT,\
 accounting_id TEXT\
 );\
 \
-CREATE TABLE reservation_templates(\
+CREATE TABLE IF NOT EXISTS reservation_templates(\
 session_name TEXT,\
 reservation_name TEXT,\
 start_time NUMERIC,\
@@ -159,21 +159,14 @@ int evaluate_result_code(int rc, char *zErrMsg)
     return rc;
 }
 
-int drmaa2_setup_db(char *name)
-{
-    char *zErrMsg = 0;
-    int rc;
-    sqlite3 *db = open_db(name);
-    rc = sqlite3_exec(db, setup, NULL, 0, &zErrMsg);
-    evaluate_result_code(rc, zErrMsg);
-    sqlite3_close(db);
-}
 
 int drmaa2_reset_db(char *name)
 {
     char *zErrMsg = 0;
     int rc;
     sqlite3 *db = open_db(name);
+    rc = sqlite3_exec(db, setup, NULL, 0, &zErrMsg);
+    evaluate_result_code(rc, zErrMsg);
     rc = sqlite3_exec(db, reset, NULL, 0, &zErrMsg);
     evaluate_result_code(rc, zErrMsg);
     sqlite3_close(db);

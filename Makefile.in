@@ -1,9 +1,9 @@
 all: drmaa examples
 examples: example-large sleepFive
 ifeq (@SQLITE3_EXISTS@,1)
-drmaa: drmaa2.so setup_persistency
+drmaa: drmaa2.so drmaa2-reset-db
 else
-drmaa: drmaa2.so setup_persistency sqlite3.o
+drmaa: drmaa2.so drmaaa2-reset-db sqlite3.o
 endif
 tests: force_look
 	cd tests; $(MAKE) $(MFLAGS) 
@@ -11,7 +11,7 @@ tests: force_look
 drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o
 	@CC@ -o $@ -shared @LIBS@ $^
 
-setup_persistency: setup_db.o drmaa2.so 
+drmaa2-reset-db: drmaa2-reset-db.o drmaa2.so 
 	@CC@ -o $@ @LIBS@ $^
 
 drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c 
@@ -39,7 +39,7 @@ sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ @CFLAGS@ -c $<
 
 clean:
-	rm -f setup_persistency
+	rm -f drmaa2-reset-db
 	rm -f *.o
 	rm -f *.so
 	rm -f tests/*.o tests/test
