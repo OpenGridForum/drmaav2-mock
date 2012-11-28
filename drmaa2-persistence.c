@@ -368,8 +368,26 @@ int has_to_be_escaped(const char *key) {
         return 1;
     else if (strcmp(key, "job_sub_state") == 0)
         return 1;
+    else if (strcmp(key, "submission_time") == 0)
+        return 1;
+    else if (strcmp(key, "dispatch_time") == 0)
+        return 1;
+    else if (strcmp(key, "finish_time") == 0)
+        return 1;
     else
         return 0;
+}
+
+
+char *comperator(const char *key) {
+    if (strcmp(key, "submission_time") == 0)
+        return ">=";
+    else if (strcmp(key, "dispatch_time") == 0)
+        return ">=";
+    else if (strcmp(key, "finish_time") == 0)
+        return ">=";
+    else
+        return "=";
 }
 
 
@@ -384,7 +402,7 @@ char *build_query_string(char* start, drmaa2_dict filter) {
     size_t i;
     for (i = 0; i < drmaa2_list_size(keys); i++) {
         const char *key = drmaa2_list_get(keys, i);
-        req_space += strlen(key) + strlen(drmaa2_dict_get(filter, key)) + 3; // 3 - 2 whitespace and '='
+        req_space += strlen(key) + strlen(drmaa2_dict_get(filter, key)) + 4; // 4 - 2 whitespace and "="/">="
         if (has_to_be_escaped(key)) {
             req_space += 2;
         }
@@ -417,10 +435,10 @@ char *build_query_string(char* start, drmaa2_dict filter) {
         const char *key = drmaa2_list_get(keys, i);
         const char *value = drmaa2_dict_get(filter, key);
         if (has_to_be_escaped(key)) {
-            asprintf(&cur_filter, "%s = \"%s\"", key, value);
+            asprintf(&cur_filter, "%s %s \"%s\"", key, comperator(key), value);
         }
         else {
-            asprintf(&cur_filter, "%s = %s", key, value);
+            asprintf(&cur_filter, "%s %s %s", key, comperator(key), value);
         }
 
         strcpy(ins, cur_filter);
@@ -440,13 +458,12 @@ drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filt
 
     char *exit_status_c         = NULL;
     char *job_state_c           = NULL;
-    char *allocated_machines_c  = NULL;
     char *slots_c               = NULL;
-    char *wallclock_time_c      = NULL;
-    char *cpu_time_c            = NULL;
-    char *submission_time_c     = NULL;
-    char *dispatch_time_c       = NULL;
-    char *finish_time_c         = NULL;
+    //char *wallclock_time_c      = NULL;       wallclock time  is ignored right now
+    //char *cpu_time_c            = NULL;       cpu time        is ignored right now
+    char submission_time_c[32];
+    char dispatch_time_c[32];
+    char finish_time_c[32];
 
     if (js != NULL) {
         asprintf(&session_id_c, "%d", js->id);
@@ -458,17 +475,42 @@ drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filt
     if (filter != NULL) {
         if (filter->jobId != DRMAA2_UNSET_STRING)
             drmaa2_dict_set(sql_filter, "rowid", filter->jobId);
+        if (filter->exitStatus != DRMAA2_UNSET_NUM) {
+            asprintf(&exit_status_c, "%d", filter->exitStatus);
+            drmaa2_dict_set(sql_filter, "exit_status", exit_status_c);
+        }
+        if (filter->terminatingSignal != DRMAA2_UNSET_STRING)
+            drmaa2_dict_set(sql_filter, "terminating_signal", filter->terminatingSignal);
+        // annotation is ignored (according to the spec)
         if (filter->jobState != DRMAA2_UNSET_ENUM) {
             asprintf(&job_state_c, "%d", filter->jobState);
             drmaa2_dict_set(sql_filter, "job_state", job_state_c);
         }
-        if (filter->allocatedMachines != DRMAA2_UNSET_LIST) {
-            allocated_machines_c = string_join(filter->allocatedMachines, '|');
-            drmaa2_dict_set(sql_filter, "allocated_machines", allocated_machines_c);
-        }
+        if (filter->jobSubState != DRMAA2_UNSET_STRING)
+            drmaa2_dict_set(sql_filter, "job_sub_state", filter->jobSubState);
+        // allocatedMachines is ignored in the mock implementation
+        if (filter->submissionMachine != DRMAA2_UNSET_STRING)
+            drmaa2_dict_set(sql_filter, "submission_machine", filter->submissionMachine);
+        if (filter->jobOwner != DRMAA2_UNSET_STRING)
+            drmaa2_dict_set(sql_filter, "job_owner", filter->jobOwner);
         if (filter->slots != DRMAA2_UNSET_NUM) {
             asprintf(&slots_c, "%lld", filter->slots);
             drmaa2_dict_set(sql_filter, "slots", slots_c);
+        }
+        if (filter->queueName != DRMAA2_UNSET_STRING)
+            drmaa2_dict_set(sql_filter, "queue_name", filter->queueName);
+
+        if (filter->submissionTime != DRMAA2_UNSET_TIME) {
+            strftime(submission_time_c, 32, "%Y-%m-%d %H:%M:%S", gmtime(&filter->submissionTime));
+            drmaa2_dict_set(sql_filter, "submission_time", submission_time_c);
+        }
+        if (filter->dispatchTime != DRMAA2_UNSET_TIME) {
+            strftime(dispatch_time_c, 32, "%Y-%m-%d %H:%M:%S", gmtime(&filter->dispatchTime));
+            drmaa2_dict_set(sql_filter, "dispatch_time", dispatch_time_c);
+        }
+        if (filter->finishTime != DRMAA2_UNSET_TIME) {
+            strftime(finish_time_c, 32, "%Y-%m-%d %H:%M:%S", gmtime(&filter->finishTime));
+            drmaa2_dict_set(sql_filter, "finish_time", finish_time_c);  
         }
     }
         
@@ -479,13 +521,9 @@ drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filt
     drmaa2_string_free(&session_id_c);
 
     drmaa2_string_free(&job_state_c);
-    drmaa2_string_free(&allocated_machines_c);
     drmaa2_string_free(&slots_c);
-    drmaa2_string_free(&wallclock_time_c);
-    drmaa2_string_free(&cpu_time_c);
-    drmaa2_string_free(&submission_time_c);
-    drmaa2_string_free(&dispatch_time_c);
-    drmaa2_string_free(&finish_time_c);
+    //drmaa2_string_free(&wallclock_time_c);
+    //drmaa2_string_free(&cpu_time_c);
 
     if (rc != SQLITE_OK) return NULL;
     return jobs;
@@ -919,7 +957,7 @@ drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId)
 
 static int get_jobinfo_callback(drmaa2_jinfo ji, int argc, char **argv, char **azColName)
 {
-    assert(argc == 5);
+    assert(argc == 19);
     int i;
     for(i=0; i<argc; i++)
     {
@@ -977,8 +1015,7 @@ static int get_jobinfo_callback(drmaa2_jinfo ji, int argc, char **argv, char **a
 drmaa2_jinfo get_job_info(drmaa2_jinfo ji)
 {
     long long row_id = atoll(ji->jobId);
-    char *stmt = sqlite3_mprintf("SELECT exit_status, terminating_signal, submission_time, dispatch_time, finish_time\
-        FROM jobs WHERE rowid = %lld", row_id);
+    char *stmt = sqlite3_mprintf("SELECT * FROM jobs WHERE rowid = %lld", row_id);
     int rc = drmaa2_db_query(stmt, (sqlite3_callback)get_jobinfo_callback, ji);
     sqlite3_free(stmt);
     if (rc != SQLITE_OK) return NULL;

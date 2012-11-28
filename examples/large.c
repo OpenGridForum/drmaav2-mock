@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../drmaa2.h"
+#include <time.h>
 
 
 
@@ -91,11 +92,17 @@ int main()
     printf("Job ran %f seconds\n", difftime(ji->finishTime, ji->dispatchTime));
 
     // close sessions, cleanup
-    //drmaa2_jtemplate_free(&jt);  // includes free of env
+    // jt is reused for jobarray
     drmaa2_rtemplate_free(&rt);  // includes free of cl
     drmaa2_jinfo_free(&ji);
     drmaa2_j_free(&j);
     drmaa2_r_free(&r);
+
+
+
+//==========================JOB ARRAY==============================
+    sleep(1);
+    printf("Here comes a job array\n");
 
     drmaa2_string_free(&jt->remoteCommand);
     jt->remoteCommand = strdup("./sleepFive");
@@ -103,7 +110,9 @@ int main()
     jt->errorPath = strdup("/$DRMAA2_INDEX$/test/$DRMAA2_INDEX$.tbl");
     jt->inputPath = strdup("$DRMAA2_WORKING_DIR$/$DRMAA2_INDEX$/test/$DRMAA2_INDEX$.tbl");
 
-    printf("Here comes a job array\n");
+    time_t ja_start = time(NULL); // used later for job filering
+
+
     drmaa2_jarray ja = drmaa2_jsession_run_bulk_jobs(js, jt, 1, 4, 1, DRMAA2_UNSET_NUM);
 
     drmaa2_jtemplate ja_jt = drmaa2_jarray_get_job_template(ja);
@@ -116,7 +125,6 @@ int main()
     drmaa2_jarray_terminate(ja);
 
 
-
     drmaa2_jarray_free(&ja);
     drmaa2_jtemplate_free(&jt);  // includes free of env
 
@@ -125,13 +133,20 @@ int main()
     drmaa2_list_free(&jl);
 
     ji = drmaa2_jinfo_create();
-    ji->jobState = DRMAA2_FAILED;
+    ji->jobState = DRMAA2_DONE;
     jl = drmaa2_jsession_get_jobs(js, ji);
-    printf("The job session has %ld failed jobs\n", drmaa2_list_size(jl));
+    printf("The job session has %ld done jobs\n", drmaa2_list_size(jl));
     drmaa2_list_free(&jl);
+
+
+    ji->jobState = DRMAA2_UNSET_ENUM;
+    ji->submissionTime = ja_start;
+
+    jl = drmaa2_jsession_get_jobs(js, ji);
+    printf("The job session has %ld jobs submitted after %s\n", drmaa2_list_size(jl), ctime(&ja_start));
+    drmaa2_list_free(&jl);
+
     drmaa2_jinfo_free(&ji);
-
-
 
 
     drmaa2_close_msession(ms);
@@ -145,5 +160,5 @@ int main()
     drmaa2_jsession_free(&js);
  
     drmaa2_list_free(&ml);
-    sleep(2); // wait that jobs are terminated
+    sleep(1); // wait that jobs are terminated
 }
