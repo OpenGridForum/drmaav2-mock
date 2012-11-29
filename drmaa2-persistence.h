@@ -11,8 +11,8 @@ int save_jsession(drmaa2_jsession *js);
 int delete_jsession(const char *session_name);
 drmaa2_jsession get_jsession(const char *session_name);
 
-int drmaa2_jsession_is_valid(const char *session_name);
-int drmaa2_rsession_is_valid(const char *session_name);
+int jsession_is_valid(drmaa2_jsession js);
+int rsession_is_valid(drmaa2_rsession rs);
 
 long long save_job(drmaa2_jsession js, long long template_id);
 long long save_jtemplate(drmaa2_jtemplate jt, const char *session_name);

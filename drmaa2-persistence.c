@@ -266,7 +266,7 @@ static int drmaa2_entry_exists_callback(void *ptr, int argc, char **argv, char *
     return 0;
 }
 
-int drmaa2_session_is_valid(int session_type, const char *session_name) {
+int session_is_valid(int session_type, const char *session_name) {
     char *session_type_name = (session_type == 0) ? "job_sessions": "reservation_sessions";
     char *stmt = sqlite3_mprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE name = %Q LIMIT 1);", session_type_name, session_name);
     int exists = 0;
@@ -275,12 +275,12 @@ int drmaa2_session_is_valid(int session_type, const char *session_name) {
     return exists;
 }
 
-int drmaa2_jsession_is_valid(const char *session_name) {
-    return drmaa2_session_is_valid(0, session_name);
+int jsession_is_valid(drmaa2_jsession js) {
+    return session_is_valid(0, js->name);
 }
 
-int drmaa2_rsession_is_valid(const char *session_name) {
-    return drmaa2_session_is_valid(1, session_name);
+int rsession_is_valid(drmaa2_rsession rs) {
+    return session_is_valid(1, rs->name);
 }
 
 

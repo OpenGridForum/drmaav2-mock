@@ -269,7 +269,7 @@ void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef) {
 
 
 drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs) {
-    if (!drmaa2_rsession_is_valid(rs->name)) {
+    if (!rsession_is_valid(rs)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -281,7 +281,7 @@ drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs) {
 
 
 drmaa2_string drmaa2_rsession_get_session_name(const drmaa2_rsession rs) {
-    if (!drmaa2_rsession_is_valid(rs->name)) {
+    if (!rsession_is_valid(rs)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -292,7 +292,7 @@ drmaa2_string drmaa2_rsession_get_session_name(const drmaa2_rsession rs) {
 
 
 drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_string reservationId) {
-    if (!drmaa2_rsession_is_valid(rs->name)) {
+    if (!rsession_is_valid(rs)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -308,7 +308,7 @@ drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_
 
 
 drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt) {
-    if (!drmaa2_rsession_is_valid(rs->name)) {
+    if (!rsession_is_valid(rs)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -329,7 +329,7 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 
 
 drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs) {
-    if (!drmaa2_rsession_is_valid(rs->name)) {
+    if (!rsession_is_valid(rs)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -427,7 +427,7 @@ drmaa2_error drmaa2_jarray_terminate (drmaa2_jarray ja) {
 
 
 drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js) {
-    if (!drmaa2_jsession_is_valid(js->name)) {
+    if (!jsession_is_valid(js)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -440,7 +440,7 @@ drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js) {
 
 
 drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js) {
-    if (!drmaa2_jsession_is_valid(js->name)) {
+    if (!jsession_is_valid(js)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -451,7 +451,7 @@ drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js) {
 
 
 drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js) {
-    if (!drmaa2_jsession_is_valid(js->name)) {
+    if (!jsession_is_valid(js)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -463,7 +463,7 @@ drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js) 
 
 
 drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_jinfo filter) {
-    if (!drmaa2_jsession_is_valid(js->name)) {
+    if (!jsession_is_valid(js)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -477,7 +477,7 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 
 
 drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drmaa2_string jobarrayId) {
-    if (!drmaa2_jsession_is_valid(js->name)) {
+    if (!jsession_is_valid(js)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -498,7 +498,7 @@ drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drma
 
 
 drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt) {
-    if (!drmaa2_jsession_is_valid(js->name)) {
+    if (!jsession_is_valid(js)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -1023,7 +1023,7 @@ drmaa2_msession drmaa2_open_msession(const char * session_name) {
 
 
 drmaa2_error drmaa2_close_jsession(drmaa2_jsession js) {
-    if (drmaa2_jsession_is_valid(js->name))
+    if (jsession_is_valid(js))
         return DRMAA2_SUCCESS;
     else
         return DRMAA2_INVALID_SESSION;
@@ -1031,7 +1031,10 @@ drmaa2_error drmaa2_close_jsession(drmaa2_jsession js) {
 
 
 drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs) {
-    return DRMAA2_SUCCESS;
+    if (rsession_is_valid(rs))
+        return DRMAA2_SUCCESS;
+    else
+        return DRMAA2_INVALID_SESSION;
 }
 
 
