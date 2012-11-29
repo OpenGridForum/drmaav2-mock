@@ -1,0 +1,30 @@
+drmaa2-mock was implemented and tested on Mac OS 10.8 with gcc 4.2.
+
+
+Dependencies:
+	unix process handling and synchronization (fork, semaphores)
+	sqlite3 (for persistency handling)
+	CUnit for testing
+
+---------------------------------------
+
+To build drmaa2-mock run:
+
+./configure
+make
+
+./drmaa2-reset-db	can be used to setup and reset the (current) drmaa2 database (required for the sample application).
+./example-large		starts a sample application (using the current set database). It's source code can be found in examples/large.c. (NOTE: "example-large" requires a preceding call of ./drmaa2-reset-db)
+
+The environment variable DRMAA2_DB_NAME stores the current used drmaa2 database. If DRMAA2_DB_NAME is not set, the default database of drmaa2-mock "drmaa2.sqlite" is used.
+The current database can be changed with:
+export DRMAA2_DB_NAME=...
+
+---------------------------------------
+
+To build and run the drmaa2-mock tests suite:
+(The test suite uses its own database "drmaa2_test.sqite".)
+
+make tests
+./test/test
+
