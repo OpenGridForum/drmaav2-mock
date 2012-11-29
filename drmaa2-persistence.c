@@ -211,8 +211,7 @@ int drmaa2_db_query_rowid(char *stmt) {
 
 //start of external used functions
 
-int save_jsession(drmaa2_jsession *jsRef) {
-    drmaa2_jsession js = *jsRef;
+int save_jsession(drmaa2_jsession js) {
     js->id = drmaa2_random_int(); 
     char *stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; INSERT INTO job_sessions VALUES(%lld, %Q, %Q); COMMIT;", js->id, js->contact, js->name);
     int rc = drmaa2_db_query(stmt, NULL, NULL);
@@ -511,8 +510,7 @@ drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filt
 }
 
 
-int save_rsession(drmaa2_rsession *rsRef) {
-    drmaa2_rsession rs = *rsRef;
+int save_rsession(drmaa2_rsession rs) {
     char *stmt = sqlite3_mprintf("INSERT INTO reservation_sessions VALUES(%Q, %Q)", rs->contact, rs->name);
     int rc = drmaa2_db_query(stmt, NULL, 0);
     sqlite3_free(stmt);

@@ -950,7 +950,8 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
     assert(js->name != DRMAA2_UNSET_STRING);
     js->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_jsession(&js) != 0) {
+    if (save_jsession(js) != 0) {
+        drmaa2_jsession_free(&js);
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
         return NULL;
@@ -976,7 +977,8 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
     assert(rs->name != DRMAA2_UNSET_STRING);
     rs->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_rsession(&rs) != 0) {
+    if (save_rsession(rs) != 0) {
+        drmaa2_rsession_free(&rs);
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
         return NULL;

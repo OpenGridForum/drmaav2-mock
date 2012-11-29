@@ -7,7 +7,7 @@
 
 
 // job session methods
-int save_jsession(drmaa2_jsession *js);
+int save_jsession(drmaa2_jsession js);
 int delete_jsession(const char *session_name);
 drmaa2_jsession get_jsession(const char *session_name);
 
@@ -23,7 +23,7 @@ drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filt
 
 
 // reservation session methods
-int save_rsession(drmaa2_rsession *rs);
+int save_rsession(drmaa2_rsession rs);
 int delete_rsession(const char *session_name);
 drmaa2_rsession get_rsession(const char *session_name);
 
