@@ -126,10 +126,6 @@ void drmaa2_r_free(drmaa2_r * rRef) {
 
 
 
-
-
-
-
 drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl) {
 #ifdef __GNUC__
     if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 2) {

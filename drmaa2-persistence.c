@@ -294,15 +294,21 @@ long long save_job(drmaa2_jsession js, long long template_id) {
 
 
 long long save_jtemplate(drmaa2_jtemplate jt, const char *session_name) {
+    drmaa2_string args_string = string_join(jt->args, '|');
+    drmaa2_string email_string = string_join(jt->email, '|');
+    drmaa2_string cm_string = string_join(jt->candidateMachines, '|');
     char *stmt = sqlite3_mprintf("INSERT INTO job_templates VALUES(%Q, %Q, %Q, %d, %d, %Q, %Q, %Q, %Q, %d, %d, %Q, %Q, %Q,\
                                 %Q, %d, %Q, %Q, %lld, %lld, %lld, %Q, %lld, %d, %d, %d, %d, %Q, %Q, %Q, %Q)",
-                    session_name, jt->remoteCommand, jt->args, jt->submitAsHold, jt->rerunnable, NULL, jt->workingDirectory,
-                    jt->jobCategory, NULL, jt->emailOnStarted, jt->emailOnTerminated, jt->jobName, jt->inputPath,
+                    session_name, jt->remoteCommand, args_string, jt->submitAsHold, jt->rerunnable, NULL, jt->workingDirectory,
+                    jt->jobCategory, email_string, jt->emailOnStarted, jt->emailOnTerminated, jt->jobName, jt->inputPath,
                     jt->outputPath, jt->errorPath, jt->joinFiles, jt->reservationId, jt->queueName, jt->minSlots,
-                    jt->maxSlots, jt->priority, NULL, jt->minPhysMemory, jt->machineOS, jt->machineArch, jt->startTime,
+                    jt->maxSlots, jt->priority, cm_string, jt->minPhysMemory, jt->machineOS, jt->machineArch, jt->startTime,
                     jt->deadlineTime, NULL, NULL, NULL, jt->accountingId);
     sqlite3_int64 row_id = query_rowid(stmt);
     sqlite3_free(stmt);
+    drmaa2_string_free(&args_string);
+    drmaa2_string_free(&email_string);
+    drmaa2_string_free(&cm_string);
     return row_id;
 }
 
@@ -555,6 +561,7 @@ drmaa2_rsession get_rsession(const char *session_name) {
 
 
 long long save_reservation(const char *session_name, long long template_id, const char *name) {
+    // TODO: save all informations
     char *stmt = sqlite3_mprintf("INSERT INTO reservations VALUES(%Q, %lld, %Q, %Q, %Q, %Q, %Q, %Q)", session_name, template_id, NULL, NULL, NULL, NULL, NULL, NULL);
     sqlite3_int64 row_id = query_rowid(stmt);
     sqlite3_free(stmt);
@@ -568,12 +575,15 @@ long long save_reservation(const char *session_name, long long template_id, cons
 
 
 long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name) {
-    //TODO: save string lists
+    drmaa2_string acl_string = string_join(rt->usersACL, '|');
+    drmaa2_string cm_string = string_join(rt->candidateMachines, '|');
     char *stmt = sqlite3_mprintf("INSERT INTO reservation_templates VALUES(%Q, %Q, %d, %d, %d, %lld, %lld, %Q, %Q, %Q, %lld, %d, %d)", 
                     session_name, rt->reservationName, rt->startTime, rt->endTime, rt->duration, rt->minSlots, rt->maxSlots,
-                    rt->jobCategory, NULL, NULL, rt->minPhysMemory, rt->machineOS, rt->machineArch);
+                    rt->jobCategory, acl_string, cm_string, rt->minPhysMemory, rt->machineOS, rt->machineArch);
     sqlite3_int64 row_id = query_rowid(stmt);
     sqlite3_free(stmt);
+    drmaa2_string_free(&acl_string);
+    drmaa2_string_free(&cm_string);
     return row_id;
 }
 
@@ -674,7 +684,6 @@ drmaa2_r_list get_reservations(drmaa2_r_list reservations) {
 
 
 static int get_rtemplate_callback(drmaa2_rtemplate rt, int argc, char **argv, char **azColName) {
-    //TODO: save string lists
     assert(argc == 12);
     int i;
     for (i = 0; i < argc; i++) {
@@ -688,9 +697,9 @@ static int get_rtemplate_callback(drmaa2_rtemplate rt, int argc, char **argv, ch
         else if (!strcmp(azColName[i], "job_category") && argv[i] != NULL)
             rt->jobCategory = strdup(argv[i]);
         else if (!strcmp(azColName[i], "users_ACL") && argv[i] != NULL)
-            rt->usersACL = DRMAA2_UNSET_LIST;
+            rt->usersACL = string_split(argv[i], '|');
         else if (!strcmp(azColName[i], "candidate_machines") && argv[i] != NULL)
-            rt->candidateMachines = DRMAA2_UNSET_LIST;
+            rt->candidateMachines = string_split(argv[i], '|');
         else if (!strcmp(azColName[i], "min_phys_memory") && argv[i] != NULL)
             rt->minPhysMemory = atoi(argv[i]);
         else if (!strcmp(azColName[i], "machine_os") && argv[i] != NULL)
@@ -745,9 +754,10 @@ static int get_rinfo_callback(drmaa2_rinfo ri, int argc, char **argv, char **azC
         if (!strcmp(azColName[i], "reservation_name") && argv[i] != NULL)
             ri->reservationName = strdup(argv[i]);
         else if (!strcmp(azColName[i], "users_ACL") && argv[i] != NULL)
-            ri->usersACL = DRMAA2_UNSET_LIST;
+            ri->usersACL = string_split(argv[i], '|');
         else if (!strcmp(azColName[i], "reserved_slots") && argv[i] != NULL)
             ri->reservedSlots = atoi(argv[i]);
+        // reserved machines are not supported right now
         else if ((argv[i] != NULL) && 
     (!strcmp(azColName[i], "reserved_start_time") || !strcmp(azColName[i], "reserved_end_time") ) )
         {
@@ -785,13 +795,14 @@ drmaa2_rinfo get_rinfo(drmaa2_rinfo ri) {
 
 
 static int get_job_template_callback(drmaa2_jtemplate jt, int argc, char **argv, char **azColName) {
-    //TODO: save string lists
     assert(argc == 30);
     int i;
     for (i = 0; i < argc; i++) {
         DEBUG_PRINT("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         if (!strcmp(azColName[i], "remote_command") && argv[i] != NULL)
             jt->remoteCommand = strdup(argv[i]);
+        else if (!strcmp(azColName[i], "args") && argv[i] != NULL)
+            jt->args = string_split(argv[i], '|');
         else if (!strcmp(azColName[i], "submit_as_hold") && argv[i] != NULL)
             jt->submitAsHold = atoi(argv[i]);
         else if (!strcmp(azColName[i], "rerunnable") && argv[i] != NULL)
@@ -803,7 +814,7 @@ static int get_job_template_callback(drmaa2_jtemplate jt, int argc, char **argv,
         else if (!strcmp(azColName[i], "job_category") && argv[i] != NULL)
             jt->jobCategory = strdup(argv[i]);
         else if (!strcmp(azColName[i], "email") && argv[i] != NULL)
-            jt->email = DRMAA2_UNSET_LIST;
+            jt->email = string_split(argv[i], '|');
         else if (!strcmp(azColName[i], "email_on_started") && argv[i] != NULL)
             jt->emailOnStarted = atoi(argv[i]);
         else if (!strcmp(azColName[i], "email_on_terminated") && argv[i] != NULL)
@@ -829,7 +840,7 @@ static int get_job_template_callback(drmaa2_jtemplate jt, int argc, char **argv,
         else if (!strcmp(azColName[i], "priority") && argv[i] != NULL)
             jt->priority = atoi(argv[i]);
         else if (!strcmp(azColName[i], "candidate_machines") && argv[i] != NULL)
-            jt->candidateMachines = DRMAA2_UNSET_LIST;
+            jt->candidateMachines = string_split(argv[i], '|');
         else if (!strcmp(azColName[i], "min_phys_memory") && argv[i] != NULL)
             jt->minPhysMemory = atoi(argv[i]);
         else if (!strcmp(azColName[i], "machine_os") && argv[i] != NULL)
