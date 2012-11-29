@@ -298,7 +298,7 @@ drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_
         return NULL;
     }
 
-    drmaa2_r r = drmaa2_get_reservation(reservationId);
+    drmaa2_r r = get_reservation(reservationId);
     if (r == NULL) {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Reservation ID is invalid.";
@@ -336,7 +336,7 @@ drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs) {
     }
 
     drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, (drmaa2_list_entryfree)drmaa2_r_free);
-    reservations = drmaa2_get_session_reservations(reservations, rs->name);
+    reservations = get_session_reservations(reservations, rs->name);
 
     return reservations;
 }
@@ -354,7 +354,7 @@ drmaa2_string drmaa2_r_get_session_name(const drmaa2_r r) {
 
 drmaa2_rtemplate  drmaa2_r_get_reservation_template(const drmaa2_r r) {
     drmaa2_rtemplate rt = drmaa2_rtemplate_create();
-    rt = drmaa2_get_rtemplate(rt, r->id);
+    rt = get_rtemplate(rt, r->id);
     return rt;
 }
 
@@ -362,7 +362,7 @@ drmaa2_rtemplate  drmaa2_r_get_reservation_template(const drmaa2_r r) {
 drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r) {
     drmaa2_rinfo ri = drmaa2_rinfo_create();
     ri->reservationId = strdup(r->id);
-    ri = drmaa2_get_rinfo(ri);
+    ri = get_rinfo(ri);
     return ri; 
 }
 
@@ -390,7 +390,7 @@ drmaa2_string drmaa2_jarray_get_session_name(const drmaa2_jarray ja) {
 
 drmaa2_jtemplate drmaa2_jarray_get_job_template(const drmaa2_jarray ja) {
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
-    return drmaa2_get_jobarray_template(jt, ja->id);
+    return get_jobarray_template(jt, ja->id);
 }
 
 
@@ -770,7 +770,7 @@ drmaa2_string drmaa2_j_get_session_name(const drmaa2_j j) {
 
 drmaa2_jtemplate drmaa2_j_get_jt(const drmaa2_j j) {
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
-    jt = drmaa2_get_job_template(jt, j->id);
+    jt = get_job_template(jt, j->id);
     return jt;
 }
 

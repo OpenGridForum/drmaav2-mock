@@ -11,6 +11,6 @@ This executable creates DRMAA2 database tables if they do not exists yet\n\
 AND\ndeletes all data from them.\n\nusage: %s\n", argv[0]);
         return(1);
     }
-    drmaa2_reset_db();
+    reset_db();
     return 0;
 }

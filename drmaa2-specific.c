@@ -222,13 +222,13 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
     }
     else {
         // parent - monitors the running job
-        drmaa2_save_pid(row_id, job_pid);
+        save_pid(row_id, job_pid);
         sem_post(lock); // pid is written now (notify lib)
 
         pid_t child;
         int status;
         child = waitpid(job_pid, &status, 0);
-        drmaa2_save_exit_status(row_id, WEXITSTATUS(status));
+        save_exit_status(row_id, WEXITSTATUS(status));
 
         if (WIFEXITED(status)) {
             save_state(j, DRMAA2_DONE);

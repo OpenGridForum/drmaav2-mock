@@ -297,7 +297,7 @@ int main(int argc, char* argv[]) {
         }
 
         setenv("DRMAA2_DB_NAME", "drmaa2_test.sqlite", 1);
-        drmaa2_reset_db();
+        reset_db();
 
 
         CU_basic_set_mode(mode);

@@ -9,7 +9,7 @@
 
 
 void test_empty_jsession_list() {
-    drmaa2_reset_db(DRMAA_DBFILE);
+    reset_db(DRMAA_DBFILE);
     drmaa2_string_list sl = drmaa2_get_jsession_names();
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 0);
     drmaa2_list_free(&sl);

@@ -6,6 +6,9 @@
 
 
 
+int reset_db();
+
+
 // job session methods
 int save_jsession(drmaa2_jsession js);
 int delete_jsession(const char *session_name);
@@ -30,26 +33,20 @@ drmaa2_rsession get_rsession(const char *session_name);
 long long save_reservation(const char *session_name, long long template_id, const char *name);
 long long save_rtemplate(drmaa2_rtemplate rt, const char *session_name);
 
-drmaa2_r drmaa2_get_reservation(const drmaa2_string reservationId);
+drmaa2_r get_reservation(const drmaa2_string reservationId);
 
 drmaa2_string_list get_rsession_names(drmaa2_string_list session_names);
-drmaa2_r_list drmaa2_get_session_reservations(drmaa2_r_list reservations, const char *session_name);
+drmaa2_r_list get_session_reservations(drmaa2_r_list reservations, const char *session_name);
 
 drmaa2_r_list get_reservations(drmaa2_r_list reservations);
 
 
-drmaa2_rtemplate drmaa2_get_rtemplate(drmaa2_rtemplate rt, const char *reservationId);
-drmaa2_rinfo drmaa2_get_rinfo(drmaa2_rinfo ri);
+drmaa2_rtemplate get_rtemplate(drmaa2_rtemplate rt, const char *reservationId);
+drmaa2_rinfo get_rinfo(drmaa2_rinfo ri);
 
-
-int drmaa2_get_job_status(drmaa2_j j);
-
-drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId);
+drmaa2_jtemplate get_job_template(drmaa2_jtemplate jt, const char *jobId);
 
 drmaa2_jinfo get_job_info(drmaa2_jinfo ji);
-
-
-int drmaa2_reset_db();
 
 
 pid_t get_job_pid(drmaa2_j j);
@@ -64,13 +61,13 @@ int jarray_exists(const char *session_name, const char *jobarrayId);
 
 drmaa2_j_list get_jobs_of_jarray(drmaa2_jarray ja);
 
-drmaa2_jtemplate drmaa2_get_jobarray_template(drmaa2_jtemplate jt, const char *jobarrayId);
+drmaa2_jtemplate get_jobarray_template(drmaa2_jtemplate jt, const char *jobarrayId);
 
 
 
-int drmaa2_save_pid(long long row_id, pid_t pid);
+int save_pid(long long row_id, pid_t pid);
 
-int drmaa2_save_exit_status(long long row_id, int status);
+int save_exit_status(long long row_id, int status);
 
 
 

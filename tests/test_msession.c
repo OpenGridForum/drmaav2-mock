@@ -9,7 +9,7 @@
 
 
 void test_reservation_lists() {
-    drmaa2_reset_db();
+    reset_db();
     drmaa2_error error_code;
 
     //test empty reservation list
@@ -67,7 +67,7 @@ void test_reservation_lists() {
 
 
 void test_job_lists() {
-    drmaa2_reset_db();
+    reset_db();
     drmaa2_error error_code;
 
     //test empty job list
