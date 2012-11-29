@@ -5,19 +5,19 @@
 #include <assert.h>
 
 
-void drmaa2_list_free (drmaa2_list * listref)
-{
+
+void drmaa2_list_free (drmaa2_list * listref) {
     drmaa2_list l = *listref;
     if (l == NULL)
         return;
 
     drmaa2_list_item head = (drmaa2_list_item)l->head;
     drmaa2_list_item tmp;
-    while (head != NULL)
-    {
+    while (head != NULL) {
         tmp = head;
         head = tmp->next;
-        if (l->free_entry != NULL) l->free_entry((void **)&(tmp->data));
+        if (l->free_entry != NULL)
+            l->free_entry((void **)&(tmp->data));
         free(tmp);
     }
     free(l);
@@ -25,8 +25,7 @@ void drmaa2_list_free (drmaa2_list * listref)
 }
 
 
-const void *drmaa2_list_get (const drmaa2_list l, long pos)
-{
+const void *drmaa2_list_get (const drmaa2_list l, long pos) {
     if (l == NULL)
         return NULL;
 
@@ -41,26 +40,22 @@ const void *drmaa2_list_get (const drmaa2_list l, long pos)
 }
 
 
-drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
-{
+drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value) {
     if (l == NULL)
         return DRMAA2_INVALID_ARGUMENT;
   
     drmaa2_list_item new_item;
-    if ((new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item))) == NULL)
-    {
+    if ((new_item = (drmaa2_list_item)malloc(sizeof(drmaa2_list_item))) == NULL) {
         printf("bad allocation\n");
         return DRMAA2_OUT_OF_RESOURCE;
     }
     new_item->data = value;
     new_item->next = NULL;
 
-   if (l->head == NULL)
-    {
+   if (l->head == NULL) {
         l->head = new_item;
     }
-    else
-    {
+    else {
         drmaa2_list_item current_item = (drmaa2_list_item)l->head;
         while (current_item->next)
             current_item = current_item->next;
@@ -71,8 +66,7 @@ drmaa2_error drmaa2_list_add (drmaa2_list l, const void * value)
     return DRMAA2_SUCCESS;
 }
 
-drmaa2_error drmaa2_list_del (drmaa2_list l, long pos)
-{
+drmaa2_error drmaa2_list_del (drmaa2_list l, long pos) {
     if (l == NULL)
         return DRMAA2_INVALID_ARGUMENT;
 
@@ -80,8 +74,7 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, long pos)
         return DRMAA2_INVALID_ARGUMENT;
 
     drmaa2_list_item current_item = (drmaa2_list_item)l->head;
-    if (pos == 0)
-    {
+    if (pos == 0) {
         drmaa2_list_item to_delete = current_item;
         l->head = to_delete->next;
         l->size--;
@@ -105,16 +98,14 @@ drmaa2_error drmaa2_list_del (drmaa2_list l, long pos)
 }
 
 
-long drmaa2_list_size (const drmaa2_list l)
-{
+long drmaa2_list_size (const drmaa2_list l) {
     if (l == NULL)
         return -1;
     return l->size;
 }
 
 
-drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback)
-{
+drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entryfree callback) {
   drmaa2_list l;
 
   l = (drmaa2_list)malloc(sizeof(drmaa2_list_s));
@@ -147,8 +138,7 @@ drmaa2_list drmaa2_list_create (const drmaa2_listtype t, const drmaa2_list_entry
 }
 
 
-drmaa2_string_list string_split(const char *string, char separator)
-{
+drmaa2_string_list string_split(const char *string, char separator) {
     if (string == NULL)
         return DRMAA2_UNSET_LIST;
 
@@ -156,8 +146,7 @@ drmaa2_string_list string_split(const char *string, char separator)
     char *rest = (char *)string;
     char *to_insert;
     char *separator_pos;
-    while((separator_pos = strchr(rest, separator)) != NULL)
-    {
+    while((separator_pos = strchr(rest, separator)) != NULL) {
         to_insert = (char *)malloc(sizeof(char) * (separator_pos-rest+1));
         strncpy(to_insert, rest, separator_pos-rest);
         to_insert[separator_pos-rest] = '\0';
@@ -172,23 +161,19 @@ drmaa2_string_list string_split(const char *string, char separator)
     return sl;
 }
 
-drmaa2_string string_join(drmaa2_string_list sl, char separator)
-{
+drmaa2_string string_join(drmaa2_string_list sl, char separator) {
     if (sl == NULL || drmaa2_list_size(sl) == 0)
         return NULL;
     size_t character_count = 0;
     //we calculate space for items, separators and terminating '\0'
     size_t i;
     for (i = 0; i < drmaa2_list_size(sl); i++)
-    {
         character_count += strlen(drmaa2_list_get(sl, i)) + 1;
-    }
     
     drmaa2_string string = (char *)malloc(sizeof(char) * character_count);
     char *next_cpy_pos = string;
     char *to_insert = NULL;
-    for (i = 0; i < drmaa2_list_size(sl); i++)
-    {
+    for (i = 0; i < drmaa2_list_size(sl); i++) {
         to_insert = (char *)drmaa2_list_get(sl, i);
         size_t item_len = strlen(to_insert);
         strncpy(next_cpy_pos, to_insert, item_len);
@@ -198,7 +183,5 @@ drmaa2_string string_join(drmaa2_string_list sl, char separator)
     string[character_count-1] = '\0';
     return string;
 }
-
-
 
 

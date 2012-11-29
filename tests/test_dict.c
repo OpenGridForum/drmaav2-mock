@@ -5,16 +5,15 @@
 #include "test_dict.h"
 
 
-void testFreeNullDict()
-{
+
+void testFreeNullDict() {
     drmaa2_dict d = NULL;
     drmaa2_dict_free(&d);
     CU_ASSERT(1);
 }
 
 
-void testDictErrorHandling()
-{
+void testDictErrorHandling() {
     drmaa2_dict d = NULL;
     drmaa2_error e = drmaa2_dict_set(d, "hallo", "1");
     CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
@@ -44,8 +43,7 @@ void testDictErrorHandling()
 }
 
 
-void testBasicDict()
-{
+void testBasicDict() {
     drmaa2_dict d = drmaa2_dict_create(NULL);
 
     drmaa2_dict_set(d, "name", "drmaa2");
@@ -69,8 +67,7 @@ void testBasicDict()
     CU_ASSERT(1);
 }
 
-void testDict()
-{
+void testDict() {
     drmaa2_dict d = drmaa2_dict_create(NULL);
     drmaa2_dict_set(d, "name", "drmaa2");
     drmaa2_dict_set(d, "language", "c");
@@ -98,8 +95,7 @@ void testDict()
 }
 
 
-void testDictList()
-{
+void testDictList() {
     drmaa2_dict d = drmaa2_dict_create(NULL);
     drmaa2_dict_set(d, "name", "drmaa2");
     drmaa2_dict_set(d, "language", "c");
@@ -121,6 +117,5 @@ void testDictList()
 
     drmaa2_list_free(&sl);
 }
-
 
 

@@ -12,6 +12,7 @@
 #include "drmaa2-debug.h"
 
 
+
 // internal global error variables
 int drmaa2_lasterror_v          = DRMAA2_SUCCESS;
 char *drmaa2_lasterror_text_v   = NULL;
@@ -33,8 +34,7 @@ void call_state_chage_notification(drmaa2_j j, drmaa2_jstate state) {
 
 
 
-void drmaa2_string_free(drmaa2_string * sRef)
-{
+void drmaa2_string_free(drmaa2_string * sRef) {
     if (*sRef != NULL) {        
         free(*sRef);
         *sRef = NULL;
@@ -42,20 +42,17 @@ void drmaa2_string_free(drmaa2_string * sRef)
 }
 
 
-drmaa2_error drmaa2_lasterror(void)
-{
+drmaa2_error drmaa2_lasterror(void) {
     return drmaa2_lasterror_v;
 }
 
 
-drmaa2_string drmaa2_lasterror_text(void)
-{
+drmaa2_string drmaa2_lasterror_text(void) {
     return drmaa2_lasterror_text_v ? strdup(drmaa2_lasterror_text_v) : NULL;
 }
 
 
-drmaa2_jinfo drmaa2_jinfo_create(void)
-{
+drmaa2_jinfo drmaa2_jinfo_create(void) {
     drmaa2_jinfo ji = (drmaa2_jinfo)malloc(sizeof(drmaa2_jinfo_s));
     ji->jobId               = DRMAA2_UNSET_STRING;
     ji->exitStatus          = DRMAA2_UNSET_NUM;
@@ -77,8 +74,7 @@ drmaa2_jinfo drmaa2_jinfo_create(void)
 }
 
 
-void drmaa2_jinfo_free(drmaa2_jinfo * jiRef)
-{
+void drmaa2_jinfo_free(drmaa2_jinfo * jiRef) {
     drmaa2_jinfo ji = *jiRef;
     if (ji != NULL) {
         drmaa2_string_free(&(ji->jobId));
@@ -95,8 +91,7 @@ void drmaa2_jinfo_free(drmaa2_jinfo * jiRef)
 }
 
 
-void drmaa2_slotinfo_free(drmaa2_slotinfo * siRef)
-{
+void drmaa2_slotinfo_free(drmaa2_slotinfo * siRef) {
     drmaa2_slotinfo si = *siRef;
     if (si != NULL) {
         drmaa2_string_free(&(si->machineName));
@@ -107,8 +102,7 @@ void drmaa2_slotinfo_free(drmaa2_slotinfo * siRef)
 
 
 // no drmaa function - only used by implementation
-drmaa2_rinfo drmaa2_rinfo_create(void)
-{
+drmaa2_rinfo drmaa2_rinfo_create(void) {
     drmaa2_rinfo ri = (drmaa2_rinfo) malloc(sizeof(drmaa2_rinfo_s));
     ri->reservationId       = DRMAA2_UNSET_STRING;
     ri->reservationName     = DRMAA2_UNSET_STRING;
@@ -121,8 +115,7 @@ drmaa2_rinfo drmaa2_rinfo_create(void)
 }
 
 
-void drmaa2_rinfo_free(drmaa2_rinfo * riRef)
-{
+void drmaa2_rinfo_free(drmaa2_rinfo * riRef) {
     drmaa2_rinfo ri = *riRef;
     if (ri != NULL) {
         drmaa2_string_free(&(ri->reservationId));
@@ -135,8 +128,7 @@ void drmaa2_rinfo_free(drmaa2_rinfo * riRef)
 }
 
 
-drmaa2_jtemplate  drmaa2_jtemplate_create(void)
-{
+drmaa2_jtemplate  drmaa2_jtemplate_create(void) {
     drmaa2_jtemplate jt = (drmaa2_jtemplate)malloc(sizeof(drmaa2_jtemplate_s));
     jt->remoteCommand       = DRMAA2_UNSET_STRING;
     jt->args                = DRMAA2_UNSET_LIST;          
@@ -172,8 +164,7 @@ drmaa2_jtemplate  drmaa2_jtemplate_create(void)
 }
 
 
-void drmaa2_jtemplate_free(drmaa2_jtemplate * jtRef)
-{
+void drmaa2_jtemplate_free(drmaa2_jtemplate * jtRef) {
     drmaa2_jtemplate jt = *jtRef;
     if (jt != NULL) {
         drmaa2_string_free(&(jt->remoteCommand));
@@ -199,8 +190,7 @@ void drmaa2_jtemplate_free(drmaa2_jtemplate * jtRef)
 }
 
 
-drmaa2_rtemplate drmaa2_rtemplate_create(void)
-{
+drmaa2_rtemplate drmaa2_rtemplate_create(void) {
     drmaa2_rtemplate rt = (drmaa2_rtemplate)malloc(sizeof(drmaa2_rtemplate_s));
     rt->reservationName     = DRMAA2_UNSET_STRING;          
     rt->startTime           = DRMAA2_UNSET_TIME;          
@@ -218,8 +208,7 @@ drmaa2_rtemplate drmaa2_rtemplate_create(void)
 }
 
 
-void drmaa2_rtemplate_free(drmaa2_rtemplate * rtRef)
-{
+void drmaa2_rtemplate_free(drmaa2_rtemplate * rtRef) {
     drmaa2_rtemplate rt = *rtRef;
     if (rt != NULL) {
         drmaa2_string_free(&(rt->reservationName));          
@@ -232,8 +221,7 @@ void drmaa2_rtemplate_free(drmaa2_rtemplate * rtRef)
 }
 
 
-void drmaa2_notification_free(drmaa2_notification *nRef)
-{
+void drmaa2_notification_free(drmaa2_notification *nRef) {
     drmaa2_notification n = *nRef;
     if (n != NULL) {
         drmaa2_string_free(&(n->jobId));
@@ -244,8 +232,7 @@ void drmaa2_notification_free(drmaa2_notification *nRef)
 }
 
 
-void drmaa2_queueinfo_free(drmaa2_queueinfo * qiRef)
-{
+void drmaa2_queueinfo_free(drmaa2_queueinfo * qiRef) {
     drmaa2_queueinfo qi = *qiRef;
     if (qi != NULL) {
         drmaa2_string_free(&(qi->name));          
@@ -255,8 +242,7 @@ void drmaa2_queueinfo_free(drmaa2_queueinfo * qiRef)
 }
 
 
-void drmaa2_version_free(drmaa2_version * vRef)
-{
+void drmaa2_version_free(drmaa2_version * vRef) {
     if (*vRef != NULL) {
         drmaa2_string_free(&((*vRef)->major));
         drmaa2_string_free(&((*vRef)->minor));
@@ -266,8 +252,7 @@ void drmaa2_version_free(drmaa2_version * vRef)
 }
 
 
-void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef)
-{
+void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef) {
     if (*miRef != NULL) {
         drmaa2_string_free (&((*miRef)->name));
         drmaa2_version_free(&((*miRef)->machineOSVersion));
@@ -283,10 +268,8 @@ void drmaa2_machineinfo_free(drmaa2_machineinfo * miRef)
 // drmaa2 interface types and corresponding free functions are implemented by drmaa2-specific
 
 
-drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs)
-{
-    if (!drmaa2_rsession_is_valid(rs->name))
-    {
+drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs) {
+    if (!drmaa2_rsession_is_valid(rs->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -297,10 +280,8 @@ drmaa2_string drmaa2_rsession_get_contact(const drmaa2_rsession rs)
 }
 
 
-drmaa2_string drmaa2_rsession_get_session_name(const drmaa2_rsession rs)
-{
-    if (!drmaa2_rsession_is_valid(rs->name))
-    {
+drmaa2_string drmaa2_rsession_get_session_name(const drmaa2_rsession rs) {
+    if (!drmaa2_rsession_is_valid(rs->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -310,18 +291,15 @@ drmaa2_string drmaa2_rsession_get_session_name(const drmaa2_rsession rs)
 }
 
 
-drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_string reservationId)
-{
-    if (!drmaa2_rsession_is_valid(rs->name))
-    {
+drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_string reservationId) {
+    if (!drmaa2_rsession_is_valid(rs->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
     }
 
     drmaa2_r r = drmaa2_get_reservation(reservationId);
-    if (r == NULL)
-    {
+    if (r == NULL) {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Reservation ID is invalid.";
     }
@@ -329,10 +307,8 @@ drmaa2_r drmaa2_rsession_get_reservation(const drmaa2_rsession rs, const drmaa2_
 }
 
 
-drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt)
-{
-    if (!drmaa2_rsession_is_valid(rs->name))
-    {
+drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drmaa2_rtemplate rt) {
+    if (!drmaa2_rsession_is_valid(rs->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
@@ -352,15 +328,12 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 }
 
 
-drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs)
-{
-        if (!drmaa2_rsession_is_valid(rs->name))
-    {
+drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs) {
+    if (!drmaa2_rsession_is_valid(rs->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Reservation session is invalid.";
         return NULL;
     }
-
 
     drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, (drmaa2_list_entryfree)drmaa2_r_free);
     reservations = drmaa2_get_session_reservations(reservations, rs->name);
@@ -369,28 +342,24 @@ drmaa2_r_list drmaa2_rsession_get_reservations(const drmaa2_rsession rs)
 }
 
 
-drmaa2_string drmaa2_r_get_id(const drmaa2_r r)
-{
+drmaa2_string drmaa2_r_get_id(const drmaa2_r r) {
     return strdup(r->id);
 }
 
 
-drmaa2_string drmaa2_r_get_session_name(const drmaa2_r r)
-{
+drmaa2_string drmaa2_r_get_session_name(const drmaa2_r r) {
     return strdup(r->session_name);
 }
 
 
-drmaa2_rtemplate  drmaa2_r_get_reservation_template(const drmaa2_r r)
-{
+drmaa2_rtemplate  drmaa2_r_get_reservation_template(const drmaa2_r r) {
     drmaa2_rtemplate rt = drmaa2_rtemplate_create();
     rt = drmaa2_get_rtemplate(rt, r->id);
     return rt;
 }
 
 
-drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r)
-{
+drmaa2_rinfo drmaa2_r_get_info(const drmaa2_r r) {
     drmaa2_rinfo ri = drmaa2_rinfo_create();
     ri->reservationId = strdup(r->id);
     ri = drmaa2_get_rinfo(ri);
@@ -403,89 +372,75 @@ drmaa2_error drmaa2_r_terminate (drmaa2_r r) {
 }
 
 
-drmaa2_string drmaa2_jarray_get_id(const drmaa2_jarray ja)
-{
+drmaa2_string drmaa2_jarray_get_id(const drmaa2_jarray ja) {
     return strdup(ja->id);
 }
 
 
-drmaa2_j_list drmaa2_jarray_get_jobs(const drmaa2_jarray ja)
-{
+drmaa2_j_list drmaa2_jarray_get_jobs(const drmaa2_jarray ja) {
     drmaa2_j_list jl = get_jobs_of_jarray(ja);
     return jl;
 }
 
 
-drmaa2_string drmaa2_jarray_get_session_name(const drmaa2_jarray ja)
-{
+drmaa2_string drmaa2_jarray_get_session_name(const drmaa2_jarray ja) {
     return strdup(ja->session_name);
 }
 
 
-drmaa2_jtemplate drmaa2_jarray_get_job_template(const drmaa2_jarray ja)
-{
+drmaa2_jtemplate drmaa2_jarray_get_job_template(const drmaa2_jarray ja) {
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
     return drmaa2_get_jobarray_template(jt, ja->id);
 }
 
 
 // helper method to avoid code duplication
-drmaa2_error drmaa2_jarray_change_state(drmaa2_jarray ja, drmaa2_error (*chage_state_method)(drmaa2_j))
-{
+drmaa2_error drmaa2_jarray_change_state(drmaa2_jarray ja, drmaa2_error (*chage_state_method)(drmaa2_j)) {
     drmaa2_j_list jl = drmaa2_jarray_get_jobs(ja);
     size_t i;
-    for (i = 0; i < drmaa2_list_size(jl); i++)
-    {
+    for (i = 0; i < drmaa2_list_size(jl); i++) {
         chage_state_method((drmaa2_j)drmaa2_list_get(jl, i));
     }
     drmaa2_list_free(&jl);
     return DRMAA2_SUCCESS;
 }
 
-drmaa2_error drmaa2_jarray_suspend (drmaa2_jarray ja)
-{
+drmaa2_error drmaa2_jarray_suspend (drmaa2_jarray ja) {
     return drmaa2_jarray_change_state(ja, drmaa2_j_suspend);
 }
 
-drmaa2_error drmaa2_jarray_resume (drmaa2_jarray ja)
-{
+drmaa2_error drmaa2_jarray_resume (drmaa2_jarray ja) {
     return drmaa2_jarray_change_state(ja, drmaa2_j_resume);
 }
 
-drmaa2_error drmaa2_jarray_hold (drmaa2_jarray ja)
-{
+drmaa2_error drmaa2_jarray_hold (drmaa2_jarray ja) {
     return drmaa2_jarray_change_state(ja, drmaa2_j_hold);
 }
 
-drmaa2_error drmaa2_jarray_release (drmaa2_jarray ja)
-{
+drmaa2_error drmaa2_jarray_release (drmaa2_jarray ja) {
     return drmaa2_jarray_change_state(ja, drmaa2_j_release);
 }
 
-drmaa2_error drmaa2_jarray_terminate (drmaa2_jarray ja)
-{
+drmaa2_error drmaa2_jarray_terminate (drmaa2_jarray ja) {
     return drmaa2_jarray_change_state(ja, drmaa2_j_terminate);    
 }
 
 
-drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js)
-{
-    if (!drmaa2_jsession_is_valid(js->name))
-    {
+drmaa2_string drmaa2_jsession_get_contact(const drmaa2_jsession js) {
+    if (!drmaa2_jsession_is_valid(js->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
     }
     
-    if (js->contact) return strdup(js->contact);
-            return DRMAA2_UNSET_STRING;
+    if (js->contact)
+        return strdup(js->contact);
+    return DRMAA2_UNSET_STRING;
 }
 
 
-drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js)
-{
-    if (!drmaa2_jsession_is_valid(js->name))
-    {
+drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js) {
+    if (!drmaa2_jsession_is_valid(js->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -495,10 +450,8 @@ drmaa2_string drmaa2_jsession_get_session_name(const drmaa2_jsession js)
 }
 
 
-drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
-{
-    if (!drmaa2_jsession_is_valid(js->name))
-    {
+drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js) {
+    if (!drmaa2_jsession_is_valid(js->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -509,10 +462,8 @@ drmaa2_string_list drmaa2_jsession_get_job_categories(const drmaa2_jsession js)
 }
 
 
-drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_jinfo filter)
-{
-    if (!drmaa2_jsession_is_valid(js->name))
-    {
+drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_jinfo filter) {
+    if (!drmaa2_jsession_is_valid(js->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -525,24 +476,20 @@ drmaa2_j_list drmaa2_jsession_get_jobs (const drmaa2_jsession js, const drmaa2_j
 }
 
 
-drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drmaa2_string jobarrayId)
-{
-    if (!drmaa2_jsession_is_valid(js->name))
-    {
+drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drmaa2_string jobarrayId) {
+    if (!drmaa2_jsession_is_valid(js->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
     }
 
     drmaa2_jarray ja = NULL;
-    if (jarray_exists(js->name, jobarrayId))
-    {
+    if (jarray_exists(js->name, jobarrayId)) {
         ja = (drmaa2_jarray)malloc(sizeof(drmaa2_jarray));
         ja->id = strdup(jobarrayId);
         ja->session_name = strdup(js->name);
     }
-    else
-    {
+    else {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Session does not / no longer contain the according job array.";
     }
@@ -550,10 +497,8 @@ drmaa2_jarray drmaa2_jsession_get_job_array(const drmaa2_jsession js, const drma
 }
 
 
-drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt)
-{
-    if (!drmaa2_jsession_is_valid(js->name))
-    {
+drmaa2_j drmaa2_jsession_run_job(const drmaa2_jsession js, const drmaa2_jtemplate jt) {
+    if (!drmaa2_jsession_is_valid(js->name)) {
         drmaa2_lasterror_v = DRMAA2_INVALID_SESSION;
         drmaa2_lasterror_text_v = "Job session is invalid.";
         return NULL;
@@ -659,8 +604,7 @@ char *str_replace(char *orig, char *rep, char *with) {
 
 
 drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drmaa2_jtemplate jt, 
-    unsigned long begin_index, unsigned long end_index, unsigned long step, unsigned long max_parallel)
-{
+    unsigned long begin_index, unsigned long end_index, unsigned long step, unsigned long max_parallel) {
     if (end_index < begin_index) {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "The beginIndex value must be less than or equal to endIndex.";
@@ -680,7 +624,6 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
     char *outputPath = jt->outputPath;
     char *errorPath = jt->errorPath;
     while (index <= end_index) {
-
     // Start replace placeholders
         char *index_c;
         char *tmp_working_dir;
@@ -715,9 +658,7 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
         drmaa2_string_free(&tmp_error_path);
     // End replace placeholders
 
-
         j = drmaa2_jsession_run_job(js, jt);
-
 
     // Start clean up replacement variables
         tmp_working_dir = jt->workingDirectory;
@@ -739,7 +680,6 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
         free(index_c);
     // End clean up replacement variables
 
-
         drmaa2_list_add(sl, strdup(j->id));
         drmaa2_j_free(&j);
         index += step;
@@ -757,9 +697,7 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
 }
 
 
-drmaa2_j drmaa2_jsession_wait_any_started (const drmaa2_jsession js, const drmaa2_j_list l, 
-    const time_t timeout)
-{
+drmaa2_j drmaa2_jsession_wait_any_started (const drmaa2_jsession js, const drmaa2_j_list l, const time_t timeout) {
     drmaa2_j started_j = NULL;
     drmaa2_j current_j = NULL;
     drmaa2_jstate state;
@@ -820,28 +758,24 @@ drmaa2_j drmaa2_jsession_wait_any_terminated (const drmaa2_jsession js,
 
 
 
-drmaa2_string drmaa2_j_get_id(const drmaa2_j j)
-{
+drmaa2_string drmaa2_j_get_id(const drmaa2_j j) {
     return strdup(j->id);
 }
 
 
-drmaa2_string drmaa2_j_get_session_name(const drmaa2_j j)
-{
+drmaa2_string drmaa2_j_get_session_name(const drmaa2_j j) {
     return strdup(j->session_name);
 }
 
 
-drmaa2_jtemplate drmaa2_j_get_jt(const drmaa2_j j)
-{
+drmaa2_jtemplate drmaa2_j_get_jt(const drmaa2_j j) {
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
     jt = drmaa2_get_job_template(jt, j->id);
     return jt;
 }
 
 
-drmaa2_error drmaa2_j_suspend(drmaa2_j j)
-{
+drmaa2_error drmaa2_j_suspend(drmaa2_j j) {
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_RUNNING) {
         save_state(j, DRMAA2_SUSPENDED);
@@ -857,8 +791,7 @@ drmaa2_error drmaa2_j_suspend(drmaa2_j j)
 }
 
 
-drmaa2_error drmaa2_j_resume(drmaa2_j j)
-{
+drmaa2_error drmaa2_j_resume(drmaa2_j j) {
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_SUSPENDED) {
         save_state(j, DRMAA2_RUNNING);
@@ -874,8 +807,7 @@ drmaa2_error drmaa2_j_resume(drmaa2_j j)
 }
 
 
-drmaa2_error drmaa2_j_hold(drmaa2_j j)
-{
+drmaa2_error drmaa2_j_hold(drmaa2_j j) {
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_QUEUED) {
         save_state(j, DRMAA2_QUEUED_HELD);
@@ -897,8 +829,7 @@ drmaa2_error drmaa2_j_hold(drmaa2_j j)
 }
 
 
-drmaa2_error drmaa2_j_release(drmaa2_j j)
-{
+drmaa2_error drmaa2_j_release(drmaa2_j j) {
     drmaa2_jstate old_state = get_state(j);
     if (old_state == DRMAA2_QUEUED_HELD) {
         save_state(j, DRMAA2_QUEUED);
@@ -920,8 +851,7 @@ drmaa2_error drmaa2_j_release(drmaa2_j j)
 }
 
 
-drmaa2_error drmaa2_j_terminate(drmaa2_j j)
-{
+drmaa2_error drmaa2_j_terminate(drmaa2_j j) {
     pid_t jpid = get_job_pid(j);
     pid_t job_gpid =  getpgid(jpid);
     DRMAA2_DEBUG_PRINT("Kill process group %d.\n", jpid);
@@ -933,16 +863,14 @@ drmaa2_error drmaa2_j_terminate(drmaa2_j j)
 }
 
 
-drmaa2_jstate drmaa2_j_get_state(const drmaa2_j j, drmaa2_string * substate)
-{
+drmaa2_jstate drmaa2_j_get_state(const drmaa2_j j, drmaa2_string * substate) {
     *substate = NULL;
     return get_state(j);
 }
 
 
 
-drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
-{
+drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j) {
     drmaa2_jinfo ji = drmaa2_jinfo_create();
     ji->jobId = strdup(j->id);
     ji = get_job_info(ji); 
@@ -950,15 +878,15 @@ drmaa2_jinfo drmaa2_j_get_info(const drmaa2_j j)
 }
 
 
-drmaa2_error drmaa2_j_wait_started (const drmaa2_j j, const time_t timeout)
-{
+drmaa2_error drmaa2_j_wait_started (const drmaa2_j j, const time_t timeout) {
     drmaa2_jstate state;
     drmaa2_error return_status = DRMAA2_SUCCESS;
     while (1) {
         state = get_state(j);
         if (state != DRMAA2_QUEUED && state != DRMAA2_QUEUED_HELD) {
             break;
-        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
+        }
+        else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
             drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
             drmaa2_lasterror_text_v = "A timeout occured while waiting for a job start.";
             break;
@@ -969,8 +897,7 @@ drmaa2_error drmaa2_j_wait_started (const drmaa2_j j, const time_t timeout)
 }
 
 
-drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
-{
+drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout) {
 
     DRMAA2_DEBUG_PRINT("wait for job with id: %s\n", j->id);
     drmaa2_jstate state;
@@ -979,7 +906,8 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
         state = get_state(j);
         if (state == DRMAA2_DONE || state == DRMAA2_FAILED) {
             break;
-        } else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
+        }
+        else if (timeout == DRMAA2_ZERO_TIME || (timeout != DRMAA2_INFINITE_TIME && timeout <= time(NULL))) {
             drmaa2_lasterror_v = return_status = DRMAA2_TIMEOUT;
             drmaa2_lasterror_text_v = "A timeout occured while waiting for a job start.";
             break;
@@ -991,16 +919,14 @@ drmaa2_error drmaa2_j_wait_terminated(const drmaa2_j j, const time_t timeout)
 }
 
 
-drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms)
-{
+drmaa2_r_list drmaa2_msession_get_all_reservations(const drmaa2_msession ms) {
     drmaa2_r_list reservations = drmaa2_list_create(DRMAA2_RESERVATIONLIST, (drmaa2_list_entryfree)drmaa2_r_free);
     reservations = get_reservations(reservations);
     return reservations;
 }
 
 
-drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter)
-{
+drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa2_jinfo filter) {
     drmaa2_j_list jobs = drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);
     jobs = get_jobs(jobs, NULL, filter);
     return jobs;
@@ -1008,25 +934,23 @@ drmaa2_j_list drmaa2_msession_get_all_jobs(const drmaa2_msession ms, const drmaa
 
 
 //TODO: avoid code duplication
-drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact)
-{
+drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * contact) {
     drmaa2_jsession js = (drmaa2_jsession)malloc(sizeof(drmaa2_jsession_s));
 
-    if (session_name == DRMAA2_UNSET_STRING)
-    {
+    if (session_name == DRMAA2_UNSET_STRING) {
         drmaa2_string name = drmaa2_generate_unique_name("jsession");
         if (name == NULL)
             return NULL;
         js->name = name;
     }
-    else
+    else {
         js->name = strdup(session_name);
+    }
 
     assert(js->name != DRMAA2_UNSET_STRING);
     js->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_jsession(&js) != 0)
-    {
+    if (save_jsession(&js) != 0) {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
         return NULL;
@@ -1036,25 +960,23 @@ drmaa2_jsession drmaa2_create_jsession(const char * session_name, const char * c
 }
 
 
-drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * contact)
-{
+drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * contact) {
     drmaa2_rsession rs = (drmaa2_rsession)malloc(sizeof(drmaa2_rsession_s));
 
-    if (session_name == DRMAA2_UNSET_STRING)
-    {
+    if (session_name == DRMAA2_UNSET_STRING) {
         drmaa2_string name = drmaa2_generate_unique_name("rsession");
         if (name == NULL)
             return NULL;
         rs->name = name;
     }
-    else
+    else {
         rs->name = strdup(session_name);
+    }
 
     assert(rs->name != DRMAA2_UNSET_STRING);
     rs->contact = (contact != NULL) ? strdup(contact) : DRMAA2_UNSET_STRING;
 
-    if (save_rsession(contact, session_name) != 0)
-    {
+    if (save_rsession(&rs) != 0) {
         drmaa2_lasterror_v = DRMAA2_INVALID_ARGUMENT;
         drmaa2_lasterror_text_v = "Could not store session information.";
         return NULL;
@@ -1064,10 +986,8 @@ drmaa2_rsession drmaa2_create_rsession(const char * session_name, const char * c
 }
 
 
-drmaa2_jsession drmaa2_open_jsession(const char * session_name)
-{
-    if (session_name != DRMAA2_UNSET_STRING)
-    {
+drmaa2_jsession drmaa2_open_jsession(const char * session_name) {
+    if (session_name != DRMAA2_UNSET_STRING) {
         drmaa2_jsession js = get_jsession(session_name);
         if (js)
             return js;
@@ -1080,8 +1000,7 @@ drmaa2_jsession drmaa2_open_jsession(const char * session_name)
 }
 
 
-drmaa2_rsession drmaa2_open_rsession(const char * session_name)
-{
+drmaa2_rsession drmaa2_open_rsession(const char * session_name) {
     if (session_name != DRMAA2_UNSET_STRING)
     {
         drmaa2_rsession rs = get_rsession(session_name);
@@ -1096,16 +1015,14 @@ drmaa2_rsession drmaa2_open_rsession(const char * session_name)
 }
 
 
-drmaa2_msession drmaa2_open_msession(const char * session_name)
-{
+drmaa2_msession drmaa2_open_msession(const char * session_name) {
     drmaa2_msession ms = (drmaa2_msession)malloc(sizeof(drmaa2_msession_s));
     ms->name = session_name ? strdup(session_name) : NULL;
     return ms;
 }
 
 
-drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
-{
+drmaa2_error drmaa2_close_jsession(drmaa2_jsession js) {
     if (drmaa2_jsession_is_valid(js->name))
         return DRMAA2_SUCCESS;
     else
@@ -1113,20 +1030,17 @@ drmaa2_error drmaa2_close_jsession(drmaa2_jsession js)
 }
 
 
-drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs)
-{
+drmaa2_error drmaa2_close_rsession(drmaa2_rsession rs) {
     return DRMAA2_SUCCESS;
 }
 
 
-drmaa2_error drmaa2_close_msession(drmaa2_msession ms)
-{
+drmaa2_error drmaa2_close_msession(drmaa2_msession ms) {
     return DRMAA2_SUCCESS;
 }
 
 
-drmaa2_error drmaa2_destroy_jsession(const char * session_name)
-{
+drmaa2_error drmaa2_destroy_jsession(const char * session_name) {
     if (session_name == NULL)
         return DRMAA2_INVALID_ARGUMENT;
 
@@ -1135,8 +1049,7 @@ drmaa2_error drmaa2_destroy_jsession(const char * session_name)
 }
 
 
-drmaa2_error drmaa2_destroy_rsession(const char * session_name)
-{
+drmaa2_error drmaa2_destroy_rsession(const char * session_name) {
     if (session_name == NULL)
         return DRMAA2_INVALID_ARGUMENT;
 
@@ -1145,25 +1058,24 @@ drmaa2_error drmaa2_destroy_rsession(const char * session_name)
 }
 
 
-drmaa2_string_list drmaa2_get_jsession_names(void)
-{
+drmaa2_string_list drmaa2_get_jsession_names(void) {
     drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
     session_names = get_jsession_names(session_names);
     return session_names;
 }
 
 
-drmaa2_string_list drmaa2_get_rsession_names(void)
-{
+drmaa2_string_list drmaa2_get_rsession_names(void) {
     drmaa2_string_list session_names = drmaa2_list_create(DRMAA2_STRINGLIST, (drmaa2_list_entryfree)drmaa2_string_free);
     session_names = get_rsession_names(session_names);
     return session_names;
 }
 
 
-drmaa2_error drmaa2_register_event_notification(const drmaa2_callback callback)
-{
+drmaa2_error drmaa2_register_event_notification(const drmaa2_callback callback) {
     current_drmaa2_callback = callback;
     return DRMAA2_SUCCESS;
 }
+
+
 

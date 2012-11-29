@@ -8,9 +8,7 @@
 
 
 
-
-void test_reservation_lists()
-{
+void test_reservation_lists() {
     drmaa2_reset_db();
     drmaa2_error error_code;
 
@@ -68,8 +66,7 @@ void test_reservation_lists()
 }
 
 
-void test_job_lists()
-{
+void test_job_lists() {
     drmaa2_reset_db();
     drmaa2_error error_code;
 
@@ -124,8 +121,7 @@ void test_job_lists()
 }
 
 
-void test_get_queues()
-{
+void test_get_queues() {
     drmaa2_msession ms = drmaa2_open_msession("my_msession");
     drmaa2_queueinfo_list ql = drmaa2_msession_get_all_queues(ms, NULL);
     CU_ASSERT_PTR_NOT_NULL(ql);

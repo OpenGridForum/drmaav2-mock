@@ -4,6 +4,5 @@ autoscan.log
 config.log
 config.status
 *.o
-setup
-wrapper
+*.sqlite
 

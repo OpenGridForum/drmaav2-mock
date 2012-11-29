@@ -7,8 +7,8 @@
 #include "test_rsession.h"
 
 
-void test_rsession_invalidation()
-{
+
+void test_rsession_invalidation() {
     drmaa2_rsession rs = drmaa2_create_rsession("mysession", NULL);
     drmaa2_destroy_rsession("mysession");
     CU_ASSERT_PTR_NULL(drmaa2_rsession_get_contact(rs));
@@ -18,8 +18,7 @@ void test_rsession_invalidation()
 }
 
 
-void test_rsession_getter_methods()
-{
+void test_rsession_getter_methods() {
     drmaa2_rsession rs = drmaa2_create_rsession("mysession", NULL);
     
     // test getter functions
@@ -35,8 +34,7 @@ void test_rsession_getter_methods()
 }
 
 
-void test_rsession_get_reservation()
-{
+void test_rsession_get_reservation() {
     drmaa2_rsession rs = drmaa2_create_rsession("mysession2", NULL);
     CU_ASSERT_PTR_NOT_NULL(rs);
 
@@ -78,8 +76,7 @@ void test_rsession_get_reservation()
 }
 
 
-void test_rsession_get_reservations()
-{
+void test_rsession_get_reservations() {
     drmaa2_rsession rs = drmaa2_create_rsession("mysession", NULL);
     CU_ASSERT_PTR_NOT_NULL(rs);
 
@@ -101,8 +98,6 @@ void test_rsession_get_reservations()
 
     drmaa2_destroy_rsession("mysession");
     drmaa2_rsession_free(&rs);
-
-
-
 }
+
 

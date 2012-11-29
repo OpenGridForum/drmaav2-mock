@@ -7,8 +7,8 @@
 #include "test_reservation.h"
 
 
-void test_j_get_id_name()
-{
+
+void test_j_get_id_name() {
     drmaa2_jsession js = drmaa2_create_jsession("my_job_session", NULL);
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
@@ -32,8 +32,7 @@ void test_j_get_id_name()
 }
 
 
-void test_j_get_info()
-{
+void test_j_get_info() {
     drmaa2_jsession js = drmaa2_create_jsession("my_job_session2", NULL);
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
@@ -51,9 +50,8 @@ void test_j_get_info()
 }
 
 
-void test_j_get_template()
-{
-drmaa2_jsession js = drmaa2_create_jsession("my_job_session", NULL);
+void test_j_get_template() {
+    drmaa2_jsession js = drmaa2_create_jsession("my_job_session", NULL);
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
     jt->remoteCommand = strdup("/bin/date");
@@ -74,4 +72,6 @@ drmaa2_jsession js = drmaa2_create_jsession("my_job_session", NULL);
     drmaa2_destroy_jsession("my_job_session");
     drmaa2_jsession_free(&js);
 }
+
+
 

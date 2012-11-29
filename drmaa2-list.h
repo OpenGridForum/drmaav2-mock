@@ -4,6 +4,7 @@
 #include "drmaa2.h"
 
 
+
 typedef struct drmaa2_list_item_s {
 	const void *data;
 	struct drmaa2_list_item_s *next;

@@ -1,4 +1,4 @@
-#include<stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <CUnit/Basic.h>
@@ -9,8 +9,8 @@
 #include "../drmaa2-debug.h"
 
 
-void test_simple_app()
-{
+
+void test_simple_app() {
     drmaa2_jsession js;
     drmaa2_jtemplate jt;
     drmaa2_j j;
@@ -20,8 +20,7 @@ void test_simple_app()
     
     printf("This is %s version %s.%s\n", name, version->major, version->minor);
     js = drmaa2_create_jsession("testsession", DRMAA2_UNSET_STRING);
-    if (js == NULL)
-    {
+    if (js == NULL) {
         printf("%s\n", drmaa2_lasterror_text());
         //memory should be freed for real apps
         return;
@@ -46,8 +45,7 @@ void test_simple_app()
 
 
 
-void test_advanced_app()
-{
+void test_advanced_app() {
     drmaa2_jinfo            ji = NULL;
     drmaa2_j                 j = NULL;
     drmaa2_r                 r = NULL;
@@ -60,8 +58,7 @@ void test_advanced_app()
     drmaa2_dict            env = drmaa2_dict_create(NULL);
 
     drmaa2_jsession js = drmaa2_create_jsession("myjsession", NULL);     // open sessions to DRM system
-    if (js == NULL)
-    {
+    if (js == NULL) {
         printf("%s\n", drmaa2_lasterror_text());
         // mem should be freed for real applications
         return;
@@ -76,8 +73,7 @@ void test_advanced_app()
     drmaa2_msession ms = drmaa2_open_msession(NULL);
 
     ml = drmaa2_msession_get_all_machines(ms, DRMAA2_UNSET_LIST);        // determine name of first machine
-    if (drmaa2_list_size(ml) < 1)
-    {
+    if (drmaa2_list_size(ml) < 1) {
         printf("No machines to assign jobs to.\n");
         return;
     }
@@ -119,3 +115,5 @@ void test_advanced_app()
 
     CU_ASSERT(1);
 }
+
+

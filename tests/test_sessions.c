@@ -7,16 +7,15 @@
 #include "../config.h"
 
 
-void test_empty_jsession_list()
-{
+
+void test_empty_jsession_list() {
     drmaa2_reset_db(DRMAA_DBFILE);
     drmaa2_string_list sl = drmaa2_get_jsession_names();
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 0);
     drmaa2_list_free(&sl);
 }
 
-void test_basic_session_methods()
-{
+void test_basic_session_methods() {
      // test creation and closing of sessions
     drmaa2_jsession js = drmaa2_create_jsession("js1", NULL);
     CU_ASSERT_PTR_NOT_NULL(js);
@@ -44,8 +43,7 @@ void test_basic_session_methods()
 }
 
 
-void test_multiple_sessions()
-{
+void test_multiple_sessions() {
     //test creation of multiple sessions
     drmaa2_jsession js1, js2, js3, js4;
     js1 = drmaa2_create_jsession("js1", NULL);
@@ -77,5 +75,6 @@ void test_multiple_sessions()
 
     drmaa2_destroy_jsession("js1");
     drmaa2_destroy_jsession("js3");
-
 }
+
+

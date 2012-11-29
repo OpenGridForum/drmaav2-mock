@@ -140,8 +140,7 @@ drmaa2_string_list add_supported_job_categories(drmaa2_string_list jl) {
 }
 
 
-drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names)
-{
+drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, const drmaa2_string_list names) {
     drmaa2_queueinfo_list ql = drmaa2_list_create(DRMAA2_QUEUEINFOLIST, (drmaa2_list_entryfree)drmaa2_queueinfo_free);
     if (names == DRMAA2_UNSET_LIST) {
         // return all queue info instances
@@ -163,8 +162,7 @@ drmaa2_queueinfo_list drmaa2_msession_get_all_queues(const drmaa2_msession ms, c
 }
 
 
-drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names)
-{
+drmaa2_machineinfo_list drmaa2_msession_get_all_machines(const drmaa2_msession ms, const drmaa2_string_list names) {
     drmaa2_machineinfo_list ml = drmaa2_list_create(DRMAA2_MACHINEINFOLIST, (drmaa2_list_entryfree)drmaa2_machineinfo_free);
 
     drmaa2_machineinfo mi = (drmaa2_machineinfo)malloc(sizeof(drmaa2_machineinfo_s));
@@ -341,8 +339,7 @@ drmaa2_bool drmaa2_supports(const drmaa2_capability c) {
 }
 
 
-drmaa2_string drmaa2_generate_unique_name(char* prefix)
-{
+drmaa2_string drmaa2_generate_unique_name(char* prefix) {
     int r = drmaa2_random_int();
     char *name;
     if (asprintf(&name, "%s%i", prefix, r) == -1)

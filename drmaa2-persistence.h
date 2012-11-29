@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 
+
 // job session methods
 int save_jsession(drmaa2_jsession *js);
 int delete_jsession(const char *session_name);
@@ -22,7 +23,7 @@ drmaa2_j_list get_jobs(drmaa2_j_list jobs, drmaa2_jsession js, drmaa2_jinfo filt
 
 
 // reservation session methods
-int save_rsession(const char *contact, const char *session);
+int save_rsession(drmaa2_rsession *rs);
 int delete_rsession(const char *session_name);
 drmaa2_rsession get_rsession(const char *session_name);
 
@@ -66,10 +67,6 @@ drmaa2_j_list get_jobs_of_jarray(drmaa2_jarray ja);
 drmaa2_jtemplate drmaa2_get_jobarray_template(drmaa2_jtemplate jt, const char *jobarrayId);
 
 
-
-//queries for wrapper
-
-char *get_command(long long row_id);
 
 int drmaa2_save_pid(long long row_id, pid_t pid);
 

@@ -6,16 +6,15 @@
 #include "../drmaa2-debug.h"
 
 
-void testFreeNullList()
-{
+
+void testFreeNullList() {
     drmaa2_list l = NULL;
     drmaa2_list_free(&l);
     CU_ASSERT(1);
 }
 
 
-void testListErrorHandling()
-{
+void testListErrorHandling() {
     drmaa2_string_list sl = NULL;
     drmaa2_error e = drmaa2_list_add(sl, "hallo");
     CU_ASSERT_EQUAL(e, DRMAA2_INVALID_ARGUMENT);
@@ -48,8 +47,7 @@ void testListErrorHandling()
 }
 
 
-void testList()
-{
+void testList() {
     drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
     CU_ASSERT_EQUAL(drmaa2_list_size(sl), 0);
 
@@ -83,8 +81,7 @@ void testList()
 }
 
 
-void testStringSplit()
-{
+void testStringSplit() {
     char string[] = "1|9|17|25";
 
     drmaa2_string_list sl = string_split(string, '|');
@@ -99,8 +96,7 @@ void testStringSplit()
 }
 
 
-void testStringJoin()
-{
+void testStringJoin() {
     drmaa2_string_list sl = drmaa2_list_create(DRMAA2_STRINGLIST, NULL);
     // add items
     drmaa2_list_add(sl, "1");
@@ -116,8 +112,5 @@ void testStringJoin()
     drmaa2_string_free(&string);
     CU_PASS("test finished")
 }
-
-
-
 
 

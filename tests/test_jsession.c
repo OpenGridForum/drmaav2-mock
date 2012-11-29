@@ -7,8 +7,8 @@
 #include "test_jsession.h"
 
 
-void test_jsession_invalidation()
-{
+
+void test_jsession_invalidation() {
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
     drmaa2_destroy_jsession("mysession");
     CU_ASSERT_PTR_NULL(drmaa2_jsession_get_contact(js));
@@ -20,8 +20,7 @@ void test_jsession_invalidation()
 }
 
 
-void test_jsession_getter_methods()
-{
+void test_jsession_getter_methods() {
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
     
     // test getter functions
@@ -36,8 +35,7 @@ void test_jsession_getter_methods()
     drmaa2_jsession_free(&js);
 }
 
-void test_jsession_getter_methods2()
-{
+void test_jsession_getter_methods2() {
     drmaa2_jsession js = drmaa2_create_jsession(NULL, "contact");
     
     // test getter functions
@@ -54,8 +52,7 @@ void test_jsession_getter_methods2()
 }
 
 
-void test_job_list()
-{
+void test_job_list() {
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
 
     //test empty joblist
@@ -99,12 +96,10 @@ void test_job_list()
     drmaa2_jtemplate_free(&jt);
     drmaa2_destroy_jsession("mysession");
     drmaa2_jsession_free(&js2);
-
 }
 
 
-void test_job_categories()
-{
+void test_job_categories() {
     drmaa2_jsession js = drmaa2_create_jsession("mysession", NULL);
 
     drmaa2_string_list jc = drmaa2_jsession_get_job_categories(js);
@@ -119,12 +114,10 @@ void test_job_categories()
     drmaa2_jtemplate_free(&jt);
     drmaa2_destroy_jsession("mysession");
     drmaa2_jsession_free(&js);
-
 }
 
 
-void test_wait_any_terminated()
-{
+void test_wait_any_terminated() {
     drmaa2_jsession js = drmaa2_create_jsession("mysession_termination", NULL);
 
     drmaa2_jtemplate jt = drmaa2_jtemplate_create();
@@ -155,8 +148,5 @@ void test_wait_any_terminated()
     sleep(6);
 
 }
-
-
-
 
 

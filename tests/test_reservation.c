@@ -7,8 +7,8 @@
 #include "test_reservation.h"
 
 
-void test_r_get_info()
-{
+
+void test_r_get_info() {
     drmaa2_rsession rs = drmaa2_create_rsession("mysession", NULL);
 
     // create and get reservation
@@ -31,8 +31,7 @@ void test_r_get_info()
 }
 
 
-void test_r_get_template()
-{
+void test_r_get_template() {
     drmaa2_rsession rs = drmaa2_create_rsession("mysession", NULL);
 
     // create and get reservation
@@ -58,4 +57,5 @@ void test_r_get_template()
     drmaa2_destroy_rsession("mysession");
     drmaa2_rsession_free(&rs);
 }
+
 
