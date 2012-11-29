@@ -3,9 +3,6 @@
 
 #include "drmaa2.h"
 #include <unistd.h>
-#include "config.h"
-
-#define DB_NAME DRMAA_DBFILE
 
 
 // job session methods
@@ -51,7 +48,7 @@ drmaa2_jtemplate drmaa2_get_job_template(drmaa2_jtemplate jt, const char *jobId)
 drmaa2_jinfo get_job_info(drmaa2_jinfo ji);
 
 
-int drmaa2_reset_db(char *name);
+int drmaa2_reset_db();
 
 
 pid_t get_job_pid(drmaa2_j j);

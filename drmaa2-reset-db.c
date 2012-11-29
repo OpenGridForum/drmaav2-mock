@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "config.h"
 #include "drmaa2-persistence.h"
 
 
@@ -14,7 +13,7 @@ usage: %s\n", argv[0]);
         return(1);
     }
     
-    drmaa2_reset_db(DRMAA_DBFILE);
+    drmaa2_reset_db();
 
     return 0;
 }

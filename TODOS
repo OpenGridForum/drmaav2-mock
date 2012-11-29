@@ -3,10 +3,5 @@
 
 - prefix global variables
 
-- use test database (implementation should allow multiple databases)
 -------------------------------------------------------------------------
-
-for mock
-
-- complete jobinfo filter
 

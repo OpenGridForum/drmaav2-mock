@@ -25,6 +25,8 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/TestDB.h>
 
+#include "../drmaa2-persistence.h"
+
 #include "test_app.h"
 #include "test_dict.h"
 #include "test_list.h"
@@ -308,6 +310,8 @@ int main(int argc, char* argv[])
       return CU_get_error();
     }
 
+    setenv("DRMAA2_DB_NAME", "drmaa2_test.sqlite", 0);
+    drmaa2_reset_db();
 
 
     CU_basic_set_mode(mode);

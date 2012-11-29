@@ -5,7 +5,7 @@ drmaa: drmaa2.so drmaa2-reset-db
 else
 drmaa: drmaa2.so drmaaa2-reset-db sqlite3.o
 endif
-tests: force_look
+tests: force_look drmaa2.so
 	cd tests; $(MAKE) $(MFLAGS) 
 
 drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o

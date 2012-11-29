@@ -12,6 +12,18 @@
 #include "drmaa2-debug.h"
 #include "drmaa2-list.h"
 
+#include "config.h"
+
+
+
+char *drmaa2_current_db() {
+    char *db_name = getenv("DRMAA2_DB_NAME");
+    if  (db_name == NULL) {
+        db_name = DRMAA_DBFILE;  // use default db defined in config.h
+    }
+    return db_name;
+}
+
 
 
 char setup[] = "\
@@ -134,11 +146,11 @@ typedef int (*sqlite3_callback)(void*, int, char**, char**);
 
 // sqlite3 helper functions
 
-sqlite3 *open_db(char *name)
+sqlite3 *drmaa2_open_db()
 {
 	sqlite3 *db;
     int rc;
-    rc = sqlite3_open(name, &db);
+    rc = sqlite3_open(drmaa2_current_db(), &db);
     sqlite3_busy_timeout(db, 30000);
     if( rc )
     {
@@ -153,18 +165,18 @@ int evaluate_result_code(int rc, char *zErrMsg)
 {
     if( rc!=SQLITE_OK )
     {
-        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        fprintf(stderr, "SQL error (database: %s): %s\n", drmaa2_current_db(), zErrMsg);
         sqlite3_free(zErrMsg);
     }
     return rc;
 }
 
 
-int drmaa2_reset_db(char *name)
+int drmaa2_reset_db()
 {
     char *zErrMsg = 0;
     int rc;
-    sqlite3 *db = open_db(name);
+    sqlite3 *db = drmaa2_open_db();
     rc = sqlite3_exec(db, setup, NULL, 0, &zErrMsg);
     evaluate_result_code(rc, zErrMsg);
     rc = sqlite3_exec(db, reset, NULL, 0, &zErrMsg);
@@ -175,7 +187,7 @@ int drmaa2_reset_db(char *name)
 
 int drmaa2_db_query(char *stmt, sqlite3_callback callback, void *args)
 {
-    sqlite3 *db = open_db(DRMAA_DBFILE);
+    sqlite3 *db = drmaa2_open_db();
     char *zErrMsg = 0;
 
     DEBUG_PRINT("%s\n", stmt);
@@ -190,7 +202,7 @@ int drmaa2_db_query(char *stmt, sqlite3_callback callback, void *args)
 
 int drmaa2_db_query_rowid(char *stmt)
 {
-    sqlite3 *db = open_db(DRMAA_DBFILE);
+    sqlite3 *db = drmaa2_open_db();
     char *zErrMsg = 0;
 
     DEBUG_PRINT("%s\n", stmt);
