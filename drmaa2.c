@@ -22,18 +22,6 @@ char *drmaa2_lasterror_text_v   = NULL;
 drmaa2_callback current_drmaa2_callback = NULL;
 
 
-void call_state_change_notification(drmaa2_j j, drmaa2_jstate state) {
-    drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
-    n->event = DRMAA2_NEW_STATE;    //only state change notifications are supported
-    n->jobId = strdup(j->id);
-    n->sessionName = strdup(j->session_name);
-    n->jobState = state;
-    current_drmaa2_callback(&n);
-}
-
-
-
-
 void drmaa2_string_free(drmaa2_string * sRef) {
     if (*sRef != NULL) {        
         free(*sRef);

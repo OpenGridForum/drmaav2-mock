@@ -19,6 +19,18 @@ extern char *drmaa2_lasterror_text_v;
 extern drmaa2_callback current_drmaa2_callback;
 
 
+// Tool functions
+
+void call_state_change_notification(drmaa2_j j, drmaa2_jstate state) {
+    drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
+    n->event = DRMAA2_NEW_STATE;    //only state change notifications are supported
+    n->jobId = strdup(j->id);
+    n->sessionName = strdup(j->session_name);
+    n->jobState = state;
+    current_drmaa2_callback(&n);
+}
+
+
 // DRMAA2 reflective interface 
 
 drmaa2_string_list drmaa2_jtemplate_impl_spec(void) {
@@ -231,14 +243,14 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
         if (WIFEXITED(status)) {
             save_state(j, DRMAA2_DONE);
             if (current_drmaa2_callback != NULL)
-                call_state_chage_notification(j, DRMAA2_DONE);
+                call_state_change_notification(j, DRMAA2_DONE);
             DRMAA2_DEBUG_PRINT("Process %d terminated normally by a call to _exit(2) or exit(3).\n", job_pid);
             DRMAA2_DEBUG_PRINT("%d  - evaluates to the low-order 8 bits of the argument passed to _exit(2) or exit(3) by the child.\n", WEXITSTATUS(status));
         }
         if (WIFSIGNALED(status)) {
             save_state(j, DRMAA2_FAILED);
             if (current_drmaa2_callback != NULL)
-                call_state_chage_notification(j, DRMAA2_FAILED);
+                call_state_change_notification(j, DRMAA2_FAILED);
             DRMAA2_DEBUG_PRINT("Process %d terminated due to receipt of a signal.\n", job_pid);
             DRMAA2_DEBUG_PRINT("%d  - evaluates to the number of the signal that caused the termination of the process.\n", WTERMSIG(status));
             DRMAA2_DEBUG_PRINT("%d  - evaluates as true if the termination of the process was accompanied by the creation of a core \

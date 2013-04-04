@@ -4,6 +4,10 @@
 #include "drmaa2.h"
 
 
+// tool functions used both by the SPI and the API implementation
+
+ void call_state_change_notification(drmaa2_j j, drmaa2_jstate state);
+
 // implementation-specific drmaa inface types
 
 typedef struct drmaa2_jsession_s
