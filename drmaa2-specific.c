@@ -235,9 +235,8 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
         save_pid(row_id, job_pid);
         sem_post(lock); // pid is written now (notify lib)
 
-        pid_t child;
         int status;
-        child = waitpid(job_pid, &status, 0);
+        waitpid(job_pid, &status, 0);
         save_exit_status(row_id, WEXITSTATUS(status));
 
         if (WIFEXITED(status)) {
