@@ -22,7 +22,7 @@ char *drmaa2_lasterror_text_v   = NULL;
 drmaa2_callback current_drmaa2_callback = NULL;
 
 
-void call_state_chage_notification(drmaa2_j j, drmaa2_jstate state) {
+void call_state_change_notification(drmaa2_j j, drmaa2_jstate state) {
     drmaa2_notification n = (drmaa2_notification)malloc(sizeof(drmaa2_notification_s));
     n->event = DRMAA2_NEW_STATE;    //only state change notifications are supported
     n->jobId = strdup(j->id);
@@ -794,7 +794,7 @@ drmaa2_error drmaa2_j_suspend(drmaa2_j j) {
     if (old_state == DRMAA2_RUNNING) {
         save_state(j, DRMAA2_SUSPENDED);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_SUSPENDED);
+            call_state_change_notification(j, DRMAA2_SUSPENDED);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -810,7 +810,7 @@ drmaa2_error drmaa2_j_resume(drmaa2_j j) {
     if (old_state == DRMAA2_SUSPENDED) {
         save_state(j, DRMAA2_RUNNING);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_RUNNING);
+            call_state_change_notification(j, DRMAA2_RUNNING);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -826,13 +826,13 @@ drmaa2_error drmaa2_j_hold(drmaa2_j j) {
     if (old_state == DRMAA2_QUEUED) {
         save_state(j, DRMAA2_QUEUED_HELD);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_QUEUED_HELD);
+            call_state_change_notification(j, DRMAA2_QUEUED_HELD);
         return DRMAA2_SUCCESS;
     }
     else if (old_state == DRMAA2_REQUEUED) {
         save_state(j, DRMAA2_REQUEUED_HELD);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_REQUEUED);
+            call_state_change_notification(j, DRMAA2_REQUEUED);
         return DRMAA2_SUCCESS;
     }
     else {
@@ -848,13 +848,13 @@ drmaa2_error drmaa2_j_release(drmaa2_j j) {
     if (old_state == DRMAA2_QUEUED_HELD) {
         save_state(j, DRMAA2_QUEUED);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_QUEUED);
+            call_state_change_notification(j, DRMAA2_QUEUED);
         return DRMAA2_SUCCESS;
     }
     else if (old_state == DRMAA2_REQUEUED_HELD) {
         save_state(j, DRMAA2_REQUEUED);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_REQUEUED);
+            call_state_change_notification(j, DRMAA2_REQUEUED);
         return DRMAA2_SUCCESS;
     }
     else {

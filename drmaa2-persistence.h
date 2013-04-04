@@ -6,7 +6,7 @@
 
 
 
-int reset_db();
+void reset_db();
 
 
 // job session methods

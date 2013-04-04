@@ -168,7 +168,7 @@ int evaluate_result_code(int rc, char *zErrMsg) {
 }
 
 
-int reset_db() {
+void reset_db() {
     char *zErrMsg = 0;
     int rc;
     sqlite3 *db = open_db();
@@ -250,7 +250,7 @@ static int get_jsession_callback(void **ptr, int argc, char **argv, char **azCol
 drmaa2_jsession get_jsession(const char *session_name) {
 	drmaa2_jsession js = NULL;
     char *stmt = sqlite3_mprintf("SELECT * FROM job_sessions WHERE name = %Q", session_name);
-    int rc = query(stmt, (sqlite3_callback)get_jsession_callback, &js);
+    query(stmt, (sqlite3_callback)get_jsession_callback, &js);
     sqlite3_free(stmt);
     if (js == NULL)
         printf("no such jobsession\n");
@@ -269,7 +269,7 @@ int session_is_valid(int session_type, const char *session_name) {
     char *session_type_name = (session_type == 0) ? "job_sessions": "reservation_sessions";
     char *stmt = sqlite3_mprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE name = %Q LIMIT 1);", session_type_name, session_name);
     int exists = 0;
-    int rc = query(stmt, (sqlite3_callback)drmaa2_entry_exists_callback, &exists);
+    query(stmt, (sqlite3_callback)drmaa2_entry_exists_callback, &exists);
     sqlite3_free(stmt);
     return exists;
 }
@@ -552,7 +552,7 @@ static int get_rsession_callback(void **ptr, int argc, char **argv, char **azCol
 drmaa2_rsession get_rsession(const char *session_name) {
     drmaa2_rsession rs = NULL;
     char *stmt = sqlite3_mprintf("SELECT * FROM reservation_sessions WHERE name = %Q", session_name);
-    int rc = query(stmt, (sqlite3_callback)get_rsession_callback, &rs);
+    query(stmt, (sqlite3_callback)get_rsession_callback, &rs);
     sqlite3_free(stmt);
     if (rs == NULL)
         printf("no such reservation session\n");
@@ -567,7 +567,7 @@ long long save_reservation(const char *session_name, long long template_id, cons
     sqlite3_free(stmt);
     stmt = sqlite3_mprintf("BEGIN EXCLUSIVE; UPDATE reservations\
         SET reservation_name = \'%s%d\' WHERE rowid = %lld; COMMIT;", name, row_id, row_id);
-    int rc = query(stmt, NULL, NULL);
+    query(stmt, NULL, NULL);
     sqlite3_free(stmt);
 
     return row_id;
@@ -975,7 +975,7 @@ pid_t get_job_pid(drmaa2_j j) {
     pid_t pid;
     long long row_id = atoll(j->id);
     char *stmt = sqlite3_mprintf("SELECT pid FROM jobs WHERE rowid = %lld", row_id);
-    int rc = query(stmt, (sqlite3_callback)get_pid_callback, &pid);
+    query(stmt, (sqlite3_callback)get_pid_callback, &pid);
     sqlite3_free(stmt);
     return pid;
 }
@@ -991,7 +991,7 @@ int get_state(drmaa2_j j) {
     int state;
     long long row_id = atoll(j->id);
     char *stmt = sqlite3_mprintf("SELECT job_state FROM jobs WHERE rowid = %lld", row_id);
-    int rc = query(stmt, (sqlite3_callback)get_pid_callback, &state);
+    query(stmt, (sqlite3_callback)get_pid_callback, &state);
     sqlite3_free(stmt);
     return state;
 }
@@ -1030,7 +1030,7 @@ int jarray_exists(const char *session_name, const char *jobarrayId) {
     char *stmt = sqlite3_mprintf("SELECT EXISTS(SELECT 1 FROM job_arrays \
         WHERE session_name = %Q AND rowid = %lld LIMIT 1);", session_name, row_id);
     int exists = 0;
-    int rc = query(stmt, (sqlite3_callback)jarray_exists_callback, &exists);
+    query(stmt, (sqlite3_callback)jarray_exists_callback, &exists);
     sqlite3_free(stmt);
     return exists;
 }
@@ -1047,7 +1047,7 @@ drmaa2_j_list get_jobs_of_jarray(drmaa2_jarray ja) {
     char *stmt = sqlite3_mprintf("SELECT jobs FROM job_arrays \
         WHERE rowid = %lld;", row_id);
     char *jobs = NULL;
-    int rc = query(stmt, (sqlite3_callback)get_jobs_of_jarray_callback, &jobs);
+    query(stmt, (sqlite3_callback)get_jobs_of_jarray_callback, &jobs);
     sqlite3_free(stmt);
     drmaa2_string_list sl = string_split(jobs, '|');
     drmaa2_j_list jl = (drmaa2_j_list)drmaa2_list_create(DRMAA2_JOBLIST, (drmaa2_list_entryfree)drmaa2_j_free);

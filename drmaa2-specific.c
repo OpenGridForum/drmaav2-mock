@@ -1,4 +1,5 @@
 #include "drmaa2-specific.h"
+#include "drmaa2-persistence.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -212,7 +213,7 @@ void start_and_monitor_job(drmaa2_j j, drmaa2_jtemplate jt, sem_t *lock) {
         setsid();   // create new process group so that jobs containing multiple processes can be killed
         save_state(j, DRMAA2_RUNNING);
         if (current_drmaa2_callback != NULL)
-            call_state_chage_notification(j, DRMAA2_RUNNING);
+            call_state_change_notification(j, DRMAA2_RUNNING);
         char *args[] = {jt->remoteCommand, NULL};
         execv(args[0], args);
         return;           // dead code, just to avoid GCC warning

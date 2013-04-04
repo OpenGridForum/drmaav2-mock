@@ -17,10 +17,10 @@ drmaa2-reset-db: drmaa2-reset-db.o drmaa2.so
 	@CC@ -o $@ @LIBS@ $^
 
 drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c 
-	@CC@ @CFLAGS@ -c $^
+	@CC@ $(CFLAGS) -c $^
 
 drmaa2-specific.o: drmaa2-specific.c
-	@CC@ @CFLAGS@ -c $^
+	@CC@ $(CFLAGS) -c $^
 
 sleepFive: sleepFive.c
 	@CC@ -o $@ $^
