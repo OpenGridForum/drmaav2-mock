@@ -53,6 +53,8 @@ pid_t get_job_pid(drmaa2_j j);
 
 int get_state(drmaa2_j j);
 
+int get_state_callback(int *state, int argc, char **argv, char **azColName);
+
 int save_state(drmaa2_j j, drmaa2_jstate state);
 
 

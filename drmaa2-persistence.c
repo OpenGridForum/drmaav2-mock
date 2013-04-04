@@ -981,7 +981,7 @@ pid_t get_job_pid(drmaa2_j j) {
 }
 
 
-static int get_state_callback(int *state, int argc, char **argv, char **azColName) {
+int get_state_callback(int *state, int argc, char **argv, char **azColName) {
     assert(argc == 1);
     *state = atoi(argv[0]);
     return 0;
