@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../drmaa2.h"
 #include <time.h>
+#include <unistd.h>
 
 
 
@@ -145,4 +146,5 @@ int main() {
  
     drmaa2_list_free(&ml);
     sleep(1); // wait that jobs are terminated
+    return 0;
 }
