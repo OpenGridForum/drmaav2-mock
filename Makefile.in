@@ -1,3 +1,5 @@
+CFLAGS=@CFLAGS@ -Wall -D_GNU_SOURCE
+
 all: drmaa examples
 examples: example-large sleepFive
 ifeq (@SQLITE3_EXISTS@,1)
@@ -33,7 +35,7 @@ force_look:
 	true
 
 %.o: %.c
-	@CC@ -Wall -g -c $<
+	@CC@ $(CFLAGS) -c $<
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ @CFLAGS@ -c $<
