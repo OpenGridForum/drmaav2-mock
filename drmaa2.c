@@ -320,7 +320,11 @@ drmaa2_r drmaa2_rsession_request_reservation(const drmaa2_rsession rs, const drm
 
     drmaa2_r r = (drmaa2_r)malloc(sizeof(drmaa2_r_s));
     char *cid;
-    asprintf(&cid, "%lld", id);
+    if (-1 == asprintf(&cid, "%lld", id)) {
+    	drmaa2_lasterror_v = DRMAA2_INTERNAL;
+	drmaa2_lasterror_text_v = "Error on asprintf() usage.";
+	return NULL;
+    }
     r->id = cid; //already allocated
     r->session_name = strdup(rs->name);
 
@@ -630,7 +634,11 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
         char *tmp_input_path;
         char *tmp_output_path;
         char *tmp_error_path;
-        asprintf(&index_c, "%lu", index);
+	if (-1 == asprintf(&index_c, "%lu", index)) {
+		drmaa2_lasterror_v = DRMAA2_INTERNAL;
+		drmaa2_lasterror_text_v = "Error on asprintf() usage.";
+		return NULL;
+	}   
 
         tmp_working_dir = str_replace(jt->workingDirectory, "$DRMAA2_INDEX$", index_c);
         jt->workingDirectory = str_replace(tmp_working_dir, "$DRMAA2_HOME_DIR$", "~");
@@ -690,7 +698,13 @@ drmaa2_jarray drmaa2_jsession_run_bulk_jobs(const drmaa2_jsession js, const drma
     drmaa2_list_free(&sl);
     drmaa2_jarray ja = (drmaa2_jarray)malloc(sizeof(drmaa2_jarray_s));
     char *cid;
-    asprintf(&cid, "%lld", id);
+   
+    if (-1 == asprintf(&cid, "%lld", id)) {
+      drmaa2_lasterror_v = DRMAA2_INTERNAL;
+      drmaa2_lasterror_text_v = "Error on asprintf() usage.";
+      return NULL;
+    }
+
     ja->id = cid; //already allocated
     ja->session_name = strdup(js->name);
     return ja;
