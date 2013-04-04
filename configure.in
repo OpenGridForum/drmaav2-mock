@@ -28,11 +28,14 @@ AC_ARG_WITH([database-file],
    AC_DEFINE([DRMAA_DBFILE],["drmaa2.sqlite"],["DRMAA library persistency DB"]),
 )
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([stdlib.h string.h unistd.h semaphore.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_TYPE_PID_T
+
+# Add pthread flag to enable semaphore functions
+CFLAGS="$CFLAGS -pthread"
 
 # Checks for library functions.
 AC_FUNC_FORK
