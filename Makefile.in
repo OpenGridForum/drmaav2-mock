@@ -1,4 +1,4 @@
-CFLAGS=@CFLAGS@ -Wall -D_GNU_SOURCE -fPIC
+CFLAGS=@CFLAGS@ -shared -Wall -D_GNU_SOURCE -fPIC
 
 all: drmaa examples
 examples: example-large sleepFive
@@ -11,10 +11,10 @@ tests: force_look drmaa2.so
 	cd tests; $(MAKE) $(MFLAGS) 
 
 drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o
-	@CC@ $(CFLAGS) -o $@ -shared @LIBS@ $^
+	@CC@ $(CFLAGS) -o $@ @LIBS@ $^
 
 drmaa2-reset-db: drmaa2-reset-db.o drmaa2.so 
-	@CC@ -o $@ @LIBS@ $^
+	@CC@ $(CFLAGS) -o $@ @LIBS@ $^
 
 drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c 
 	@CC@ $(CFLAGS) -c $^
@@ -26,10 +26,10 @@ sleepFive: sleepFive.c
 	@CC@ -o $@ $^
 
 example-large: example-large.o drmaa2.so
-	@CC@ -o $@ @LIBS@ $^
+	@CC@ $(CFLAGS) -o $@ @LIBS@ $^
 
 example-large.o: examples/large.c
-	@CC@ -o $@ -c $^
+	@CC@ $(CFLAGS) -o $@ -c $^
 
 force_look:
 	true
