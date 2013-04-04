@@ -1,4 +1,4 @@
-CFLAGS=@CFLAGS@ -shared -Wall -D_GNU_SOURCE -fPIC
+CFLAGS=@CFLAGS@ -g -shared -Wall -D_GNU_SOURCE -fPIC
 
 all: drmaa examples
 examples: example-large sleepFive
