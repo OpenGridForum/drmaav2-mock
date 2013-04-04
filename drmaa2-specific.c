@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <semaphore.h>
+#include <fcntl.h>
 
 #include "drmaa2-debug.h"
 
