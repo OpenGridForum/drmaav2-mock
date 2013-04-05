@@ -3,40 +3,39 @@ CFLAGS=@CFLAGS@ -Wall -D_GNU_SOURCE
 all: drmaa examples
 examples: example-large sleepFive
 ifeq (@SQLITE3_EXISTS@,1)
-drmaa: drmaa2.so drmaa2-reset-db
+drmaa: libdrmaa2.so drmaa2-reset-db
 else
-drmaa: drmaa2.so drmaaa2-reset-db sqlite3.o
+drmaa: libdrmaa2.so drmaaa2-reset-db sqlite3.o
 endif
-tests: force_look drmaa2.so
-	cd tests; $(MAKE) $(MFLAGS) 
 
-drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o
+testsuite: sleepFive libdrmaa2.so tests/*.c
+	@CC@ $(CFLAGS) -o $@ tests/*.c -lcunit -Wl,-rpath,. -L. -ldrmaa2
+
+libdrmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o
 	@CC@ $(CFLAGS) -shared -o $@ $^ @LIBS@
 
-drmaa2-reset-db: drmaa2-reset-db.o drmaa2.so 
+drmaa2-reset-db: drmaa2-reset-db.o libdrmaa2.so 
 	@CC@ $(CFLAGS) -Wl,-rpath,. @LIBS@ -o $@ $^
 
 sleepFive: sleepFive.c
 	@CC@ -o $@ $^
 
-example-large: example-large.o drmaa2.so
+example-large: example-large.o libdrmaa2.so
 	@CC@ $(CFLAGS) -o $@ $^ @LIBS@
 
 example-large.o: examples/large.c
 	@CC@ $(CFLAGS) -o $@ -c $^
 
-force_look:
-	true
-
 %.o: %.c
 	@CC@ $(CFLAGS) -fPIC -c $<
+
+tests/%.o: tests/%.c
+	@CC@ $(CFLAGS) -c $<
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
 	@CC@ $(CFLAGS) -fPIC -c $<
 
 clean:
-	rm -f drmaa2-reset-db
 	rm -f *.o
 	rm -f *.so
-	rm -f tests/*.o tests/test
-	rm -f app example-large test_app sleepFive
+	rm -f example-large testsuite sleepFive drmaa2-reset-db

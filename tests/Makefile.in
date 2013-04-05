@@ -1,8 +1,0 @@
-all: test ../sleepFive
-
-../sleepFive: ../sleepFive.c
-	@CC@ -o $@ $^
-
-test: *.c
-	@CC@ -o $@ @CFLAGS@  @LIBS@ ../drmaa2.so $^
-
