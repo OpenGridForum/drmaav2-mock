@@ -1,4 +1,4 @@
-CFLAGS=@CFLAGS@ -g -shared -Wall -D_GNU_SOURCE -fPIC
+CFLAGS=@CFLAGS@ -Wall -D_GNU_SOURCE 
 
 all: drmaa examples
 examples: example-large sleepFive
@@ -11,22 +11,16 @@ tests: force_look drmaa2.so
 	cd tests; $(MAKE) $(MFLAGS) 
 
 drmaa2.so: drmaa2.o drmaa2-specific.o drmaa2-persistence.o drmaa2-list.o drmaa2-dict.o
-	@CC@ $(CFLAGS) -o $@ @LIBS@ $^
+	@CC@ $(CFLAGS) -shared -o $@ $^ @LIBS@
 
 drmaa2-reset-db: drmaa2-reset-db.o drmaa2.so 
-	@CC@ $(CFLAGS) -o $@ @LIBS@ $^
-
-drmaa2-persistence.o: drmaa2-persistence.c drmaa2-list.c 
-	@CC@ $(CFLAGS) -c $^
-
-drmaa2-specific.o: drmaa2-specific.c
-	@CC@ $(CFLAGS) -c $^
+	@CC@ $(CFLAGS) -Wl,-rpath,. @LIBS@ -o $@ $^
 
 sleepFive: sleepFive.c
 	@CC@ -o $@ $^
 
 example-large: example-large.o drmaa2.so
-	@CC@ $(CFLAGS) -o $@ @LIBS@ $^
+	@CC@ $(CFLAGS) -o $@ $^ @LIBS@
 
 example-large.o: examples/large.c
 	@CC@ $(CFLAGS) -o $@ -c $^
@@ -35,10 +29,10 @@ force_look:
 	true
 
 %.o: %.c
-	@CC@ $(CFLAGS) -c $<
+	@CC@ $(CFLAGS) -fPIC -c $<
 
 sqlite3.o: lib/sqlite3.c lib/sqlite3.h
-	@CC@ $(CFLAGS) -c $<
+	@CC@ $(CFLAGS) -fPIC -c $<
 
 clean:
 	rm -f drmaa2-reset-db
