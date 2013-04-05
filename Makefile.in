@@ -20,11 +20,8 @@ drmaa2-reset-db: drmaa2-reset-db.o libdrmaa2.so
 sleepFive: sleepFive.c
 	@CC@ -o $@ $^
 
-example-large: example-large.o libdrmaa2.so
-	@CC@ $(CFLAGS) -o $@ $^ @LIBS@
-
-example-large.o: examples/large.c
-	@CC@ $(CFLAGS) -o $@ -c $^
+example-large: examples/large.c libdrmaa2.so
+	@CC@ $(CFLAGS) -o $@ examples/large.c -Wl,-rpath,. -L. -ldrmaa2
 
 %.o: %.c
 	@CC@ $(CFLAGS) -fPIC -c $<
