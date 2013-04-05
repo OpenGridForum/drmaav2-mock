@@ -1,5 +1,4 @@
-drmaa2-mock was implemented and tested on Mac OS 10.8 with gcc 4.2.
-
+drmaa2-mock was implemented and tested on Mac OS 10.8 with gcc 4.2, and Ubuntu 12.04 with gcc 4.6.3
 
 Dependencies:
 	unix process handling and synchronization (fork, semaphores)
@@ -25,6 +24,6 @@ export DRMAA2_DB_NAME=...
 To build and run the drmaa2-mock tests suite:
 (The test suite uses its own database "drmaa2_test.sqite".)
 
-make tests
-./test/test
+make testsuite
+./testsuite
 
