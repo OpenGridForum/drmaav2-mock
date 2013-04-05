@@ -5,4 +5,5 @@ config.log
 config.status
 *.o
 *.sqlite
+config.h
 
